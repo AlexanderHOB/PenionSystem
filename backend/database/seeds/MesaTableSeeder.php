@@ -11,10 +11,14 @@ class MesaTableSeeder extends Seeder
      */
     public function run()
     {
+        for($i=21;$i<=99;$i++){
+
         DB::table('mesas')->insert([
-            'capacidad' => Int::random(40),
-            'descripcion' => Str::random(10).'@gmail.com',
-            'condicion' => 1,
+            'numero'=>$i,
+            'capacidad' => rand(5,25),
+            'descripcion' => 'mesa Ubicado en '.Str::random(10),
+            'condicion' => 1,           
         ]);
+    }
     }
 }

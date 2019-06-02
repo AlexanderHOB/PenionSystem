@@ -14,10 +14,10 @@ class MesaController extends Controller
         $criterio = $request->criterio;
 
         if ($buscar == ''){
-            $mesas=Mesa::orderBy('id', 'desc')->paginate(8);
+            $mesas=Mesa::orderBy('id', 'asc')->paginate(10);
         }
         else{
-            $mesas=Mesa::where($criterio, 'like', '%'.$buscar.'%')->orderBy('id', 'desc')->paginate(8);
+            $mesas=Mesa::where($criterio, 'like', '%'.$buscar.'%')->orderBy('id', 'asc')->paginate(10);
         }
         return[
             'pagination'    =>[
@@ -45,25 +45,26 @@ class MesaController extends Controller
 
     public function store(Request $request)
     {
-        if (!$request->ajax()) return redirect('/');
+        //if (!$request->ajax()) return redirect('/');
         $mesa = new Mesa();
         $mesa->numero=$request->numero;
         $mesa->capacidad=$request->capacidad;
         $mesa->descripcion=$request->descripcion;
         $mesa->condicion='1';
         $mesa->save();
-
+        return $mesa;
     }
 
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
-        if (!$request->ajax()) return redirect('/');
-        $mesa = Mesa::findOrFail($request->id);
+        //if (!$request->ajax()) return redirect('/');
+        $mesa = Mesa::findOrFail($id);
         $mesa->numero=$request->numero;
         $mesa->capacidad=$request->capacidad;
         $mesa->descripcion=$request->descripcion;
         $mesa->condicion='1';
-        $mesa->save();
+        $mesa->update();
+        return $mesa;
     }
     public function desactivar(Request $request)
     {
