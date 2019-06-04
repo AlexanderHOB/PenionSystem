@@ -63,7 +63,7 @@ class MesaController extends Controller
         $mesa->capacidad=$request->capacidad;
         $mesa->descripcion=$request->descripcion;
         $mesa->condicion='1';
-        $mesa->update();
+        $mesa->save();
         return $mesa;
     }
     public function desactivar(Request $request)
