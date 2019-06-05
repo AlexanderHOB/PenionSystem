@@ -39,12 +39,7 @@ class CategoriaController extends Controller
         ->select('id','nombre')->orderBy('nombre', 'asc')->get();
         return ['categorias' => $categorias];
     }
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
     public function store(Request $request)
     {
         //if (!$request->ajax()) return redirect('/');

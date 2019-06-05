@@ -15,16 +15,15 @@ class VerifyAccessKey
      */
     public function handle($request, Closure $next)
     {
-        // // Obtenemos el api-key que el usuario envia
-        // $key = $request->headers->get('apikey');
-        // // Si coincide con el valor almacenado en la aplicacion
-        // // la aplicacion se sigue ejecutando
-        // if (isset($key) && $key === env('API_KEY')) {
-        //     return $next($request);
-        // } else {
-        //     // Si falla devolvemos el mensaje de error
-        //     return response()->json(['error' => 'Error perro' ], 401);
-        // }
-        return $next($request);
+        // Obtenemos el api-key que el usuario envia
+        $key = $request->headers->get('Authorization');
+        // Si coincide con el valor almacenado en la aplicacion
+        // la aplicacion se sigue ejecutando
+        if (!empty($key) && $key === env('API_KEY')) {
+            return $next($request);
+        } else {
+            // Si falla devolvemos el mensaje de error
+            return response()->json(['message' => 'API KEY INVALID' ]);
+        }
     }
 }

@@ -18,6 +18,7 @@ class CreateMesasTable extends Migration
             $table->string('numero',2);
             $table->integer('capacidad');
             $table->string('descripcion',50)->nullable();
+            $table->string('estado',30)->nullable();
             $table->boolean('condicion')->default(1);
             $table->timestamps();
         });

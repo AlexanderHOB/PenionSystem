@@ -11,4 +11,9 @@ class Categoria extends Model
         'descripcion',
         'condicion'
     ];
+    
+    //Relacion con la tabla Platillos
+    protected function platillos(){
+        return $this->hasMany('App\Platillo');
+    }
 }
