@@ -10,12 +10,13 @@
           class="my-3"
           contain
           height="200"
+          @click="title = 'Title Change'"
         ></v-img>
       </v-flex>
 
       <v-flex mb-4>
         <h1 class="display-2 font-weight-bold mb-3">
-          Welcome to Vuetify
+          {{ title }}
         </h1>
         <p class="subheading font-weight-regular">
           For help and collaboration with other Vuetify developers,
@@ -80,13 +81,38 @@
           </a>
         </v-layout>
       </v-flex>
+
+      <v-flex xs12>
+        <!-- <v-img src="https://aomine1745.github.io/Img/20.jpg" alt=""></v-img> -->
+      </v-flex>
+    </v-layout>
+
+    <v-layout
+      v-touch="{
+        left: () => swipe('Left'),
+        right: () => swipe('Right'),
+        up: () => swipe('Up'),
+        down: () => swipe('Down')
+      }"
+      column
+      align-center
+      justify-center
+      style="height: 500px"
+      class="grey lighten-2"
+    >
+      <v-subheader>Swipe Direction</v-subheader>
+      {{ swipeDirection }}
     </v-layout>
   </v-container>
 </template>
 
 <script>
+  import { mapState, mapMutations } from 'vuex';
+
   export default {
     data: () => ({
+      x: '',
+      title: 'Welcome to Vuetify',
       ecosystem: [
         {
           text: 'vuetify-loader',
@@ -136,9 +162,14 @@
           text: 'Frequently Asked Questions',
           href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions'
         }
-
-      ]
-    })
+      ],
+      swipeDirection: 'None'
+    }),
+    methods: {
+      swipe (direction) {
+        this.swipeDirection = direction
+      }
+    }
   }
 </script>
 
