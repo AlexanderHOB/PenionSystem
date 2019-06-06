@@ -3,3 +3,8 @@
 	user-select: none;
 	-webkit-tap-highlight-color: transparent;
 }
+
+// Background
+%bg-primary {
+	background-image: $primary-gradient;
+}
