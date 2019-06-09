@@ -26,7 +26,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-05.svg')"
+            :src="require('../assets/iconos/home.svg')"
             contain
             height="32"
           ></v-img>
@@ -44,7 +44,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-06.svg')"
+            :src="require('../assets/iconos/administrador.svg')"
             contain
             height="32"
           ></v-img>
@@ -56,19 +56,19 @@
         
       <v-list-tile
         @click=""
-        :to="{name: 'about'}"
+        :to="{name: 'categorias'}"
         active-class="white--text sidenav-items-active"
         ripple
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-07.svg')"
+            :src="require('../assets/iconos/almacen.svg')"
             contain
             height="32"
           ></v-img>
         </v-list-tile-action>
         <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Almacen</v-list-tile-title>
+          <v-list-tile-title>Categorias</v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
 
@@ -79,7 +79,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-08.svg')"
+            :src="require('../assets/iconos/compras.svg')"
             contain
             height="32"
           ></v-img>
@@ -96,7 +96,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-09.svg')"
+            :src="require('../assets/iconos/platillos.svg')"
             contain
             height="32"
           ></v-img>
@@ -113,7 +113,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-10.svg')"
+            :src="require('../assets/iconos/ventas.svg')"
             contain
             height="32"
           ></v-img>
@@ -130,7 +130,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-11.svg')"
+            :src="require('../assets/iconos/acceso.svg')"
             contain
             height="32"
           ></v-img>
@@ -147,7 +147,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-12.svg')"
+            :src="require('../assets/iconos/reportes.svg')"
             contain
             height="32"
           ></v-img>
@@ -164,7 +164,7 @@
       >
         <v-list-tile-action>
           <v-img 
-            :src="require('../assets/iconos/icono-13.svg')"
+            :src="require('../assets/iconos/soportes.svg')"
             contain
             height="32"
           ></v-img>

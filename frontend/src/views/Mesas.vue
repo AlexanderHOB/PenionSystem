@@ -1,12 +1,19 @@
 <template>
-  <v-container grid-list-lg>
-    <v-btn dark @click="getMesas" class="ml-0">Actualizar mesas</v-btn>
-    <v-btn color="green white--text" @click="crearMesaModal = true">Crear mesa</v-btn>
-    <v-layout row wrap  mt-3>
+
+  <LoadingFish v-if="loadingFish" />
+
+  <v-container grid-list-lg v-else>
+    <v-layout row wrap>
       <v-flex xs12 v-if="messageMesas">
-        <p>{{ messageMesas }}</p>
+        <ErrorMessage :errorMessage="messageMesas" :refresh="getMesas" />
       </v-flex>
       <template v-else>
+        <v-flex xs12 class="d-flex align-center">
+          <h1 class="display-1">{{ title }}</h1>
+          <div class="text-xs-right">
+            <v-btn class="blue" dark fab small @click="getMesas"><v-icon>replay</v-icon></v-btn>
+          </div>
+        </v-flex>
         <v-flex v-for="(mesa, index) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
           <v-card>
             <v-img
@@ -23,13 +30,74 @@
               <p>{{ mesa.descripcion }}</p>
             </v-card-text>
             <v-card-actions>
-              <!-- <v-btn color="blue" class="ml-0" flat>Ver Mesa</v-btn> -->
               <v-btn color="green" flat @click="editarMesaModal(index)">Editar Mesa</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </template>
     </v-layout>
+
+    <v-dialog v-model="createModal" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 v-if="create" class="headline">Crear Mesa</h3>
+          <h3 v-else class="headline">Editar Mesa</h3>
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-card-text class="pt-0">
+          <v-form
+            ref="form"
+            lazy-validation
+            v-model="valid"
+          >
+            <v-container>
+              <v-layout row wrap>
+                <v-flex xs12 sm6>
+                  <v-text-field
+                    color="blue"
+                    label="Número de mesa"
+                    v-model="numero"
+                    autofocus
+                    :rules="[rules.required]"
+                    counter
+                    mask="##"
+                  ></v-text-field>
+                </v-flex> 
+                <v-flex xs12 sm6>
+                  <v-text-field 
+                    color="blue"
+                    label="Capacidad"
+                    v-model="capacidad"
+                    :rules="[rules.required, rules.maxValue]"
+                    counter
+                    mask="##"
+                  ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-textarea
+                    color="blue"
+                    label="Descripción"
+                    auto-grow
+                    @click:append="descripcion = ''"
+                    v-model="descripcion"
+                    :rules="[rules.counter]"
+                    counter="50"
+                    append-icon="clear"
+                  ></v-textarea>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="text-xs-center">
+          <v-spacer></v-spacer>
+            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-if="create" color="green" flat @click="crearMesa">Crear</v-btn>
+            <v-btn :disabled="!valid" v-else color="green darken-1" flat @click="editarMesa">Editar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <template v-if="pageTotal">
       <div class="text-xs-center mt-4">
@@ -46,72 +114,41 @@
       </div>
     </template>
 
-    <v-dialog v-model="crearMesaModal" max-width="600px">
-      <v-card>
-        <v-card-title>
-          <span class="headline">Crear Mesa</span>
-        </v-card-title>
-        <v-card-text>
-          <v-form>
-            <v-container grid-list-md>
-              <v-layout wrap>
-                <v-flex xs12>
-                  <v-text-field color="blue" label="Número de mesa" type="number" autofocus required v-model="numero"></v-text-field>
-                </v-flex> 
-                <v-flex xs12>
-                  <v-text-field color="blue" label="Capacidad" type="number" required v-model="capacidad"></v-text-field>
-                </v-flex>
-                <v-flex xs12>
-                  <v-textarea
-                    color="blue"
-                    label="Descripción"
-                    auto-grow
-                    required
-                    clearable
-                    v-model="descripcion"
-                  ></v-textarea>
-                </v-flex>
-              </v-layout>
-            </v-container>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="crearMesaModal = false">Close</v-btn>
-          <v-btn v-if="create" color="blue darken-1" flat @click="crearMesa">Save</v-btn>
-          <v-btn v-else color="blue darken-1" flat @click="editarMesa">Edit</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <Loading :loading="loading" />
+    <LoadingDialog />
 
   </v-container>
 </template>
 
 <script>
   import axios from 'axios';
-  import Loading from '../components/Loading';
-  import { mapState } from 'vuex';
+  import LoadingDialog from '../components/LoadingDialog';
+  import LoadingFish from '../components/LoadingFish';
+  import ErrorMessage from '../components/ErrorMessage';
+
+  import { mapState, mapMutations } from 'vuex';
 
   export default {
     components: {
-      Loading
+      LoadingDialog,
+      LoadingFish,
+      ErrorMessage
     },
     data:() => ({
+      title: 'Mesas',
       // Data para las mesas
       messageMesas: '',
       mesas: [],
+      mesasTotal: 0,
       // Data para la paginación
       pageTotal: 0,
       page: 1,
       paginateDisabled: false,
-      // Data para crear mesa
-      crearMesaModal: false,
-      // Data del Loading
-      loading: {
-        state: false,
-        title: 'Accediendo a la información' 
+      // Datos para valdiar formulario
+      valid: true,
+      rules: {
+        required: value => !!value || 'Required.',
+        counter: value => value.length <= 50 || 'como maximo 50 caracteres',
+        maxValue: value => value <= 30 || 'Capacidad no puede ser mas de 30'
       },
       // Data para editar Mesa
       numero: null,
@@ -120,10 +157,14 @@
       create: true,
     }),
     methods: {
+      test(){
+        this.descripcion = '';
+      },
       // OBTENER MESAS
       async getMesas(){
         try {
-          this.loading.state = true;
+          this.loadingTitleMutation('Accediendo a la información');
+          this.loadingDialogMutation(true);
 
           let response = await axios.get(this.url + 'mesa', this.config);
 
@@ -133,65 +174,61 @@
             if(mesas.length > 0){
               this.mesas = mesas;
               this.messageMesas = '';
+              this.mesasTotal = data.total;
+
               if(data.last_page){
                 this.pageTotal = data.last_page;
               }
+              this.page = 1;
             }else {
               this.messageMesas = 'No existen mesas creadas';
+              this.pageTotal = false;
             }
+            this.headerActionsMutation(true);
           }else {
+            this.headerActionsMutation(false);
             this.messageMesas = response.data.message;
             this.mesas = [];
+            this.pageTotal = false;
           }
         } catch (error) {
+          this.headerActionsMutation(false);
+          this.pageTotal = false;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
-          this.loading.state = false;
+          this.loadingDialogMutation(false);
         }
       },
 
       // ACTUALIZANDO MESAS
-      async refreshMesas(){
+      async refreshMesas(page, loadingTitle ='Accediendo a la información', create = true){
         try {
           this.paginateDisabled = true;
-          this.loading.state = true;
-          let response = await axios.get(this.url + 'mesa', {
-          params: {
-            page: this.page
-          },
-          headers: {
-            Authorization: this.config.headers.Authorization
+          this.loadingTitleMutation(loadingTitle);
+          if(create){
+            this.loadingDialogMutation(true);
           }
-        });
+
+          let response = await axios.get(this.url + 'mesa', {
+            params: {
+              page: this.page
+            },
+            headers: {
+              Authorization: this.config.headers.Authorization
+            }
+          });
+          let data = response.data;
           let mesas = response.data.data;
           this.messageMesas = '';
           this.mesas = mesas;
+          this.headerActionsMutation(true);
         } catch (error) {
+          this.headerActionsMutation(false);
+          this.pageTotal = false;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
-          this.loading.state = false;
+          this.loadingDialogMutation(false);
           this.paginateDisabled = false;
-        }
-      },
-
-      // CREAR MESAS
-      async crearMesa(){
-        try {
-          let response = await axios.post(this.url + 'mesa/registrar', {
-            numero: this.numero,
-            capacidad: this.capacidad,
-            descripcion: this.descripcion
-          }, this.config);
-
-          await this.getMesas();
-
-        } catch (error) {
-            console.log(error);
-        }finally {
-          this.crearMesaModal = false;
-          this.numero = null;
-          this.capacidad = null;
-          this.descripcion = '';
         }
       },
 
@@ -203,38 +240,105 @@
         this.index = index;
         this.id = this.mesas[index].id;
         this.create = false;
-        this.crearMesaModal = true;
+        this.$refs.form.resetValidation();
+        this.createModalMutation(true);
+      },
+
+      // CERRAR MODAL
+      closeModal(){
+        this.createModalMutation(false);
+        setTimeout(this.resetForm, 100);
+      },
+
+      // Limpiar Formulario
+      resetForm(){
+        this.numero = null;
+        this.capacidad = null;
+        this.descripcion = '';
+        this.create = true;
+        this.$refs.form.resetValidation();
+      },
+
+      // CREAR MESAS
+      async crearMesa(){
+        try {
+          if (this.$refs.form.validate()) {
+            this.loadingTitleMutation('Subiendo informacón');
+            this.loadingDialogMutation(true);
+            this.createModalMutation(false);
+
+            let response = await axios.post(this.url + 'mesa/registrar', {
+              numero: this.numero,
+              capacidad: this.capacidad,
+              descripcion: this.descripcion
+            }, this.config);
+
+            this.resetForm();            
+            
+            if(this.mesasTotal % 10 == 0){
+              this.pageTotal++;
+            }
+            this.page = this.pageTotal;
+            await this.refreshMesas(null, 'Creando Mesa', false);
+          }
+        } catch (error) {
+          this.resetForm();
+          console.log(error);
+        }
       },
 
       // EDITAR MESA
       async editarMesa(){
         try {
-          let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
-            numero: this.numero,
-            capacidad: this.capacidad,
-            descripcion: this.descripcion
-          }, this.config);
+          if (this.$refs.form.validate()) {
+            this.createModalMutation(false);
+            if(this.descripcion == '' || this.descripcion == null){
+              this.descripcion = 'Mesa sin descripción';
+            }
 
-          this.mesas[this.index].numero = this.numero;
-          this.mesas[this.index].capacidad = this.capacidad;
-          this.mesas[this.index].descripcion = this.descripcion;
+            let numeroBup = this.numero;
+            let capacidadBup = this.capacidad;
+            let descripcionBup = this.descripcion;
+
+            this.mesas[this.index].numero = this.numero;
+            this.mesas[this.index].capacidad = this.capacidad;
+            this.mesas[this.index].descripcion = this.descripcion;
+
+            this.resetForm();
+
+            let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
+              numero: numeroBup,
+              capacidad: capacidadBup,
+              descripcion: descripcionBup
+            }, this.config);
+          }
         } catch (error) {
-            console.log(error);
-        }finally {
-          this.crearMesaModal = false;
-          this.numero = null;
-          this.capacidad = null;
-          this.descripcion = '';
+          this.resetForm();
+          console.log(error);
+        }
+      },
+      ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation']),
+    },
+    computed: {
+      ...mapState(['url', 'config', 'loadingFish', 'createModalState']),
+      createModal: {
+        get() {
+          return this.createModalState
+        },
+        set(value) {
+          this.createModalMutation(value)
         }
       }
     },
-    computed: {
-      ...mapState(['url', 'config'])
+    created() {
+      this.headerActionsMutation(false);
+      this.loadingFishMutation(true);
     },
-
     // Al crear la instancia de vue
-    mounted(){
-      this.getMesas();
+    async mounted(){
+      this.breadcrumbMutation('Mesas');
+      await this.getMesas();
+      this.loadingFishMutation(false);
     }
   }
 </script>

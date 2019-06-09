@@ -51,6 +51,16 @@
 
 <style lang="scss">
   // General
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    // background-color: transparent;
+    // text-shadow: 0 0 2px #ff0;
+  }
   body {	
     // Scroll
     &::-webkit-scrollbar {
@@ -76,6 +86,10 @@
   a {
     @extend %tap-highlight;
   }
+  img {
+    width: 100%;
+    display: block;
+  }
 
   // Sidenav
   .sidenav {
@@ -91,6 +105,9 @@
   // Header
   .header-waves .v-image__image {
     background-repeat: repeat-x;
+  }
+  .v-navigation-drawer[data-booted="true"]{
+        // transition: .2s cubic-bezier(0.17, .67, 0.64, .18);
   }
 </style>
 

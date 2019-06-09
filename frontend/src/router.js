@@ -19,9 +19,13 @@ export default new Router({
       component: () => import( './views/Mesas.vue')
     },
     {
-      path: '/about',
-      name: 'about',
-      component: () => import('./views/About.vue')
+      path: '/categorias',
+      name: 'categorias',
+      component: () => import('./views/Categorias.vue')
+    },
+    {
+      path: '*',
+      component: () => import('./views/NotFound.vue')
     }
   ]
 })
