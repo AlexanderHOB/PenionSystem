@@ -19,9 +19,7 @@ class MesaController extends Controller
         else{
             $mesas=Mesa::where($criterio, 'like', '%'.$buscar.'%')->orderBy('id', 'asc')->paginate(10);
         }
-        return[
-            'mesas' =>  $mesas
-        ];
+        return  $mesas;
     }
     
     public function selectMesa(Request $request){
@@ -37,11 +35,25 @@ class MesaController extends Controller
 
     public function store(Request $request)
     {
-        //if (!$request->ajax()) return redirect('/');
+        
+        $v = \Validator::make($request->all(), [
+           
+            'numero' => 'required|integer',
+            'capacidad' => 'required',
+
+        ]);
+ 
+        if ($v->fails())
+        {
+            return ['Errores de validación de datos en el servidor'];
+        }
+
         $mesa = new Mesa();
         $mesa->numero=$request->numero;
         $mesa->capacidad=$request->capacidad;
-        $mesa->descripcion=$request->descripcion;
+        if($request->descripcion!=''||$request->descripcion!=null){
+            $mesa->descripcion=$request->descripcion;
+        }
         $mesa->condicion='1';
         $mesa->save();
         return $mesa;
@@ -49,7 +61,19 @@ class MesaController extends Controller
 
     public function update($id, Request $request)
     {
-        //if (!$request->ajax()) return redirect('/');
+        
+        $v = \Validator::make($request->all(), [
+            
+            'numero' => 'required|integer',
+            'capacidad' => 'required',
+
+        ]);
+ 
+        if ($v->fails())
+        {
+            return ['Errores de validación de datos en el servidor'];
+        }
+
         $mesa = Mesa::findOrFail($id);
         $mesa->numero=$request->numero;
         $mesa->capacidad=$request->capacidad;
@@ -58,17 +82,17 @@ class MesaController extends Controller
         $mesa->save();
         return $mesa;
     }
-    public function desactivar(Request $request)
+    public function desactivar($id)
     {
-        //if (!$request->ajax()) return redirect('/');
-        $mesa = Mesa::findOrFail($request->id);
+    
+        $mesa = Mesa::findOrFail($id);
         $mesa->condicion='0';
         $mesa->save();
     }
-    public function activar(Request $request)
+    public function activar($id)
     {
-        //if (!$request->ajax()) return redirect('/');
-        $mesa = Mesa::findOrFail($request->id);
+        
+        $mesa = Mesa::findOrFail($id);
         $mesa->condicion='1';
         $mesa->save();
     }

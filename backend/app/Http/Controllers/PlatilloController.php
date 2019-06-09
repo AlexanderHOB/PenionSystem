@@ -9,8 +9,6 @@ class PlatilloController extends Controller
     public function index(Request $request )
     {
 
-        //if(!$request->ajax()) return redirect('/');
-
         $buscar= $request->buscar;
         $criterio=$request->criterio;
         if($buscar==''){
@@ -28,21 +26,11 @@ class PlatilloController extends Controller
             ->orderBy('platillos.id','desc')->paginate(10);           
         }
         
-        return [
-            'pagination' => [
-                'total' =>          $platillos->total(),
-                'current_page'=>    $platillos->currentPage(),
-                'per_page'=>        $platillos->perPage(),
-                'last_page'=>       $platillos->lastPage(),
-                'from' =>           $platillos->firstItem(),
-                'to' =>             $platillos->lastItem()
-            ],
-            'platillos' => $platillos
-        ];
+        return $platillos;
         
     }
     public function buscarPlatillo(Request $request){
-        //if (!$request->ajax()) return redirect('/');
+        
  
         $filtro = $request->filtro;
         $platillos = Platillo::where('codigo','=', $filtro)
@@ -53,7 +41,7 @@ class PlatilloController extends Controller
     }
     public function listarPlatillo(Request $request)
     {
-        //if (!$request->ajax()) return redirect('/');
+        
 
         $buscar = $request->buscar;
         $criterio = $request->criterio;
@@ -81,23 +69,21 @@ class PlatilloController extends Controller
     }
     public function store(Request $request)
     {
-        //if(!$request->ajax()) return redirect('/');
-
         $v = \Validator::make($request->all(), [
             
-            'full_name' => 'required',
-            'address' => 'required',
-            'email'    => 'required|email|unique:clients',
-            'phone_number' => 'required',
-            'type' => 'required|in:empresa,particular',
-            'register' => 'required_if:type,empresa'
+            'idcategoria' => 'required|integer',
+            'codigo' => 'required|string|max:5',
+            'nombre'    => 'required|string|max:60',
+            'area' => 'required|max:150',
+            'precio' => 'required|integer',
+
         ]);
  
         if ($v->fails())
         {
-            return redirect()->back()->withInput()->withErrors($v->errors());
+            return ['Errores de validación de datos en el servidor'];
         }
-        
+
         $platillo = new Platillo();
         $platillo->idcategoria=$request->idcategoria;
         $platillo->codigo=$request->codigo;
@@ -108,11 +94,28 @@ class PlatilloController extends Controller
         $platillo->condicion='1';
         $platillo->save();
 
+        return ['Platillo creado correctamente'];
+
     }
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
-        //if(!$request->ajax()) return redirect('/');
-        $platillo = Platillo::findOrFail($request->id);
+        //VALIDACION DE ACTUALIZACIÓN
+        $v = \Validator::make($request->all(), [
+            
+            'idcategoria' => 'required|integer',
+            'codigo' => 'required|string|max:5',
+            'nombre'    => 'required|string|max:60',
+            'area' => 'required|max:150',
+            'precio' => 'required|integer',
+
+        ]);
+ 
+        if ($v->fails())
+        {
+            return ['Errores de validación de datos en el servidor'];
+        }
+
+        $platillo = Platillo::findOrFail($id);
         $platillo->idcategoria=$request->idcategoria;
         $platillo->codigo=$request->codigo;
         $platillo->nombre=$request->nombre;
@@ -122,17 +125,17 @@ class PlatilloController extends Controller
         $platillo->condicion='1';
         $platillo->save();
     }
-    public function desactivar(Request $request)
+    public function desactivar($id)
     {
         //if(!$request->ajax()) return redirect('/');
-        $platillo = Platillo::findOrFail($request->id);
+        $platillo = Platillo::findOrFail($id);
         $platillo->condicion='0';
         $platillo->save();
     }
-    public function activar(Request $request)
+    public function activar($id)
     {
         //if(!$request->ajax()) return redirect('/');
-        $platillo = Platillo::findOrFail($request->id);
+        $platillo = Platillo::findOrFail($id);
         $platillo->condicion='1';
         $platillo->save();
     }

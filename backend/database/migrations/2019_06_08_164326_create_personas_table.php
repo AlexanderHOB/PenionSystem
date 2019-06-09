@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMesasTable extends Migration
+class CreatePersonasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateMesasTable extends Migration
      */
     public function up()
     {
-        Schema::create('mesas', function (Blueprint $table) {
+        Schema::create('personas', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('numero',2);
-            $table->integer('capacidad');
-            $table->string('descripcion',50)->nullable()->default('Sin Descripción');
-            $table->string('estado',30)->nullable();
-            $table->boolean('condicion')->default(1);
+            $table->string('nombre', 100)->unique();
+            $table->string('dni', 8);
+            $table->string('direccion', 100)->nullable();
+            $table->string('celular', 9)->nullable();
+            $table->string('email', 60)->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateMesasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('mesas');
+        Schema::dropIfExists('personas');
     }
 }
