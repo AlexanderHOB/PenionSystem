@@ -20,18 +20,7 @@ class CategoriaController extends Controller
             $categorias = Categoria::where($criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(10);
         }
         
-
-        return [
-            'pagination' => [
-                'total'        => $categorias->total(),
-                'current_page' => $categorias->currentPage(),
-                'per_page'     => $categorias->perPage(),
-                'last_page'    => $categorias->lastPage(),
-                'from'         => $categorias->firstItem(),
-                'to'           => $categorias->lastItem(),
-            ],
-            'categorias' => $categorias
-        ];
+        return $categorias;
     }   
     public function selectCategoria(Request $request){
         //if (!$request->ajax()) return redirect('/');
@@ -42,7 +31,17 @@ class CategoriaController extends Controller
     
     public function store(Request $request)
     {
-        //if (!$request->ajax()) return redirect('/');
+        //Validar datos de creacion
+        $v = \Validator::make($request->all(), [
+            
+            'nombre' => 'required|string|max:60',
+
+        ]);
+ 
+        if ($v->fails())
+        {
+            return ['Errores de validación de datos en el servidor'];
+        }
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
         $categoria->descripcion = $request->descripcion;
@@ -62,20 +61,20 @@ class CategoriaController extends Controller
         $categoria->save();
     }
 
-    public function desactivar(Request $request)
+    public function desactivar($id)
     {
         //if (!$request->ajax()) return redirect('/');
 
-        $categoria = Categoria::findOrFail($request->id);
+        $categoria = Categoria::findOrFail($id);
         $categoria->condicion = '0';
         $categoria->save();
     }
 
-    public function activar(Request $request)
+    public function activar($id)
     {
         //if (!$request->ajax()) return redirect('/');
 
-        $categoria = Categoria::findOrFail($request->id);
+        $categoria = Categoria::findOrFail($id);
         $categoria->condicion = '1';
         $categoria->save();
     }
