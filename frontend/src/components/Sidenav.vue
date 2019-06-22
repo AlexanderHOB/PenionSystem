@@ -9,7 +9,7 @@
     <v-list>
       <v-list-tile>
         <v-img 
-          :src="require('../assets/logo.png')"
+          :src="require('../assets/logo.svg')"
           contain
           height="55"
         >
@@ -90,8 +90,8 @@
       </v-list-tile>
 
       <v-list-tile
-        @click=""
         active-class="white--text sidenav-items-active"
+        :to="{name: 'platillos'}"
         ripple
       >
         <v-list-tile-action>

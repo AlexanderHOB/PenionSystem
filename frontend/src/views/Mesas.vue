@@ -11,10 +11,10 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getMesas"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshMesas(page, 'Actualizando información')"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
-        <v-flex v-for="(mesa, index) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
+        <v-flex v-for="(mesa, i) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
           <v-card>
             <v-img
             :src="require('../assets/img/mesas/mesaOcupada.svg')"
@@ -26,18 +26,18 @@
                 <h2>{{ mesa.id }}</h2>
             </v-card-title>
             <v-card-text class="py-0">
-              <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad === 1 ? 'persona' : 'personas' }}</strong></p>
+              <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad == 1 ? 'persona' : 'personas' }}</strong></p>
               <p>{{ mesa.descripcion }}</p>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="green" flat @click="editarMesaModal(index)">Editar Mesa</v-btn>
+              <v-btn color="green" flat @click="editarMesaModal(i)">Editar Mesa</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
       </template>
     </v-layout>
 
-    <v-dialog v-model="createModal" persistent max-width="600px">
+    <v-dialog v-model="createModalState" persistent max-width="600px">
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
@@ -50,6 +50,7 @@
             ref="form"
             lazy-validation
             v-model="valid"
+            @submit.prevent="formAction"
           >
             <v-container>
               <v-layout row wrap>
@@ -58,19 +59,18 @@
                     color="blue"
                     label="Número de mesa"
                     v-model="numero"
-                    autofocus
-                    :rules="[rules.required]"
-                    counter
+                    :rules="[rules.required, rules.zero]"
+                    counter="2"
                     mask="##"
                   ></v-text-field>
                 </v-flex> 
                 <v-flex xs12 sm6>
-                  <v-text-field 
+                  <v-text-field
                     color="blue"
                     label="Capacidad"
                     v-model="capacidad"
-                    :rules="[rules.required, rules.maxValue]"
-                    counter
+                    :rules="[rules.required, rules.maxValue, rules.zero]"
+                    counter="2"
                     mask="##"
                   ></v-text-field>
                 </v-flex>
@@ -86,14 +86,17 @@
                     append-icon="clear"
                   ></v-textarea>
                 </v-flex>
+                <v-flex x12 class="d-none">
+                  <v-btn type="submit"></v-btn>
+                </v-flex>
               </v-layout>
             </v-container>
           </v-form>
         </v-card-text>
-        <v-card-actions class="text-xs-center">
+        <v-card-actions>
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-if="create" color="green" flat @click="crearMesa">Crear</v-btn>
+            <v-btn :disabled="!valid" v-if="create" color="green darken-1" flat @click="crearMesa">Crear</v-btn>
             <v-btn :disabled="!valid" v-else color="green darken-1" flat @click="editarMesa">Editar</v-btn>
         </v-card-actions>
       </v-card>
@@ -116,6 +119,8 @@
 
     <LoadingDialog />
 
+    <AlertNotifications />
+
   </v-container>
 </template>
 
@@ -124,6 +129,7 @@
   import LoadingDialog from '../components/LoadingDialog';
   import LoadingFish from '../components/LoadingFish';
   import ErrorMessage from '../components/ErrorMessage';
+  import AlertNotifications from '../components/AlertNotifications';
 
   import { mapState, mapMutations } from 'vuex';
 
@@ -131,7 +137,8 @@
     components: {
       LoadingDialog,
       LoadingFish,
-      ErrorMessage
+      ErrorMessage,
+      AlertNotifications
     },
     data:() => ({
       title: 'Mesas',
@@ -147,19 +154,19 @@
       valid: true,
       rules: {
         required: value => !!value || 'Required.',
-        counter: value => value.length <= 50 || 'como maximo 50 caracteres',
-        maxValue: value => value <= 30 || 'Capacidad no puede ser mas de 30'
+        counter: value => value.length <= 50 || '50 caracteres como maximo',
+        zero: value => value.charAt(0) != 0 || 'el primer digito no puede ser 0',
+        maxValue: value => value <= 30 || 'la capacidad no puede ser más de 30'
       },
       // Data para editar Mesa
-      numero: null,
-      capacidad: null,
+      numero: '',
+      capacidad: '',
       descripcion: '',
       create: true,
+      index: 0,
+      id: 0
     }),
     methods: {
-      test(){
-        this.descripcion = '';
-      },
       // OBTENER MESAS
       async getMesas(){
         try {
@@ -176,24 +183,24 @@
               this.messageMesas = '';
               this.mesasTotal = data.total;
 
-              if(data.last_page){
+              if(data.last_page && data.last_page > 1){
                 this.pageTotal = data.last_page;
               }
               this.page = 1;
             }else {
-              this.messageMesas = 'No existen mesas creadas';
-              this.pageTotal = false;
+              this.messageMesas = 'No se encontraron mesas';
+              this.pageTotal = 0;
             }
             this.headerActionsMutation(true);
           }else {
             this.headerActionsMutation(false);
             this.messageMesas = response.data.message;
             this.mesas = [];
-            this.pageTotal = false;
+            this.pageTotal = 0;
           }
         } catch (error) {
           this.headerActionsMutation(false);
-          this.pageTotal = false;
+          this.pageTotal = 0;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
           this.loadingDialogMutation(false);
@@ -201,11 +208,11 @@
       },
 
       // ACTUALIZANDO MESAS
-      async refreshMesas(page, loadingTitle ='Accediendo a la información', create = true){
+      async refreshMesas(page = this.page, loadingTitle ='Accediendo a la información', create = false){
         try {
           this.paginateDisabled = true;
           this.loadingTitleMutation(loadingTitle);
-          if(create){
+          if(!create){
             this.loadingDialogMutation(true);
           }
 
@@ -214,17 +221,24 @@
               page: this.page
             },
             headers: {
-              Authorization: this.config.headers.Authorization
+              Authorization: this.config.headers.Authorization,
+              'Content-Type': 'application/json'
             }
           });
           let data = response.data;
-          let mesas = response.data.data;
+          let mesas = data.data;
           this.messageMesas = '';
           this.mesas = mesas;
+          if(data.total != this.mesasTotal){
+            this.mesasTotal = data.total;
+          }
+          if(data.last_page != this.pageTotal){
+            this.pageTotal = data.last_page;
+          }
           this.headerActionsMutation(true);
-        } catch (error) {
+        }catch(error) {
           this.headerActionsMutation(false);
-          this.pageTotal = false;
+          this.pageTotal = 0;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
           this.loadingDialogMutation(false);
@@ -250,10 +264,10 @@
         setTimeout(this.resetForm, 100);
       },
 
-      // Limpiar Formulario
+      // LIMPIAR FORMULARIO
       resetForm(){
-        this.numero = null;
-        this.capacidad = null;
+        this.numero = '';
+        this.capacidad = '';
         this.descripcion = '';
         this.create = true;
         this.$refs.form.resetValidation();
@@ -263,27 +277,29 @@
       async crearMesa(){
         try {
           if (this.$refs.form.validate()) {
-            this.loadingTitleMutation('Subiendo informacón');
-            this.loadingDialogMutation(true);
+            this.loadingTitleMutation('Subiendo informacón de la mesa');
             this.createModalMutation(false);
+            this.loadingDialogMutation(true);
 
             let response = await axios.post(this.url + 'mesa/registrar', {
-              numero: this.numero,
-              capacidad: this.capacidad,
+              numero: parseInt(this.numero),
+              capacidad: parseInt(this.capacidad),
               descripcion: this.descripcion
             }, this.config);
 
-            this.resetForm();            
+            this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
+
+            this.resetForm();    
             
             if(this.mesasTotal % 10 == 0){
               this.pageTotal++;
             }
             this.page = this.pageTotal;
-            await this.refreshMesas(null, 'Creando Mesa', false);
+            await this.refreshMesas(null, 'Creando Mesa', true);
           }
         } catch (error) {
+          this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
           this.resetForm();
-          console.log(error);
         }
       },
 
@@ -291,50 +307,52 @@
       async editarMesa(){
         try {
           if (this.$refs.form.validate()) {
-            this.createModalMutation(false);
             if(this.descripcion == '' || this.descripcion == null){
               this.descripcion = 'Mesa sin descripción';
             }
 
-            let numeroBup = this.numero;
-            let capacidadBup = this.capacidad;
+            let numeroBup = parseInt(this.numero);
+            let capacidadBup = parseInt(this.capacidad);
             let descripcionBup = this.descripcion;
 
-            this.mesas[this.index].numero = this.numero;
-            this.mesas[this.index].capacidad = this.capacidad;
-            this.mesas[this.index].descripcion = this.descripcion;
+            this.closeModal();
 
-            this.resetForm();
+            this.mesas[this.index].numero = numeroBup;
+            this.mesas[this.index].capacidad = capacidadBup;
+            this.mesas[this.index].descripcion = descripcionBup;
 
             let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
               numero: numeroBup,
               capacidad: capacidadBup,
               descripcion: descripcionBup
             }, this.config);
+            this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'});
           }
         } catch (error) {
-          this.resetForm();
-          console.log(error);
+          this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la mesa', color: 'error'});
         }
       },
-      ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation']),
+
+      // ACCION DEL FORMULARIO
+      async formAction(){
+        if(this.create){
+          await this.crearMesa();
+        }else {
+          await this.editarMesa();
+        }
+        this.$refs.form.resetValidation();
+      },
+
+      ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation']),
     },
     computed: {
-      ...mapState(['url', 'config', 'loadingFish', 'createModalState']),
-      createModal: {
-        get() {
-          return this.createModalState
-        },
-        set(value) {
-          this.createModalMutation(value)
-        }
-      }
+      ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
     },
     created() {
       this.headerActionsMutation(false);
       this.loadingFishMutation(true);
     },
-    // Al crear la instancia de vue
+    // AL CREAR LA INSTANCIA DE VUE
     async mounted(){
       this.breadcrumbMutation('Mesas');
       await this.getMesas();

@@ -24,6 +24,11 @@ export default new Router({
       component: () => import('./views/Categorias.vue')
     },
     {
+      path: '/platillos',
+      name: 'platillos',
+      component: () => import('./views/Platillos.vue')
+    },
+    {
       path: '*',
       component: () => import('./views/NotFound.vue')
     }
