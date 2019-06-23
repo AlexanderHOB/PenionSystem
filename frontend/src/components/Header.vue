@@ -3,15 +3,15 @@
     <v-container fluid class="header pt-0 pb-0">
       <v-layout row wrap class="header-layout">
         <v-flex xs12 sm3 class="pt-4">
-          <div class="hidden-md-and-down header-miniIconBox d-flex justify-center align-center fill-height" @click.stop="miniInteractive" v-ripple>
+          <div class="hidden-md-and-down header-miniIconBox d-flex justify-center align-center fill-height" @click.stop="miniMutation(!miniState)" v-ripple>
             <img
               src="../assets/iconos/pez.svg"
               alt="pez"
               class="header-miniIcon"
-              :class="{'header-miniIcon-active': !mini}"
+              :class="{'header-miniIcon-active': !miniState}"
             >
           </div>
-          <div class="hidden-lg-and-up header-miniIconBox d-flex justify-center align-center fill-height" @click="drawerMutation(!drawer)" v-ripple>
+          <div class="hidden-lg-and-up header-miniIconBox d-flex justify-center align-center fill-height" @click="drawerMutation(!drawerState)" v-ripple>
             <img
               src="../assets/iconos/pez.svg"
               alt="pez"
@@ -21,7 +21,7 @@
         </v-flex>
         <v-flex xs12 sm6 class="pt-4">
           <div class="header-breadcrumbBox d-flex align-center fill-height">
-            <p class="header-breadcrumb mb-0">El Peñon \ {{ breadcrumb }}</p>
+            <p class="header-breadcrumb mb-0">El Peñon \ <span class="yellow--text">{{ breadcrumb }}</span></p>
           </div>
         </v-flex>
         <v-flex xs12 sm3 class="header-user pt-4">
@@ -88,36 +88,9 @@ export default {
   },
   methods: {
     ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation']),
-    miniInteractive(){
-      this.miniMutation(!this.mini);
-    }
   },
   computed: {
-    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActions', 'breadcrumb']),
-    drawer: {
-      get() {
-        return this.drawerState
-      },
-      set(value) {
-        this.drawerMutation(value)
-      }
-    },
-    mini: {
-      get() {
-        return this.miniState
-      },
-      set(value) {
-        this.miniMutation(value);
-      }
-    },
-    createModal: {
-      get() {
-        return this.createModalState
-      },
-      set(value) {
-        this.createModalMutation(value)
-      }
-    }
+    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActions', 'breadcrumb'])
   }
 }
 </script>

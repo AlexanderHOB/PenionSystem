@@ -59,7 +59,7 @@
   }
   ::selection {
     // background-color: transparent;
-    // text-shadow: 0 0 2px #ff0;
+    // text-shadow: 0 0 2px #068FD2;
   }
   body {	
     // Scroll
@@ -106,8 +106,20 @@
   .header-waves .v-image__image {
     background-repeat: repeat-x;
   }
-  .v-navigation-drawer[data-booted="true"]{
-        // transition: .2s cubic-bezier(0.17, .67, 0.64, .18);
+
+  // Sanckbar
+  .v-snack__wrapper {
+    border-radius: 4px !important;
+  &.success {
+    box-shadow: 0 12px 20px -10px rgba(76,175,80,.28),
+                        0 4px 20px 0 rgba(0,0,0,.12),
+                        0 7px 8px -5px rgba(76,175,80,.2) !important;
   }
+  &.error {
+    box-shadow: 0 12px 20px -10px rgba(244,67,54,.28),
+                        0 4px 20px 0 rgba(0,0,0,.12),
+                        0 7px 8px -5px rgba(244,67,54,.2)!important;
+  }
+ }
 </style>
 
