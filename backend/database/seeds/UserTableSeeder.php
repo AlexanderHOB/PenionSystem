@@ -19,7 +19,7 @@ class UserTableSeeder extends Seeder
                 'password'         => bcrypt('admin'),
                 'color'            => '#'.rand(111111,999999),  
                 'condicion'        => 1,
-                'idrol'            =>rand(1,6),
+                'rol_id'            =>rand(1,6),
 
             ]);
         }

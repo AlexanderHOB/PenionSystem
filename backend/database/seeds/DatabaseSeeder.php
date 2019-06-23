@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call(PlatilloTableSeeder::class);
         $this->call(PersonaTableSeeder::class);
         $this->call(UserTableSeeder::class);
+        $this->call(TransaccionesTableSeeder::class);
+
 
 
 

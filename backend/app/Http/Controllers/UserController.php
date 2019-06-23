@@ -16,14 +16,14 @@ class UserController extends Controller
         
         if ($buscar==''){
             $personas = User::join('personas','users.id','=','personas.id')
-            ->join('roles','users.idrol','=','roles.id')
-            ->select('personas.id','personas.nombre','personas.dni','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.idrol','roles.nombre as rol')
+            ->join('roles','users.rol_id','=','roles.id')
+            ->select('personas.id','personas.nombre','personas.dni','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
             ->orderBy('personas.id', 'desc')->paginate(10);
         }
         else{
             $personas = User::join('personas','users.id','=','personas.id')
-            ->join('roles','users.idrol','=','roles.id')
-            ->select('personas.id','personas.nombre','personas.dni','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.idrol','roles.nombre as rol')
+            ->join('roles','users.rol_id','=','roles.id')
+            ->select('personas.id','personas.nombre','personas.dni','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
             ->where('personas.'.$criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(10);
         }
         
@@ -44,7 +44,7 @@ class UserController extends Controller
  
         if ($v->fails())
         {
-            return ['Errores de validación de datos en el servidor'];
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);            
         }
         try{
             DB::beginTransaction();
@@ -59,7 +59,7 @@ class UserController extends Controller
 
             $user = new User();
             $user->id = $persona->id;
-            $user->idrol = $request->idrol;
+            $user->rol_id = $request->rol_id;
             $user->email = $request->email;
             $user->password = bcrypt( $request->password);
             $user->color=$request->color;
@@ -90,7 +90,7 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt( $request->password);
             $user->condicion = '1';
-            $user->idrol = $request->idrol;
+            $user->rol_id = $request->rol_id;
             $user->color = $request->color;
             $user->save();
 

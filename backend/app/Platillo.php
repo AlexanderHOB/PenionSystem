@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Platillo extends Model
 {
     protected $fillable =[
-        'idcategoria',
+        'categoria_id',
         'nombre',
         'codigo',
         'area',
@@ -16,8 +16,8 @@ class Platillo extends Model
         'condicion'
     ];
 
-    //Relacion con la tabla categorias
+    //Relacion con la tabla categorias 
     public function categoria(){
-        return $this->belongsTo('App\Categoria');
+        return $this->belongsTo('App\Categoria','categoria_id');
     }
 }

@@ -7,27 +7,14 @@ use App\Platillo;
 class PlatilloController extends Controller
 {
     public function index(Request $request )
-    {
-
-        $buscar= $request->buscar;
-        $criterio=$request->criterio;
-        if($buscar==''){
-            $platillos=Platillo::join('categorias','platillos.idcategoria','=','categorias.id')
-            ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.area',
-            'platillos.nombre','categorias.nombre as nombre_categoria',
-            'platillos.precio','platillos.descripcion','platillos.condicion')
-            ->orderBy('platillos.id','desc')->paginate(10);
-        }else{
-            $platillos=Platillo::join('categorias','platillos.idcategoria','=','categorias.id')
-            ->select('platillos.id','platillos.idcategoria','platillos.codigo',
-            'platillos.nombre','categorias.nombre as nombre_categoria',
-            'platillos.precio','platillos.descripcion','platillos.condicion')
-            ->where('platillos.'.$criterio,'like','%'.$buscar.'%')
-            ->orderBy('platillos.id','desc')->paginate(10);           
+    {        
+        //listar platillos
+        $platillos   = Platillo::paginate(10);
+        $categorias  = [];
+        foreach($platillos as $platillo){
+            array_push($categorias,$platillo->categoria);
         }
-        
-        return $platillos;
-        
+        return $platillos;   
     }
     public function buscarPlatillo(Request $request){
         
@@ -69,29 +56,32 @@ class PlatilloController extends Controller
     }
     public function store(Request $request)
     {
+        //validar datos
         $v = \Validator::make($request->all(), [
             
-            'idcategoria' => 'required|integer',
+            'categoria_id' => 'required|integer',
             'codigo' => 'required|string|max:5',
             'nombre'    => 'required|string|max:60',
             'area' => 'required|max:150',
-            'precio' => 'required|integer',
+            'precio' => 'required|numeric',
 
         ]);
  
         if ($v->fails())
         {
-            return ['Errores de validación de datos en el servidor'];
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
         }
 
         $platillo = new Platillo();
-        $platillo->idcategoria=$request->idcategoria;
-        $platillo->codigo=$request->codigo;
-        $platillo->nombre=$request->nombre;
-        $platillo->area=$request->area;
-        $platillo->precio=$request->precio;
-        $platillo->descripcion=$request->descripcion;
-        $platillo->condicion='1';
+        $platillo->categoria_id =$request->categoria_id;
+        $platillo->codigo       =$request->codigo;
+        $platillo->nombre       =$request->nombre;
+        $platillo->area         =$request->area;
+        $platillo->precio       =$request->precio;
+        if($request->descripcion!=''||$request->descripcion!=null){
+            $platillo->descripcion=$request->descripcion;
+        }
+        $platillo->condicion    ='1';
         $platillo->save();
 
         return ['Platillo creado correctamente'];
@@ -102,7 +92,7 @@ class PlatilloController extends Controller
         //VALIDACION DE ACTUALIZACIÓN
         $v = \Validator::make($request->all(), [
             
-            'idcategoria' => 'required|integer',
+            'categoria_id' => 'required|integer',
             'codigo' => 'required|string|max:5',
             'nombre'    => 'required|string|max:60',
             'area' => 'required|max:150',
@@ -112,29 +102,27 @@ class PlatilloController extends Controller
  
         if ($v->fails())
         {
-            return ['Errores de validación de datos en el servidor'];
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
         }
 
         $platillo = Platillo::findOrFail($id);
-        $platillo->idcategoria=$request->idcategoria;
-        $platillo->codigo=$request->codigo;
-        $platillo->nombre=$request->nombre;
-        $platillo->area=$request->area;
-        $platillo->precio=$request->precio;
-        $platillo->descripcion=$request->descripcion;
-        $platillo->condicion='1';
+        $platillo->categoria_id =$request->categoria_id;
+        $platillo->codigo       =$request->codigo;
+        $platillo->nombre       =$request->nombre;
+        $platillo->area         =$request->area;
+        $platillo->precio       =$request->precio;
+        $platillo->descripcion  =$request->descripcion;
+        $platillo->condicion    ='1';
         $platillo->save();
     }
     public function desactivar($id)
     {
-        //if(!$request->ajax()) return redirect('/');
         $platillo = Platillo::findOrFail($id);
         $platillo->condicion='0';
         $platillo->save();
     }
     public function activar($id)
     {
-        //if(!$request->ajax()) return redirect('/');
         $platillo = Platillo::findOrFail($id);
         $platillo->condicion='1';
         $platillo->save();
