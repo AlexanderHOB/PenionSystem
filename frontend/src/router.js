@@ -29,6 +29,11 @@ export default new Router({
       component: () => import('./views/Platillos.vue')
     },
     {
+      path: '/personal',
+      name: 'personal',
+      component: () => import('./views/Personal.vue')
+    },
+    {
       path: '*',
       component: () => import('./views/NotFound.vue')
     }

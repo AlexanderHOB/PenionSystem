@@ -41,8 +41,8 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 v-if="create" class="headline">Crear Mesa</h3>
-          <h3 v-else class="headline">Editar Mesa</h3>
+          <h3 v-show="create" class="headline title-modal">Crear Mesa</h3>
+          <h3 v-show="!create" class="headline title-modal">Editar Mesa</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text class="pt-0">
@@ -96,8 +96,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-if="create" color="green darken-1" flat @click="crearMesa">Crear</v-btn>
-            <v-btn :disabled="!valid" v-else color="green darken-1" flat @click="editarMesa">Editar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearMesa">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarMesa">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -126,10 +126,10 @@
 
 <script>
   import axios from 'axios';
-  import LoadingDialog from '../components/LoadingDialog';
-  import LoadingFish from '../components/LoadingFish';
-  import ErrorMessage from '../components/ErrorMessage';
-  import AlertNotifications from '../components/AlertNotifications';
+  import LoadingDialog from '../components/loading/LoadingDialog';
+  import LoadingFish from '../components/loading/LoadingFish';
+  import ErrorMessage from '../components/messages/ErrorMessage';
+  import AlertNotifications from '../components/messages/AlertNotifications';
 
   import { mapState, mapMutations } from 'vuex';
 
@@ -191,15 +191,15 @@
               this.messageMesas = 'No se encontraron mesas';
               this.pageTotal = 0;
             }
-            this.headerActionsMutation(true);
+            this.headerActionsMutation({create: true, report: true});
           }else {
-            this.headerActionsMutation(false);
+            this.headerActionsMutation({create: false, report: false});
             this.messageMesas = response.data.message;
             this.mesas = [];
             this.pageTotal = 0;
           }
         } catch (error) {
-          this.headerActionsMutation(false);
+          this.headerActionsMutation({create: false, report: false});
           this.pageTotal = 0;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
@@ -225,19 +225,33 @@
               'Content-Type': 'application/json'
             }
           });
-          let data = response.data;
-          let mesas = data.data;
-          this.messageMesas = '';
-          this.mesas = mesas;
-          if(data.total != this.mesasTotal){
-            this.mesasTotal = data.total;
+
+          if(response.data.data){
+            let data = response.data;
+            let mesas = data.data;
+            if(mesas.length > 0){
+              this.mesas = mesas;
+              this.messageMesas = '';
+              if(data.total != this.mesasTotal){
+                this.mesasTotal = data.total;
+              }
+              if(data.last_page != this.pageTotal){
+                this.pageTotal = data.last_page;
+              }
+            }else {
+              this.messageMesas = 'No se encontraron mesas';
+              this.pageTotal = 0;
+            }
+            this.headerActionsMutation({create: true, report: true});
+          }else {
+            this.headerActionsMutation({create: false, report: false});
+            this.messageMesas = response.data.message;
+            this.mesas = [];
+            this.pageTotal = 0;
           }
-          if(data.last_page != this.pageTotal){
-            this.pageTotal = data.last_page;
-          }
-          this.headerActionsMutation(true);
+
         }catch(error) {
-          this.headerActionsMutation(false);
+          this.headerActionsMutation({create: false, report: false});
           this.pageTotal = 0;
           this.messageMesas = 'Error al conctar con el servidor';
         }finally {
@@ -349,7 +363,7 @@
       ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
     },
     created() {
-      this.headerActionsMutation(false);
+      this.headerActionsMutation({create: false, report: false});
       this.loadingFishMutation(true);
     },
     // AL CREAR LA INSTANCIA DE VUE

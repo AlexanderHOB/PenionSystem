@@ -21,7 +21,7 @@
         </v-flex>
         <v-flex xs12 sm6 class="pt-4">
           <div class="header-breadcrumbBox d-flex align-center fill-height">
-            <p class="header-breadcrumb mb-0">El Peñon \ <span class="yellow--text">{{ breadcrumb }}</span></p>
+            <p class="header-breadcrumb mb-0"><span class="yellow--text">El Peñon \</span> {{ breadcrumb }}</p>
           </div>
         </v-flex>
         <v-flex xs12 sm3 class="header-user pt-4">
@@ -46,20 +46,18 @@
             append-icon="search"
           ></v-text-field>
         </v-flex>
-        <template v-if="headerActions">
-          <v-flex xs12 sm3 class="pt-4 mt-2 text-xs-center text-sm-right">
-            <v-btn class="ma-0 indigo  white--text" round @click="createModalMutation(true)">
-              <v-icon left>add_circle_outline</v-icon>
-              Nuevo
-            </v-btn>
-          </v-flex>
-          <v-flex xs12 sm3 class="pt-4 mt-2 text-xs-center text-sm-right">
-            <v-btn class="ma-0 deep-purple white--text" round>
-              <v-icon left>insert_drive_file</v-icon>
-              Reporte
-            </v-btn>
-          </v-flex>
-        </template>
+        <v-flex v-if="headerActionCreate" xs12 sm3 class="pt-4 mt-2 text-xs-center text-sm-right">
+          <v-btn class="ma-0 indigo  white--text" round @click="createModalMutation(true)">
+            <v-icon left>add_circle_outline</v-icon>
+            Nuevo
+          </v-btn>
+        </v-flex>
+        <v-flex v-if="headerActionReport" xs12 sm3 class="pt-4 mt-2 text-xs-center text-sm-right">
+          <v-btn class="ma-0 deep-purple white--text" round>
+            <v-icon left>insert_drive_file</v-icon>
+            Reporte
+          </v-btn>
+        </v-flex>
       </v-layout>
       <v-layout class="header-waves">
         <v-flex xs12>
@@ -90,70 +88,70 @@ export default {
     ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation']),
   },
   computed: {
-    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActions', 'breadcrumb'])
+    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb'])
   }
 }
 </script>
 
 <style lang="scss" scoped>
-  .header {
+.header {
+  position: relative;
+  padding-right: 85px;
+  padding-left: 85px;
+  &-bg {
+    @extend %bg-primary;
+  }
+  &-layout {
     position: relative;
-    padding-right: 85px;
-    padding-left: 85px;
-    &-bg {
-      @extend %bg-primary;
-    }
-    &-layout {
-      position: relative;
-      z-index: 2;
-    }
-    &-miniIconBox {
-      width: 80px;
-      padding: 4px 16px 6px;
-      @extend %header-bg-items;
-      cursor: pointer;
-      @extend %tap-highlight;
-    }
-    &-miniIcon {
-      transition: .5s ease-in;
-      @extend %tap-highlight;
-      &-active {
-        transform: rotateY(180deg);
-      }
-    }
-    &-waves {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      z-index: 1;
-      height: 80px;
-      width: 100%;
-      opacity: .9;
-    }
-    &-breadcrumbBox {
-      padding-left: 16px;
-      padding-right: 16px;
-      @extend %header-bg-items;
-    }
-    &-breadcrumb {
-      font-size: 20px;
-    }
-    &-userBox {
-      @extend %header-bg-items;
-      overflow: hidden;
-      width: 130px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    &-user {
-      display: flex;
-      justify-content: flex-end;
-      &-img {
-        height: 100%;
-        background-color: rgba(255, 255, 255, .3);
-      }
+    z-index: 2;
+  }
+  &-miniIconBox {
+    width: 80px;
+    padding: 4px 16px 6px;
+    @extend %header-bg-items;
+    cursor: pointer;
+    @extend %tap-highlight;
+  }
+  &-miniIcon {
+    transition: .5s ease-in;
+    @extend %tap-highlight;
+    &-active {
+      transform: rotateY(180deg);
     }
   }
+  &-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    height: 80px;
+    width: 100%;
+    opacity: .9;
+  }
+  &-breadcrumbBox {
+    padding-left: 16px;
+    padding-right: 16px;
+    @extend %header-bg-items;
+  }
+  &-breadcrumb {
+    font-size: 20px;
+  }
+  &-userBox {
+    @extend %header-bg-items;
+    overflow: hidden;
+    width: 130px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  &-user {
+    display: flex;
+    justify-content: flex-end;
+    &-img {
+      height: 100%;
+      background-color: rgba(255, 255, 255, .3);
+    }
+  }
+}
 </style>
 

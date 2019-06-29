@@ -14,7 +14,7 @@ export default {
   ],
   data(){
     return {
-      asd: '#dc772d'
+
     }
   }
 }
