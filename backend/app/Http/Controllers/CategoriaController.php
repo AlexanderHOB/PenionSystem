@@ -8,25 +8,16 @@ class CategoriaController extends Controller
 {
     public function index(Request $request)
     {
-        //if (!$request->ajax()) return redirect('/');
-
-        $buscar = $request->buscar;
-        $criterio = $request->criterio;
-
-        if ($buscar==''){
-            $categorias = Categoria::orderBy('id', 'desc')->paginate(10);
-        }
-        else{
-            $categorias = Categoria::where($criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(10);
-        }
-
+        //Obtener todas las categorías
+        $categorias = Categoria::orderBy('id', 'desc')->paginate(10);
+    
         return $categorias;
     }
     public function selectCategoria(Request $request){
-        //if (!$request->ajax()) return redirect('/');
+        //listar las categorias disponibles en el modulo platillo
         $categorias = Categoria::where('condicion','=','1')
-        ->select('id','nombre')->orderBy('nombre', 'asc')->get();
-        return ['categorias' => $categorias];
+        ->select('id','nombre')->orderBy('id', 'asc')->get();
+        return $categorias;
     }
 
     public function store(Request $request)
@@ -40,20 +31,22 @@ class CategoriaController extends Controller
 
         if ($v->fails())
         {
-            return ['Errores de validación de datos en el servidor'];
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
         }
+        //Crear una categoria nueva
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
-        $categoria->descripcion = $request->descripcion;
+        if($request->descripcion!=''||$request->descripcion!=null){
+            $categoria->descripcion=$request->descripcion;
+        }
         $categoria->condicion = '1';
         $categoria->save();
     }
 
 
     public function update($id, Request $request)
-    {
-        //if (!$request->ajax()) return redirect('/');
-
+    {   
+        //Actualizar una categoría
         $categoria = Categoria::findOrFail($id);
         $categoria->nombre = $request->nombre;
         $categoria->descripcion = $request->descripcion;
@@ -63,8 +56,7 @@ class CategoriaController extends Controller
 
     public function desactivar($id)
     {
-        //if (!$request->ajax()) return redirect('/');
-
+        //Desactivar la categoria
         $categoria = Categoria::findOrFail($id);
         $categoria->condicion = '0';
         $categoria->save();
@@ -73,8 +65,7 @@ class CategoriaController extends Controller
 
     public function activar($id)
     {
-        //if (!$request->ajax()) return redirect('/');
-
+        //Activar una categoría
         $categoria = Categoria::findOrFail($id);
         $categoria->condicion = '1';
         $categoria->save();

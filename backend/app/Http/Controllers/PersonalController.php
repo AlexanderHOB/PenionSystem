@@ -8,23 +8,15 @@ use App\Persona;
 class PersonalController extends Controller
 {
     public function index(Request $request)
-    {
-
-        $buscar = $request->buscar;
-        $criterio = $request->criterio;
-        
-        if ($buscar==''){
-            $personas = Persona::orderBy('id', 'desc')->paginate(10);
-        }
-        else{
-            $personas = Persona::where($criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(10);
-        }
+    {     
+        //listar personas
+        $personas = Persona::orderBy('id', 'desc')->paginate(10);
 
         return  $personas;
     }
     public function store(Request $request)
     {
-        
+        //crear un mozo
         $persona = new Persona();
         $persona->nombre = $request->nombre;
         $persona->tipo_documento = $request->tipo_documento;
