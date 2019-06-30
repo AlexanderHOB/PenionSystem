@@ -56,8 +56,8 @@
                     color="blue"
                     label="Apellidos"
                     v-model="apellidos"
-                    :rules="[rules.required]"
-                    counter
+                    :rules="[rules.required, rules.counterApellidos]"
+                    counter="50"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
@@ -65,8 +65,8 @@
                     color="blue"
                     label="Nombre"
                     v-model="nombre"
-                    :rules="[rules.required]"
-                    counter
+                    :rules="[rules.required, rules.counterNombre]"
+                    counter="30"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs5>
@@ -74,8 +74,8 @@
                     color="blue"
                     label="Dirección"
                     v-model="direccion"
-                    :rules="[rules.required]"
-                    counter
+                    :rules="[rules.required, rules.counterDirección]"
+                    counter="100"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs7>
@@ -83,8 +83,8 @@
                     color="blue"
                     label="Email"
                     v-model="email"
-                    :rules="[rules.required]"
-                    counter
+                    :rules="[rules.required, rules.counterEmail, rules.emailRules]"
+                    counter="60"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
@@ -93,7 +93,8 @@
                     label="DNI"
                     v-model="dni"
                     :rules="[rules.required]"
-                    counter
+                    counter="8"
+                    mask="########"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
@@ -102,44 +103,61 @@
                     label="Celular"
                     v-model="celular"
                     :rules="[rules.required]"
-                    counter
+                    counter="9"
+                    mask="#########"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
-                  <v-text-field 
+                  <v-select 
                     color="blue"
                     label="Puesto"
                     v-model="puesto"
+                    :items="puestos"
                     :rules="[rules.required]"
-                    counter
-                  ></v-text-field>
+                  ></v-select>
                 </v-flex>
                 <v-flex xs6>
-                  <v-text-field 
+                  <v-select 
                     color="blue"
                     label="Area"
                     v-model="area"
+                    :items="areas"
                     :rules="[rules.required]"
-                    counter
-                  ></v-text-field>
+                  ></v-select>
                 </v-flex>
                 <v-flex xs4>
-                  <v-text-field 
+                  <v-select 
                     color="blue"
                     label="Tipo de contrato"
                     v-model="tipo_contrato"
+                    :items="tipo_contratos"
                     :rules="[rules.required]"
-                    counter
-                  ></v-text-field>
+                  ></v-select>
                 </v-flex>
                 <v-flex xs4>
-                  <v-text-field 
-                    color="blue"
-                    label="Fecha de inicio"
-                    v-model="fechaInicio"
-                    :rules="[rules.required]"
-                    counter
-                  ></v-text-field>
+                  <v-menu
+                    v-model="menuDate"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    lazy
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      color="blue"
+                      v-model="fechaRegistro"
+                      label="Fecha de inicio"
+                      prepend-inner-icon="event"
+                      readonly
+                      :rules="[rules.required]"
+                      v-on="on"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker header-color="blue" color="green lighten-1" :max="maxDate" :min="minDate" locale="es-pe" v-model="date" @input="menuDate = false"></v-date-picker>
+                  </v-menu>
                 </v-flex>
                 <v-flex xs4>
                   <v-text-field 
@@ -147,7 +165,8 @@
                     label="Sueldo"
                     v-model="sueldo"
                     :rules="[rules.required]"
-                    counter
+                    type="number"
+                    prefix="$"
                   ></v-text-field>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -232,7 +251,7 @@
             <v-layout>
               <v-flex xs5><strong>Fecha de inicio</strong></v-flex>
               <v-flex xs7>
-                <p>{{ fechaInicioDetail }}</p>
+                <p>{{ fechaRegistroDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -305,7 +324,12 @@ export default {
       // Datos para valdiar formulario
       valid: true,
       rules: {
-        required: value => !!value || 'Required.'
+        required: value => !!value || 'Required.',
+        counterApellidos: value => value.length <= 50 || '50 caracteres como maximo',
+        counterNombre: value => value.length <= 30 || '30 caracteres como maximo',
+        counterDirección: value => value.length <= 100 || '100 caracteres como maximo',
+        counterEmail: value => value.length <= 60 || '60 caracteres como maximo',
+        emailRules: value => /.+@.+/.test(value) || 'E-mail invalido'
       },
       // Data para editar Categoria
       apellidos: '',
@@ -317,8 +341,12 @@ export default {
       puesto: '',
       area: '',
       tipo_contrato: '',
-      fechaInicio: '',
+      fechaRegistro: '',
+      date: new Date().toISOString().substr(0, 10),
       sueldo: '',
+      menuDate: false,
+      maxDate: new Date().toISOString().substr(0, 10),
+      minDate: '2010',
       create: true,
       index: 0,
       id: 0,
@@ -330,10 +358,14 @@ export default {
       celularDetail: '',
       puestoDetail: '',
       areaDetail: '',
-      fechaInicioDetail: '',
+      fechaRegistroDetail: '',
       sueldoDetail: '',
       // Datos para detalles de la categoria
-      personalDetail: false
+      personalDetail: false,
+      // Datos para Selects
+      puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
+      areas: ['Área de almacen', 'Área Caliente', 'Área Fría','Área mixta', 'Área de Ventas'],
+      tipo_contratos: ['Semanal', 'Quincenal', 'Mensual']
     }
   },
   methods: {
@@ -352,7 +384,6 @@ export default {
             this.personal = personal;
             this.messagePersonal = '';
             this.personalTotal = data.total;
-            console.log(personal);
             if(data.last_page && data.last_page > 1){
               this.pageTotal = data.last_page;
             }
@@ -440,7 +471,7 @@ export default {
       this.celularDetail = this.personal[index].celular;
       this.puestoDetail = this.personal[index].puesto_trabajo;
       this.areaDetail = this.personal[index].area_trabajo;
-      this.fechaInicioDetail = '';
+      this.fechaRegistroDetail = '';
       this.sueldoDetail = this.personal[index].sueldo;
       this.personalDetail = true;
     },
@@ -457,7 +488,7 @@ export default {
         self.celularDetail = '';
         self.puestoDetail = '';
         self.areaDetail = '';
-        self.fechaInicioDetail = '';
+        self.fechaRegistroDetail = '';
         self.sueldoDetail = '';
       }, 100);
     },
@@ -470,16 +501,65 @@ export default {
     // CERRAR MODAL
     closeModal(){
       this.createModalMutation(false);
+      setTimeout(this.resetForm, 100);
     },
 
     // LIMPIAR FORMUALRIO
     resetForm(){
-    
+      this.apellidos = '';
+      this.nombre = '';
+      this.direccion = '';
+      this.email = '';
+      this.dni = '';
+      this.celular = '';
+      this.puesto = '';
+      this.area = '';
+      this.tipo_contrato = '';
+      this.date = new Date().toISOString().substr(0, 10);
+      this.fechaRegistro = '';
+      this.sueldo = '';
+      this.create = true;
+      this.$refs.form.resetValidation();
     },
 
     // CREAR PERSONAL
     async registrarPersonal() {
+      try {
+        if (this.$refs.form.validate()) {
+          this.loadingTitleMutation('Subiendo información del personal');
+          this.createModalMutation(false);
+          this.loadingDialogMutation(true);
+          this.sueldo = parseFloat(parseFloat(this.sueldo).toFixed(2));
+          let response = await axios.post(this.url + 'empleado/registrar', {
+            apellidos: this.apellidos,
+            nombres: this.nombre,
+            dni: this.dni,
+            celular: this.celular,
+            email: this.email,
+            direccion: this.direccion,
+            area_trabajo: this.area,
+            puesto_trabajo: this.puesto,
+            tipo_contrato: this.tipo_contrato,
+            fecha_registro: this.date,
+            sueldo: this.sueldo
+          }, this.config);
 
+        this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
+
+        this.resetForm();
+
+        if(this.personalTotal % 10 == 0){
+            this.pageTotal++;
+          }
+          this.page = this.pageTotal;
+          await this.refreshPersonal(null, 'Registrando personal', true);
+        }
+      } catch (error) {
+        console.log(error);
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el personal', color: 'error'});
+        this.resetForm();
+        this.loadingDialogMutation(false);
+      }
     },
 
     // EDITAR CATEGORIA
@@ -515,6 +595,11 @@ export default {
   },
   computed: {
     ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
+  },
+  watch: {
+    date(val) {
+      this.fechaRegistro = val.split('-').reverse().join('-');
+    }
   },
   created(){
     this.headerActionsMutation({create: false, report: false});
