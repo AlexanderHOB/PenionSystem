@@ -79,7 +79,7 @@
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
             <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearCategoria">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="editarCategoria">Editar</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarCategoria">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -334,7 +334,7 @@ export default {
           if(this.categoriasTotal % 10 == 0){
             this.pageTotal++;
           }
-          this.page = this.pageTotal;
+          this.page = 1;
           await this.refreshCategorias(null, 'Creando Categoria', true);
         }  
       }catch (error) {
