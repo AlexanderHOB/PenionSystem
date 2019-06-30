@@ -18,7 +18,7 @@
         <v-flex xs4 v-for="(platillo, i) of platillos" :key="platillo.id" class="mb-4">
           <div class="platillo-box">
            <div class="platillo-img-box">
-             <img src="https://aomine1745.github.io/Img/bg3.jpg" alt="" class="platillo-img">
+             <img src="../assets/img/platillos/Festival-De-Trucha.jpg" alt="" class="platillo-img">
            </div>
            <svg class="clipPath-svg">
             <clipPath id="clipPath-img">
@@ -29,10 +29,12 @@
             </svg>
             <h2 class="platillo-title text-xs-center">{{ platillo.nombre }}</h2>
             <PrimaryBox class="platillo-bg" :active="platillo.condicion" :activeInteraction="activarPlatillo" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
-            <p class="mb-0 platillo-text" v-if="platillo.condicion">Activo</p> 
-            <p class="mb-0 platillo-text" v-else>Inactivo</p> 
-            <img src="../assets/iconos/edit.svg" alt="" class="platillo-edit" @click="editarPlatilloModal(i)">
-            <img src="../assets/iconos/detail.svg" alt="" class="platillo-detail" @click="detailPlatilloModal(i)">
+            <div class="platillo-textBox text-xs-center">
+              <p class="mb-0 platillo-text" v-show="platillo.condicion">Activo</p> 
+              <p class="mb-0 platillo-text" v-show="!platillo.condicion">Inactivo</p>           
+            </div>
+            <img src="../assets/iconos/edit.svg" alt="edit" class="platillo-edit" @click="editarPlatilloModal(i)">
+            <img src="../assets/iconos/detail.svg" alt="detail" class="platillo-detail" @click="detailPlatilloModal(i)">
           </div>
         </v-flex>
       </template>
@@ -42,8 +44,8 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 v-if="create" class="headline">Crear Platillo</h3>
-          <h3 v-else class="headline">Editar Platillo</h3>
+          <h3 v-show="create" class="headline title-modal">Crear Platillo</h3>
+          <h3 v-show="!create" class="headline title-modal">Editar Platillo</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text class="pt-0">
@@ -125,8 +127,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-if="create" color="green darken-1" flat @click="crearPlatillo">Crear</v-btn>
-            <v-btn :disabled="!valid" v-else color="green darken-1" flat @click="editarPlatillo">Editar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearPlatillo">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPlatillo">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -175,14 +177,14 @@
 </template>
 
 <script>
-  import axios from 'axios';
-  import LoadingDialog from '../components/LoadingDialog';
-  import LoadingFish from '../components/LoadingFish';
-  import PrimaryBox from '../components/PrimaryBox';
-  import ErrorMessage from '../components/ErrorMessage';
-  import AlertNotifications from '../components/AlertNotifications';
+import axios from 'axios';
+import LoadingDialog from '../components/loading/LoadingDialog';
+import LoadingFish from '../components/loading/LoadingFish';
+import PrimaryBox from '../components/box/PrimaryBox';
+import ErrorMessage from '../components/messages/ErrorMessage';
+import AlertNotifications from '../components/messages/AlertNotifications';
 
-  import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 
 export default {
   components: {
@@ -224,6 +226,9 @@ export default {
       precio: null,
       categoria: null,
       descripcion: '',
+      create: true,
+      index: 0,
+      id: 0,
       // Deatail
       codigoDetail: '', 
       nombreDetail: '',
@@ -231,9 +236,6 @@ export default {
       precioDetail: '',
       nombreCategoriaDetail: '',
       descripcionDetail: '',
-      create: true,
-      index: 0,
-      id: 0,
       // Datos para detalles de la categoria
       platillosDetail: false,
       // Datos de area
@@ -263,15 +265,15 @@ export default {
             this.messagePlatillos= 'No se encontraron platillos';
             this.pageTotal = 0;
           }
-          this.headerActionsMutation(true);
+          this.headerActionsMutation({create: true, report: false});
         }else {
-          this.headerActionsMutation(false);
+          this.headerActionsMutation({create: false, report: false});
           this.messagePlatillos = response.data.message;
           this.platillos = [];
           this.pageTotal = 0;
         }
       }catch (error) {
-        this.headerActionsMutation(false);
+        this.headerActionsMutation({create: false, report: false});
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
@@ -298,19 +300,32 @@ export default {
           }
         });
 
-        let data = response.data;
-        let platillos = data.data;
-        this.messagePlatillos = '';
-        this.platillos = platillos;
-        if(data.total != this.platillosTotal){
-          this.platillosTotal = data.total;
+        if(response.data.data){
+          let data = response.data;
+          let platillos = data.data;
+          if(platillos.length > 0){
+            this.platillos = platillos;
+            this.messagePlatillos = '';
+            if(data.total != this.platillosTotal){
+              this.platillosTotal = data.total;
+            }
+            if(data.last_page != this.pageTotal){
+              this.pageTotal = data.last_page;
+            }
+          }else {
+            this.messagePlatillos= 'No se encontraron platillos';
+            this.pageTotal = 0;
+          }
+          this.headerActionsMutation({create: true, report: false});
+        }else {
+          this.headerActionsMutation({create: false, report: false});
+          this.messagePlatillos = response.data.message;
+          this.platillos = [];
+          this.pageTotal = 0;
         }
-        if(data.last_page != this.pageTotal){
-          this.pageTotal = data.last_page;
-        }
-        this.headerActionsMutation(true);
+
       } catch (error) {
-        this.headerActionsMutation(false);
+        this.headerActionsMutation({create: false, report: false});
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
@@ -505,7 +520,7 @@ export default {
     ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
   },
   created(){
-    this.headerActionsMutation(false);
+    this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
   },
   async mounted(){
@@ -539,11 +554,14 @@ export default {
       overflow: hidden;
     }
     &-bg {
+      width: 100%;
+
       position: relative;
     }
     &-box {
       position: relative;
       padding-top: 80px;
+      font-family: 'Concert One', cursive;
     }
     &-title {
       position: absolute;
@@ -553,17 +571,18 @@ export default {
       z-index: 2;
       font-size: 24px;
       line-height: 100%;
-      font-family: 'Concert One', cursive;
     }
+    &-textBox {
+    position: absolute;
+    top: 70%;
+    left: 2%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    width: 25%;
+  }
     &-text {
-      position: absolute;
-      top: 70%;
-      left: 4%;
-      transform: translateY(-50%);
       color: #fff; 
       font-size: 18px;
-      font-family: 'Concert One', cursive;
-      pointer-events: none;
     }
     &-edit,
     &-detail {

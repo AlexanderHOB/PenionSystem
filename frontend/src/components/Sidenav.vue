@@ -127,6 +127,7 @@
         @click=""
         active-class="white--text sidenav-items-active"
         ripple
+        :to="{name: 'personal'}"
       >
         <v-list-tile-action>
           <v-img 
@@ -136,7 +137,7 @@
           ></v-img>
         </v-list-tile-action>
         <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Acceso</v-list-tile-title>
+          <v-list-tile-title>Personal</v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
 

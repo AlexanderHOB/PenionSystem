@@ -9,7 +9,7 @@ export default new Vuex.Store({
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
-    url: 'http://192.168.1.3:8000/api/',
+    url: 'http://192.168.1.2:8000/api/',
     // url: 'http://127.0.0.1:8000/api/',
     config: {
       headers: {
@@ -24,7 +24,8 @@ export default new Vuex.Store({
     },
     loadingFish: true,
     // Data  Header
-    headerActions: false,
+    headerActionCreate: false,
+    headerActionReport: false,
     createModalState: false,
     breadcrumb: '',
     // Data de SNackbar
@@ -50,8 +51,9 @@ export default new Vuex.Store({
     loadingFishMutation(state, value){
       state.loadingFish = value;
     },
-    headerActionsMutation(state, value){
-      state.headerActions = value;
+    headerActionsMutation(state, object){
+      state.headerActionCreate = object.create;
+      state.headerActionReport = object.report;
     },
     createModalMutation(state, value){
       state.createModalState = value;
