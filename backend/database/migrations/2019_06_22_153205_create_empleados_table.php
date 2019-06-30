@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMozosTable extends Migration
+class CreateEmpleadosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateMozosTable extends Migration
      */
     public function up()
     {
-        Schema::create('mozos', function (Blueprint $table) {
+        Schema::create('empleados', function (Blueprint $table) {
             $table->integer('id')->unsigned();
             $table->foreign('id')->references('id')->on('personas')->onDelete('cascade');
             $table->string('area_trabajo',80);
@@ -21,6 +21,7 @@ class CreateMozosTable extends Migration
             $table->string('tipo_contrato',80);
             $table->decimal('sueldo',11,2);
             $table->date('fecha_registro');
+            $table->boolean('condicion')->default('1');
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ class CreateMozosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('mozos');
+        Schema::dropIfExists('empleados');
     }
 }

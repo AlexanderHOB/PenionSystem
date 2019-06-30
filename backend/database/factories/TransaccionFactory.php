@@ -11,9 +11,9 @@ $factory->define(Transaccion::class, function (Faker $faker) {
     return [
         'fecha_inicio'      =>$semana[rand(0,2)],
         'persona_id'        =>rand(1,10),
-        'fecha_transaccion' =>$faker->date($format = 'Y-m-d', $max = 'now'),
+        'fecha_transaccion' =>$faker->date($format = 'Y-m-d',$min = '2019-06-1', $max = 'now'),
         'tipo'              =>$tipo[rand(0,1)],
-        'monto'             =>$faker->randomFloat($nbMaxDecimals = 2, $min = 0, $max = NULL),
+        'monto'             =>$faker->randomFloat($nbMaxDecimals = 2, $min = 0, $max = 500),
         'motivo'            =>$faker->text($maxNbChars = 200) 
     ];
 });

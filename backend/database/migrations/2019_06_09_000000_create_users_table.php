@@ -20,7 +20,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('color',7);
-            $table->boolean('condicion')->default();
+            $table->boolean('condicion')->default('1');
             $table->rememberToken();
             $table->timestamps();
 

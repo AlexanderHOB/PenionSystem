@@ -46,6 +46,12 @@ Route::group(['middleware' => 'cors'], function(){
      Route::put('/user/actualizar/{id}', 'UserController@update');
      Route::put('/user/desactivar/{id}', 'UserController@desactivar');
      Route::put('/user/activar/{id}', 'UserController@activar');
+     //Empleados 
+    Route::get('/empleado','EmpleadoController@index');
+    Route::post('/empleado/registrar','EmpleadoController@store');
+    Route::put('/empleado/actualizar/{id}','EmpleadoController@update');
+    Route::put('/empleado/desactivar/{id}', 'EmpleadoController@desactivar');
+    Route::put('/empleado/activar/{id}', 'EmpleadoController@activar');
      //Transacciones de pagos y adelantos de los empleados
      Route::get('/historial','TransaccionController@historial');
 
