@@ -92,7 +92,7 @@
                     color="blue"
                     label="DNI"
                     v-model="dni"
-                    :rules="[rules.required]"
+                    :rules="[rules.required, rules.counterDni]"
                     counter="8"
                     mask="########"
                   ></v-text-field>
@@ -102,7 +102,7 @@
                     color="blue"
                     label="Celular"
                     v-model="celular"
-                    :rules="[rules.required]"
+                    :rules="[rules.required, rules.counterCelular]"
                     counter="9"
                     mask="#########"
                   ></v-text-field>
@@ -154,6 +154,7 @@
                       readonly
                       :rules="[rules.required]"
                       v-on="on"
+                      :disabled="disabledDate"
                     ></v-text-field>
                   </template>
                   <v-date-picker header-color="blue" color="green lighten-1" :max="maxDate" :min="minDate" locale="es-pe" v-model="date" @input="menuDate = false"></v-date-picker>
@@ -329,6 +330,8 @@ export default {
         counterNombre: value => value.length <= 30 || '30 caracteres como maximo',
         counterDirección: value => value.length <= 100 || '100 caracteres como maximo',
         counterEmail: value => value.length <= 60 || '60 caracteres como maximo',
+        counterDni: value => value.length == 8 || '8 caracteres como minimo',
+        counterCelular: value => value.length == 9 || '9 caracteres como minimo',
         emailRules: value => /.+@.+/.test(value) || 'E-mail invalido'
       },
       // Data para editar Categoria
@@ -360,6 +363,7 @@ export default {
       areaDetail: '',
       fechaRegistroDetail: '',
       sueldoDetail: '',
+      disabledDate: false,
       // Datos para detalles de la categoria
       personalDetail: false,
       // Datos para Selects
@@ -369,14 +373,13 @@ export default {
     }
   },
   methods: {
-    // OBTENER CATEOGRIAS
+    // OBTENER PERSONAL
     async getPersonal(){
       try {
         this.loadingTitleMutation('Accediendo a la información');
         this.loadingDialogMutation(true);
 
         let response = await axios.get(this.url + 'empleado', this.config);
-
         if(response.data.data){
           let data = response.data;
           let personal = data.data;
@@ -407,7 +410,7 @@ export default {
       }
     },
 
-    // ACTUALIZAR CATEGORIAS
+    // ACTUALIZAR PERSONAL
     async refreshPersonal(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
         this.paginateDisabled = true;
@@ -471,7 +474,7 @@ export default {
       this.celularDetail = this.personal[index].celular;
       this.puestoDetail = this.personal[index].puesto_trabajo;
       this.areaDetail = this.personal[index].area_trabajo;
-      this.fechaRegistroDetail = '';
+      this.fechaRegistroDetail = this.personal[index].fecha_registro.split('-').reverse().join('-');
       this.sueldoDetail = this.personal[index].sueldo;
       this.personalDetail = true;
     },
@@ -493,9 +496,25 @@ export default {
       }, 100);
     },
 
-    // MODAL PARA EDITAR CATEGORIA
+    // MODAL PARA EDITAR PERSONAL
     editarPersonalModal(index){
-    
+      this.apellidos = this.personal[index].apellidos;
+      this.nombre = this.personal[index].nombres;
+      this.direccion = this.personal[index].direccion;
+      this.email = this.personal[index].email;
+      this.dni = this.personal[index].dni;
+      this.celular = this.personal[index].celular;
+      this.puesto = this.personal[index].puesto_trabajo;
+      this.area = this.personal[index].area_trabajo;
+      this.tipo_contrato = this.personal[index].tipo_contrato;
+      this.sueldo = this.personal[index].sueldo;
+      this.fechaRegistro = this.personal[index].fecha_registro;
+      this.index = index;
+      this.id = this.personal[index].id;
+      this.create = false;
+      this.disabledDate = true;
+      this.$refs.form.resetValidation();
+      this.createModalMutation(true);
     },
 
     // CERRAR MODAL
@@ -519,6 +538,7 @@ export default {
       this.fechaRegistro = '';
       this.sueldo = '';
       this.create = true;
+      this.disabledDate = false;
       this.$refs.form.resetValidation();
     },
 
@@ -551,20 +571,41 @@ export default {
         if(this.personalTotal % 10 == 0){
             this.pageTotal++;
           }
-          this.page = this.pageTotal;
+          this.page = 1;
           await this.refreshPersonal(null, 'Registrando personal', true);
         }
       } catch (error) {
-        console.log(error);
         this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el personal', color: 'error'});
         this.resetForm();
         this.loadingDialogMutation(false);
       }
     },
 
-    // EDITAR CATEGORIA
+    // EDITAR PERSONAL
     async editarPersonal(){
+      try {
+        if (this.$refs.form.validate()) {
+          if(this.descripcion == '' || this.descripcion == null){
+            this.descripcion = 'Cateogria sin descripción';
+          }
 
+          let nombreBup = this.nombre;
+          let descripcionBup = this.descripcion;
+
+          this.closeModal();
+
+          this.categorias[this.index].nombre = nombreBup;
+          this.categorias[this.index].descripcion = descripcionBup;
+
+          let response = await axios.post(this.url + 'categoria/platillo/actualizar/' + this.id, {
+            nombre: nombreBup,
+            descripcion: descripcionBup
+          }, this.config);
+          this.snackbarMutation({value: true, text: 'Categoria editada correctamente', color: 'success'});
+        }
+      }catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un erro al editar la categoria', color: 'error'});
+      }
     },
 
     //  ACTIVAR 
@@ -588,7 +629,12 @@ export default {
 
     // ACCION DEL FORMULARIO
     async formAction(){
-    
+      if(this.create){
+        await this.registrarPersonal();
+      }else {
+        await this.editarPersonal();
+      }
+      this.$refs.form.resetValidation();  
     },
 
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
