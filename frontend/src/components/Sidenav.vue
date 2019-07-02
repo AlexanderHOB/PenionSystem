@@ -3,7 +3,7 @@
     v-model="drawer"
     :mini-variant.sync="mini"
     app
-    class="elevation-8"
+    class="elevation-8 sidenav"
   >
 
     <v-list>
@@ -19,6 +19,7 @@
 
     <v-list class="pt-0">
       <v-list-tile
+        @click="closeGroups"
         :to="{name: 'home'}"
         active-class="white--text sidenav-items-active"
         exact
@@ -37,7 +38,7 @@
       </v-list-tile>
 
       <v-list-tile
-        @click=""
+        @click="closeGroups"
         :to="{name: 'mesas'}"
         active-class="white--text sidenav-items-active"
         ripple
@@ -55,7 +56,7 @@
       </v-list-tile>
         
       <v-list-tile
-        @click=""
+        @click="closeGroups"
         :to="{name: 'categorias'}"
         active-class="white--text sidenav-items-active"
         ripple
@@ -90,6 +91,7 @@
       </v-list-tile>
 
       <v-list-tile
+      @click="closeGroups"
         active-class="white--text sidenav-items-active"
         :to="{name: 'platillos'}"
         ripple
@@ -123,23 +125,53 @@
         </v-list-tile-content>
       </v-list-tile>
 
-      <v-list-tile
-        @click=""
-        active-class="white--text sidenav-items-active"
-        ripple
-        :to="{name: 'personal'}"
+      <v-list-group
+        no-action
+        v-model="group1"
+        class="group1"
       >
-        <v-list-tile-action>
-          <v-img 
-            :src="require('../assets/iconos/acceso.svg')"
-            contain
-            height="32"
-          ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Personal</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        <template v-slot:activator>
+          <v-list-tile>
+            <v-list-tile-action>
+              <v-img 
+                :src="require('../assets/iconos/acceso.svg')"
+                contain
+                height="32"
+              ></v-img>
+            </v-list-tile-action>
+            <v-list-tile-content class="pl-3">
+              <v-list-tile-title>Recursos Humanos</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </template>
+
+        <v-list-tile
+          @click="group1Active('.group1')"
+          active-class="sidenav-subitems-active"
+          ripple
+          :to="{name: 'personal'}"
+        >
+          <v-list-tile-title class="pl-3">Personal</v-list-tile-title>
+        </v-list-tile>
+
+        <v-list-tile
+          @click=""
+        >
+          <v-list-tile-title class="pl-3">Adelantos</v-list-tile-title>
+        </v-list-tile>
+
+        <v-list-tile
+          @click=""
+        >
+          <v-list-tile-title class="pl-3">Descuentos</v-list-tile-title>
+        </v-list-tile>
+            
+        <v-list-tile
+          @click=""
+        >
+          <v-list-tile-title class="pl-3">Pagos</v-list-tile-title>
+        </v-list-tile>
+      </v-list-group>
 
       <v-list-tile
         @click=""
@@ -185,10 +217,16 @@
     name: 'Sidenav',
     data () {
       return {
-
+        group1: false
       }
     },
     methods: {
+      closeGroups(){
+        this.group1 = false;
+      },
+      group1Active(name){
+        document.querySelector(name).classList.add('group-active')
+      },
       ...mapMutations(['drawerMutation', 'miniMutation'])
     },
     computed: {

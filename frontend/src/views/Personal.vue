@@ -314,7 +314,7 @@ export default {
   data(){
     return {
       title: 'Personal',
-      //Datos para las categorias
+      //Datos para el personal
       messagePersonal: '',
       personal: [],
       personalTotal: 0,
@@ -334,7 +334,7 @@ export default {
         counterCelular: value => value.length == 9 || '9 caracteres como minimo',
         emailRules: value => /.+@.+/.test(value) || 'E-mail invalido'
       },
-      // Data para editar Categoria
+      // Data para editar el personal
       apellidos: '',
       nombre: '',
       direccion: '',
@@ -364,7 +364,7 @@ export default {
       fechaRegistroDetail: '',
       sueldoDetail: '',
       disabledDate: false,
-      // Datos para detalles de la categoria
+      // Datos para detalles del personal
       personalDetail: false,
       // Datos para Selects
       puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
@@ -404,7 +404,7 @@ export default {
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
-        this.messageCategorias = 'Error al conctar con el servidor';
+        this.messagePersonal = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
       }
@@ -585,9 +585,6 @@ export default {
     async editarPersonal(){
       try {
         if (this.$refs.form.validate()) {
-          if(this.descripcion == '' || this.descripcion == null){
-            this.descripcion = 'Cateogria sin descripción';
-          }
 
           let nombreBup = this.nombre;
           let descripcionBup = this.descripcion;

@@ -9,8 +9,8 @@ export default new Vuex.Store({
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
-    url: 'http://192.168.1.2:8000/api/',
-    // url: 'http://127.0.0.1:8000/api/',
+    // url: 'http://192.168.1.2:8000/api/',
+    url: 'http://127.0.0.1:8000/api/',
     config: {
       headers: {
         Authorization: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
