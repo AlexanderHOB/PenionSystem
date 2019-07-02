@@ -91,23 +91,85 @@ img {
   display: block;
 }
 
-// Sidenav
+// SIDENAV
 .sidenav {
+  // Scroll
+  &::-webkit-scrollbar {
+    display: none;
+  }
   &-items-active {
     @extend %bg-primary;
     box-shadow: $primary-shadow;
   }
-}
-.theme--light.v-list .sidenav-items-active:hover {
-  background-image: $primary-gradient;
+  &-subitems-active {
+    ::before {
+      background-color: #212121;
+    }
+  }
 }
 
-// Header
+// Sidenav Mini
+.v-navigation-drawer--mini-variant {
+  // Mover subitems en mini
+  .v-list__group__items--no-action .v-list__tile {
+      ::before {
+        transform: translateX(-60px);
+      }
+  }
+
+  // Ocultar flecha de los groups en mini
+  .v-list__group__header__append-icon {
+    display: none;
+  }
+}
+
+// Subitems de un group
+.v-list__group__items--no-action .v-list__tile {
+  // Desactivando overflow hidden
+  .v-list__tile__title {
+    overflow: initial;
+  }
+  // Icons de los subitems de un group
+  ::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #212121;
+    border-radius: 50%;
+    transform: translateX(-55px);
+  }
+}
+
+// Hover para item activado
+.theme--light.v-list .sidenav-items-active:hover {
+  @extend %bg-primary;
+}
+
+// Ocultando dividers
+.v-list__group.v-list__group--active::before {
+  display: none;
+}
+
+// Group Active
+.theme--light.v-list .group-active .v-list__group__header.v-list__group__header--active {
+  color: #fff;
+  @extend %bg-primary;
+  box-shadow: $primary-shadow;
+  :hover {
+  	background-image: $primary-gradient;
+  }
+  .v-icon.material-icons.theme--light {
+    color: #fff;
+  }
+}
+
+// HEADER
 .header-waves .v-image__image {
   background-repeat: repeat-x;
 }
 
-// Sanckbar
+// SNACKBAR
 .v-snack__wrapper {
   border-radius: 4px !important;
   &.success {
