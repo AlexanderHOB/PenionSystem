@@ -39,12 +39,16 @@
       </v-layout>
       <v-layout row wrap  class="header-layout">
         <v-flex xs12 sm6 class="pt-4">
-          <v-text-field
-            solo
-            label="Texto a buscar..."
-            color="blue"
-            append-icon="search"
-          ></v-text-field>
+          <form action="" @submit.prevent="search">
+            <v-text-field
+              v-model="searchQuery"
+              solo
+              :label="searchPlaceholder"
+              color="blue"
+              append-icon="search"
+              :disabled="searchDisabled"
+            ></v-text-field>
+          </form>
         </v-flex>
         <v-flex v-if="headerActionCreate" xs12 sm3 class="pt-4 mt-2 text-xs-center text-sm-right">
           <v-btn class="ma-0 indigo  white--text" round @click="createModalMutation(true)">
@@ -81,14 +85,18 @@ export default {
   name: 'Header',
   data() {
     return {
-      
+      searchQuery: ''
     }
   },
   methods: {
-    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation']),
+    search(){
+      this.searchQueryMutation(this.searchQuery);
+      this.searchQuery = '';
+    },
+    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation']),
   },
   computed: {
-    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb'])
+    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchDisabled'])
   }
 }
 </script>

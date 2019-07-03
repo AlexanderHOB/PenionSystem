@@ -20,6 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'cors'], function(){
     //Routas Mesas
     Route::get('/mesa','MesaController@index');
+    Route::get('/mesas','MesaController@getAllMesas');
     Route::post('/mesa/registrar','MesaController@store');
     Route::post('/mesa/actualizar/{id}','MesaController@update');
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');
@@ -46,7 +47,7 @@ Route::group(['middleware' => 'cors'], function(){
      Route::put('/user/actualizar/{id}', 'UserController@update');
      Route::put('/user/desactivar/{id}', 'UserController@desactivar');
      Route::put('/user/activar/{id}', 'UserController@activar');
-     //Empleados 
+     //Empleados
     Route::get('/empleado','EmpleadoController@index');
     Route::post('/empleado/registrar','EmpleadoController@store');
     Route::put('/empleado/actualizar/{id}','EmpleadoController@update');
@@ -56,4 +57,4 @@ Route::group(['middleware' => 'cors'], function(){
      Route::get('/historial','TransaccionController@historial');
 
 
-}); 
+});

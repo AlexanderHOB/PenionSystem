@@ -12,7 +12,7 @@ class MesaController extends Controller
         $mesas=Mesa::orderBy('id', 'asc')->paginate(10);
         return  $mesas;
     }
-    
+
     public function selectMesa(Request $request){
         //seleccionar mesa especifica donde estan los clientes comiendo
         $filtro = $request->filtro;
@@ -27,12 +27,12 @@ class MesaController extends Controller
     {
         //validar datos de Mesa
         $v = \Validator::make($request->all(), [
-           
+
             'numero' => 'required|integer',
             'capacidad' => 'required',
 
         ]);
- 
+
         if ($v->fails())
         {
             return response()->json(['message'=>'Errores de validación de datos en el servidor']);
@@ -51,14 +51,14 @@ class MesaController extends Controller
 
     public function update($id, Request $request)
     {
-       //validar datos de actualización 
+       //validar datos de actualización
         $v = \Validator::make($request->all(), [
-            
+
             'numero' => 'required|integer',
             'capacidad' => 'required',
 
         ]);
- 
+
         if ($v->fails())
         {
             return response()->json(['message'=>'Errores de validación de datos en el servidor']);
@@ -83,5 +83,9 @@ class MesaController extends Controller
         $mesa = Mesa::findOrFail($id);
         $mesa->condicion='1';
         $mesa->save();
+    }
+    public function getAllMesas(){
+        $mesas = Mesa::all();
+        return $mesas;
     }
 }
