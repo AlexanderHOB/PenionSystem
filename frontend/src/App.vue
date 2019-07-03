@@ -152,13 +152,10 @@ img {
 }
 
 // Group Active
-.theme--light.v-list .group-active .v-list__group__header.v-list__group__header--active {
+.theme--light.v-list .group-active .v-list__group__header {
   color: #fff;
   @extend %bg-primary;
   box-shadow: $primary-shadow;
-  :hover {
-  	background-image: $primary-gradient;
-  }
   .v-icon.material-icons.theme--light {
     color: #fff;
   }

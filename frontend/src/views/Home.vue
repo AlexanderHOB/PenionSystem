@@ -39,12 +39,15 @@
       }
     },
     methods: {
-      ...mapMutations(['headerActionsMutation', 'breadcrumbMutation'])
+      ...mapMutations(['headerActionsMutation', 'breadcrumbMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
     },
     created(){
       this.headerActionsMutation({create: false, report: false});
+      this.searchPlaceholderMutation('Texto a buscar...');
+      this.searchDisabledMutation(true);
     },
     mounted(){
+      this.
       this.breadcrumbMutation('Inicio');
     }
   }

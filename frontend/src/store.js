@@ -33,7 +33,11 @@ export default new Vuex.Store({
       state: false,
       text: '',
       color: ''
-    }
+    },
+    // Data de search
+    searchPlaceholder: 'Texto a buscar...',
+    searchQuery: '',
+    searchDisabled: true
   },
   mutations: {
     drawerMutation(state, value){
@@ -65,6 +69,15 @@ export default new Vuex.Store({
       state.snackbarState.state = object.value;
       state.snackbarState.text = object.text;
       state.snackbarState.color = object.color;
+    },
+    searchQueryMutation(state, value){
+      state.searchQuery = value;
+    },
+    searchPlaceholderMutation(state, value){
+      state.searchPlaceholder = value;
+    },
+    searchDisabledMutation(state, value){
+      state.searchDisabled = value
     }
   },
   actions: {

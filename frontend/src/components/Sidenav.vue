@@ -128,7 +128,7 @@
       <v-list-group
         no-action
         v-model="group1"
-        class="group1"
+        :class="{'group-active': group1active}"
       >
         <template v-slot:activator>
           <v-list-tile>
@@ -217,15 +217,18 @@
     name: 'Sidenav',
     data () {
       return {
-        group1: false
+        group1: false,
+        group1active: false
       }
     },
     methods: {
       closeGroups(){
         this.group1 = false;
+        this.group1active = false;
       },
       group1Active(name){
-        document.querySelector(name).classList.add('group-active')
+        // document.querySelector(name).classList.add('group-active')
+        this.group1active = true;
       },
       ...mapMutations(['drawerMutation', 'miniMutation'])
     },
