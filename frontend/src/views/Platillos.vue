@@ -28,7 +28,7 @@
             </clipPath>
             </svg>
             <h2 class="platillo-title text-xs-center">{{ platillo.nombre }}</h2>
-            <PrimaryBox class="platillo-bg" :active="platillo.condicion" :activeInteraction="activarPlatillo" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
+            <PrimaryBox class="platillo-bg" :active="platillo.condicion" :activeInteraction="activarModal" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
             <div class="platillo-textBox text-xs-center">
               <p class="mb-0 platillo-text" v-show="platillo.condicion">Activo</p> 
               <p class="mb-0 platillo-text" v-show="!platillo.condicion">Inactivo</p>           
@@ -115,6 +115,7 @@
                     :rules="[rules.counterDescripcion]"
                     counter="70"
                     append-icon="clear"
+                    @keydown.enter="formAction"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -150,6 +151,27 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="activeDialog"
+      max-width="350"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Confirmación</h3>
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-card-text>Confirma que quieres <strong>{{ activarText }}</strong> el platillo</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click="activarPlatillo(index)">Aceptar</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -202,7 +224,14 @@ export default {
       // Datos para las platillos
       messagePlatillos: '',
       platillos: [],
+      allPlatillos: [],
       platillosTotal: 0,
+      // Backup
+      backup: {
+        platillos: [],
+        platillosIndex: true,
+        pageTotal: 0
+      },
       // Datos para las categorias
       categorias: [],
       // Datos para la paginación
@@ -239,41 +268,59 @@ export default {
       // Datos para detalles de la categoria
       platillosDetail: false,
       // Datos de area
-      areas: ['Área Mixta', 'Área Fría', 'Área Caliente']
+      areas: ['Área Mixta', 'Área Fría', 'Área Caliente'],
+      // Datos para activar/desactivar el modal
+      activeDialog: false,
+      activarText: ''
     }
   },
   methods: {
     // OBTENER PLATILLOS
     async getPlatillos(){
       try {
-        this.loadingTitleMutation('Accediendo a la información');
-        this.loadingDialogMutation(true);
+        if(this.backup.platillos.length != 0){
+          this.messagePlatillos = '';
+          this.platillos =this.backup.platillos;
+          this.backup.platillos = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.platillosIndex = true;
+        }else {
+          this.loadingTitleMutation('Accediendo a la información');
+          this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'platillo', this.config);
-        if(response.data.data){
-          let data = response.data;
-          let platillos = data.data;
-          if(platillos.length > 0){
-            this.platillos = platillos;
-            this.messagePlatillos = '';
-            this.platillosTotal = data.total;
-            if(data.last_page && data.last_page > 1){
-              this.pageTotal = data.last_page;
+          let response = await axios.get(this.url + 'platillo', this.config);
+          if(response.data.data){
+            let data = response.data;
+            let platillos = data.data;
+            if(platillos.length > 0){
+              this.platillos = platillos;
+              this.messagePlatillos = '';
+              this.platillosTotal = data.total;
+              if(data.last_page && data.last_page > 1){
+                this.pageTotal = data.last_page;
+              }
+              this.page = 1;
+            }else {
+              this.messagePlatillos= 'No se encontraron platillos';
+              this.pageTotal = 0;
             }
-            this.page = 1;
+            this.headerActionsMutation({create: true, report: false});
+            this.searchDisabledMutation(false);
           }else {
-            this.messagePlatillos= 'No se encontraron platillos';
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messagePlatillos = response.data.message;
+            this.platillos = [];
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messagePlatillos = response.data.message;
-          this.platillos = [];
-          this.pageTotal = 0;
         }
       }catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
@@ -281,56 +328,109 @@ export default {
       }
     },
 
-    // REFRESCAR PLATILLOS
+    // OBTENER TODOS LOS PLATILLOS
+    async getAllPlatillos(){
+      try {
+        let response = await axios.get(this.url + 'platillos', this.config);
+        if(response.data){
+          let platillos = response.data;
+          if(platillos.length > 0){
+            this.allPlatillos = platillos;
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    // ACTUALIZANDO PLATILLOS
     async refreshPlatillos(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
-        this.paginateDisabled = true;
-        this.loadingTitleMutation(loadingTitle);
-        if(!create){
-          this.loadingDialogMutation(true);
-        }
-
-        let response = await axios.get(this.url + 'platillo', {
-          params: {
-            page: this.page
-          },
-          headers: {
-            Authorization: this.config.headers.Authorization,
-            'Content-Type': 'application/json'
+        if(this.backup.platillos.length != 0){
+          this.platillos =this.backup.platillos;
+          this.backup.platillos = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
           }
-        });
+          this.backup.platillosIndex = true;
+        }else {
+          this.paginateDisabled = true;
+          this.loadingTitleMutation(loadingTitle);
+          if(!create){
+            this.loadingDialogMutation(true);
+          }
 
-        if(response.data.data){
-          let data = response.data;
-          let platillos = data.data;
-          if(platillos.length > 0){
-            this.platillos = platillos;
-            this.messagePlatillos = '';
-            if(data.total != this.platillosTotal){
-              this.platillosTotal = data.total;
+          let response = await axios.get(this.url + 'platillo', {
+            params: {
+              page: this.page
+            },
+            headers: {
+              Authorization: this.config.headers.Authorization,
+              'Content-Type': 'application/json'
             }
-            if(data.last_page != this.pageTotal){
-              this.pageTotal = data.last_page;
+          });
+
+          if(response.data.data){
+            let data = response.data;
+            let platillos = data.data;
+            if(platillos.length > 0){
+              this.platillos = platillos;
+              this.messagePlatillos = '';
+              if(data.total != this.platillosTotal){
+                this.platillosTotal = data.total;
+              }
+              if(data.last_page != this.pageTotal){
+                this.pageTotal = data.last_page;
+              }
+            }else {
+              this.messagePlatillos= 'No se encontraron platillos';
+              this.pageTotal = 0;
             }
+            this.headerActionsMutation({create: true, report: false});
+            this.searchDisabledMutation(false);
           }else {
-            this.messagePlatillos= 'No se encontraron platillos';
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messagePlatillos = response.data.message;
+            this.platillos = [];
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messagePlatillos = response.data.message;
-          this.platillos = [];
-          this.pageTotal = 0;
         }
-
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
         this.paginateDisabled = false;
+      }
+    },
+
+    // SEARCH PLATILLOS
+    searchPlatillos(query){
+      if(query != '' && query != null){
+        if(this.platillos.length != 0 && this.backup.platillosIndex){
+          this.backup.platillos = this.platillos;
+          if(this.pageTotal != 0){
+            this.backup.pageTotal = this.pageTotal;
+          }
+          this.backup.platillosIndex = false;
+        }
+
+        if(this.messagePlatillos.length != 0){
+          this.messagePlatillos = '';
+        }
+
+        this.platillos = this.allPlatillos.filter(function(e){
+          return  e.nombre.toLowerCase().search(query.toLowerCase()) != -1;
+        });
+        if(this.platillos.length == 0){
+          this.messagePlatillos = 'No se encontraron platillos con el nombre ' + query;
+        }
+        this.pageTotal = 0;
       }
     },
 
@@ -424,12 +524,16 @@ export default {
             precio: this.precio,
             descripcion: this.descripcion
           }, this.config);
+          this.getAllPlatillos();
+          this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'});
 
-        this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'});
+          this.resetForm();
 
-        this.resetForm();
+          if(this.pageTotal == 0 && this.backup.pageTotal != 0){
+                this.pageTotal = this.backup.pageTotal;
+            }
 
-        if(this.platillosTotal % 10 == 0){
+          if(this.platillosTotal % 10 == 0){
             this.pageTotal++;
           }
           this.page = this.pageTotal;
@@ -463,13 +567,26 @@ export default {
 
           this.closeModal();
 
-          let categoriaJsonBup = this.categorias.filter(e => e.id == categoriaBup);
+          var categoriaJsonBup = this.categorias.filter(e => e.id == categoriaBup);
+
           this.platillos[this.index].categoria = categoriaJsonBup[0];
           this.platillos[this.index].codigo = codigoBup;
           this.platillos[this.index].nombre = nombreBup;
           this.platillos[this.index].area = areaBup;
           this.platillos[this.index].precio = precioBup;
           this.platillos[this.index].descripcion = descripcionBup;
+
+          var self = this;
+          this.allPlatillos.forEach(function(e){
+            if(self.platillos[self.index].id == e.id){
+              e.categoria_id = categoriaBup;
+              e.codigo = codigoBup;
+              e.nombre = nombreBup;
+              e.area = areaBup;
+              e.precio = precioBup;
+              e.descripcion = descripcionBup;
+            } 
+          });
 
           let response = await axios.put(this.url + 'platillo/actualizar/' + this.id, {
             categoria_id: categoriaBup,
@@ -486,17 +603,44 @@ export default {
       }
     },
 
+    // MODAL PARA ACTIVAR
+    activarModal(index){
+        this.index = index;
+        if(this.platillos[index].condicion){
+          this.activarText = 'desactivar';
+        }else{
+          this.activarText = 'activar';
+        }
+        this.activeDialog = true;
+    },
+
     //  ACTIVAR 
     async activarPlatillo(index){
       try {
-        this.index = index;
         this.id = this.platillos[index].id;
+        this.activeDialog = false;
         if(this.platillos[index].condicion){
           this.platillos[index].condicion = 0;
+
+          var self = this;
+          this.allPlatillos.forEach(function(e){
+            if(self.platillos[index].id == e.id){
+              e.condicion = 0;
+            } 
+          });
+
           let response = await axios.put(this.url + 'platillo/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Platillo desactivada correctamente', color: 'success'});
-        }else { 
+        }else {
           this.platillos[index].condicion = 1;
+
+          var self = this;
+          this.allPlatillos.forEach(function(e){
+            if(self.platillos[index].id == e.id){
+              e.condicion = 1;
+            } 
+          });
+
           let response = await axios.put(this.url + 'platillo/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Platillo activada correctamente', color: 'success'});
         }
@@ -514,17 +658,25 @@ export default {
       }
       this.$refs.form.resetValidation();
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+  },
+  watch: {
+    searchQuery(){
+      this.searchPlatillos(this.searchQuery);
+    }
   },
   created(){
+    this.getAllPlatillos();
     this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    this.breadcrumbMutation('Platillos');
+    this.searchPlaceholderMutation('Nombre del platillo...');
+    this.searchDisabledMutation(true);
   },
   async mounted(){
-    this.breadcrumbMutation('Platillos');
     this.getCategorias();
     await this.getPlatillos();
     this.loadingFishMutation(false);
@@ -533,74 +685,78 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-  .clipPath-svg {
-    width: 0;
-    height: 0;
+.clipPath-svg {
+  width: 0;
+  height: 0;
+}
+.platillo {
+  &-img {
+    height: 100%;
+    display: block;
+    object-fit: cover;
   }
-  .platillo {
-    &-img {
-      height: 100%;
-      display: block;
-      object-fit: cover;
-    }
-    &-img-box {
-      position: absolute;
-      top: 5%;
-      left: 26%;
-      width: 75%;
-      height: 50%;
-      z-index: 0;
-      clip-path: url('#clipPath-img');
-      overflow: hidden;
-    }
-    &-bg {
-      width: 100%;
-
-      position: relative;
-    }
-    &-box {
-      position: relative;
-      padding-top: 80px;
-      font-family: 'Concert One', cursive;
-    }
-    &-title {
-      position: absolute;
-      top: 67.5%;
-      left: 65%;
-      transform: translate(-50%, -50%);
-      z-index: 2;
-      font-size: 24px;
-      line-height: 100%;
-    }
-    &-textBox {
+  &-img-box {
     position: absolute;
-    top: 70%;
-    left: 2%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    width: 25%;
+    top: 5%;
+    left: 26%;
+    width: 75%;
+    height: 50%;
+    z-index: 0;
+    clip-path: url('#clipPath-img');
+    overflow: hidden;
   }
-    &-text {
-      color: #fff; 
-      font-size: 18px;
-    }
-    &-edit,
-    &-detail {
-      position: absolute;
-      bottom: 0;
-      transform: translateY(20px);
-      width: 50px;
-      transition: .5s;
-      cursor: pointer;
-      &:hover {
-        transform: translateY(20px) scale(1.1);
-      }
-    }
-    &-edit {
-      left: 40%;
-    }
-    &-detail {
-      right: 15%;
+  &-bg {
+    width: 100%;
+    position: relative;
+  }
+  &-box {
+    position: relative;
+    padding-top: 80px;
+    font-family: 'Concert One', cursive;
+  }
+  &-title {
+    position: absolute;
+    top: 67.5%;
+    left: 65%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    font-size: 24px;
+    line-height: 100%;
+  }
+  &-textBox {
+  position: absolute;
+  top: 70%;
+  left: 2%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 25%;
+}
+  &-text {
+    color: #fff; 
+    font-size: 18px;
+  }
+  &-edit,
+  &-detail {
+    position: absolute;
+    bottom: 0;
+    transform: translateY(20px);
+    width: 50px;
+    transition: .5s;
+    cursor: pointer;
+    &:hover {
+      transform: translateY(20px) scale(1.1);
     }
   }
+  &-edit {
+    left: 40%;
+  }
+  &-detail {
+    right: 15%;
+  }
+}
+.title-modal {
+  background-image: $primary-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 </style>

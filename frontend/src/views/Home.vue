@@ -41,13 +41,10 @@
     methods: {
       ...mapMutations(['headerActionsMutation', 'breadcrumbMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
     },
-    created(){
+    mounted(){
       this.headerActionsMutation({create: false, report: false});
       this.searchPlaceholderMutation('Texto a buscar...');
       this.searchDisabledMutation(true);
-    },
-    mounted(){
-      this.
       this.breadcrumbMutation('Inicio');
     }
   }

@@ -18,7 +18,7 @@
         <v-flex xs4 v-for="(categoria, i) of categorias" :key="categoria.id" class="mb-4">
           <div class="categoria-box">
             <h2 class="categoria-title text-xs-center">{{ categoria.nombre }}</h2>
-            <PrimaryBox class="categoria-bg" :active="categoria.condicion" :activeInteraction="activarCategoria" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
+            <PrimaryBox class="categoria-bg" :active="categoria.condicion" :activeInteraction="activarModal" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
             <div class="categoria-textBox text-xs-center">
               <p class="mb-0 categoria-text" v-show="categoria.condicion">Activo</p> 
               <p class="mb-0 categoria-text" v-show="!categoria.condicion">Inactivo</p> 
@@ -34,8 +34,8 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 v-show="create" class="headline title-modal">Crear Categoria</h3>
-          <h3 v-show="!create" class="headline title-modal">Editar Categoria</h3>
+          <h3 v-show="create" class="title-modal headline title-modal">Crear Categoria</h3>
+          <h3 v-show="!create" class="title-modal headline title-modal">Editar Categoria</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text class="pt-0">
@@ -66,6 +66,7 @@
                     :rules="[rules.counterDescripcion]"
                     counter="50"
                     append-icon="clear"
+                    @keydown.enter="formAction"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -88,7 +89,7 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 class="headline">{{ nombreDetail }}</h3>
+          <h3 class="title-modal headline">{{ nombreDetail }}</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text class="pb-0">
@@ -97,6 +98,27 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="activeDialog"
+      max-width="350"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Confirmación</h3>
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-card-text>Confirma que quieres <strong>{{ activarText }}</strong> la categoria</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click="activarCategoria(index)">Aceptar</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -149,7 +171,14 @@ export default {
       //Datos para las categorias
       messageCategorias: '',
       categorias: [],
+      allCategorias: [],
       categoriasTotal: 0,
+      // Backup
+      backup: {
+        categorias: [],
+        cateogriasIndex: true,
+        pageTotal: 0
+      },
       // Datos para la paginación
       pageTotal: 0,
       page: 1,
@@ -171,43 +200,60 @@ export default {
       nombreDetail: '',
       descripcionDetail: '',
       // Datos para detalles de la categoria
-      categoriasDetail: false
+      categoriasDetail: false,
+      // Datos para activar/desactivar el modal
+      activeDialog: false,
+      activarText: ''
     }
   },
   methods: {
     // OBTENER CATEOGRIAS
     async getCategorias(){
       try {
-        this.loadingTitleMutation('Accediendo a la información');
-        this.loadingDialogMutation(true);
+        if(this.backup.categorias.length != 0){
+          this.messageCategorias = '';
+          this.categorias =this.backup.categorias;
+          this.backup.categorias = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.cateogriasIndex = true;
+        }else {
+          this.loadingTitleMutation('Accediendo a la información');
+          this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'categoria/platillo', this.config);
-        if(response.data.data){
-          let data = response.data;
-          let categorias = data.data;
-          if(categorias.length > 0){
-            this.categorias = categorias;
-            this.messageCategorias = '';
-            this.categoriasTotal = data.total;
+          let response = await axios.get(this.url + 'categoria/platillo', this.config);
+          if(response.data.data){
+            let data = response.data;
+            let categorias = data.data;
+            if(categorias.length > 0){
+              this.categorias = categorias;
+              this.messageCategorias = '';
+              this.categoriasTotal = data.total;
 
-            if(data.last_page && data.last_page > 1){
-              this.pageTotal = data.last_page;
+              if(data.last_page && data.last_page > 1){
+                this.pageTotal = data.last_page;
+              }
+              this.page = 1;
+            }else {
+              this.messageCategorias = 'No se encontraron categorias';
+              this.pageTotal = 0;
             }
-            this.page = 1;
+            this.headerActionsMutation({create: true, report: false});
+            this.searchDisabledMutation(false);
           }else {
-            this.messageCategorias = 'No se encontraron categorias';
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messageCategorias = response.data.message;
+            this.categorias = [];
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messageCategorias = response.data.message;
-          this.categorias = [];
-          this.pageTotal = 0;
         }
-         
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messageCategorias = 'Error al conctar con el servidor';
       }finally {
@@ -215,61 +261,115 @@ export default {
       }
     },
 
+    // OBTENER TODAS LAS CATEGORIAS
+    async getAllCategorias(){
+        try {
+          let response = await axios.get(this.url + 'categoria/platillos', this.config);
+          if(response.data){
+            let cateogrias = response.data;
+            if(cateogrias.length > 0){
+              this.allCategorias = cateogrias;
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+    },
+
     // ACTUALIZAR CATEGORIAS
     async refreshCategorias(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
-        this.paginateDisabled = true;
-        this.loadingTitleMutation(loadingTitle);
-        if(!create){
-          this.loadingDialogMutation(true);
-        }
-
-        let response = await axios.get(this.url + 'categoria/platillo', {
-          params: {
-            page: this.page
-          },
-          headers: {
-            Authorization: this.config.headers.Authorization,
-            'Content-Type': 'application/json'
+        if(this.backup.categorias.length != 0){
+          this.categorias =this.backup.categorias;
+          this.backup.categorias = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
           }
-        });
+          this.backup.cateogriasIndex = true;
+        }else {
+          this.paginateDisabled = true;
+          this.loadingTitleMutation(loadingTitle);
+          if(!create){
+            this.loadingDialogMutation(true);
+          }
 
-        if(response.data.data){
-          let data = response.data;
-          let categorias = data.data;
-          if(categorias.length > 0){
-            this.categorias = categorias;
-            this.messageCategorias = '';
-            
-            if(data.total != this.categoriasTotal){
-              this.categoriasTotal = data.total;
+          let response = await axios.get(this.url + 'categoria/platillo', {
+            params: {
+              page: this.page
+            },
+            headers: {
+              Authorization: this.config.headers.Authorization,
+              'Content-Type': 'application/json'
             }
-          
-            if(data.last_page && data.last_page > 1){
-              if(data.last_page != this.pageTotal){
-                this.pageTotal = data.last_page;
+          });
+
+          if(response.data.data){
+            let data = response.data;
+            let categorias = data.data;
+            if(categorias.length > 0){
+              this.categorias = categorias;
+              this.messageCategorias = '';
+              
+              if(data.total != this.categoriasTotal){
+                this.categoriasTotal = data.total;
               }
+            
+              if(data.last_page && data.last_page > 1){
+                if(data.last_page != this.pageTotal){
+                  this.pageTotal = data.last_page;
+                }
+              }
+            }else {
+              this.messageCategorias = 'No se encontraron categorias';
+              this.pageTotal = 0;
             }
+            this.headerActionsMutation({create: true, report: false});
+            this.searchDisabledMutation(false);
           }else {
-            this.messageCategorias = 'No se encontraron categorias';
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messageCategorias = response.data.message;
+            this.categorias = [];
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messageCategorias = response.data.message;
-          this.categorias = [];
-          this.pageTotal = 0;
         }
-          
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messageCategorias = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
         this.paginateDisabled = false;
       }
+    },
+
+    // SEARCH CATEGORIAS
+    searchCategorias(query){
+      if(query != '' && query != null){
+        if(this.categorias.length != 0 &&  this.backup.cateogriasIndex){
+          this.backup.categorias = this.categorias;
+          if(this.pageTotal != 0){
+            this.backup.pageTotal = this.pageTotal;
+          }
+          this.backup.cateogriasIndex = false;
+        }
+
+          if(this.messageCategorias.length != 0){
+            this.messageCategorias = '';
+          }
+
+        this.categorias = this.allCategorias.filter(function(e){
+          return e.nombre.toLowerCase().search(query.toLowerCase()) != -1;
+        });
+
+        if(this.categorias.length == 0){
+          this.messageCategorias = 'No se encontraron categorias con el nombre ' + query;
+        }
+        this.pageTotal = 0;   
+      }   
     },
 
     // MODAL DE DETALLE
@@ -326,15 +426,21 @@ export default {
             nombre: this.nombre,
             descripcion: this.descripcion
           }, this.config);
-
+          this.getAllCategorias();
           this.snackbarMutation({value: true, text: 'Categoria creada correctamente', color: 'success'});
 
           this.resetForm();
 
+          if(this.pageTotal == 0 && this.backup.pageTotal != 0){
+              this.pageTotal = this.backup.pageTotal;
+          }
+
           if(this.categoriasTotal % 10 == 0){
             this.pageTotal++;
           }
+
           this.page = 1;
+          this.backup.categorias = [];
           await this.refreshCategorias(null, 'Creando Categoria', true);
         }  
       }catch (error) {
@@ -360,6 +466,14 @@ export default {
           this.categorias[this.index].nombre = nombreBup;
           this.categorias[this.index].descripcion = descripcionBup;
 
+          var self = this;
+          this.allCategorias.forEach(function(e){
+            if(self.categorias[self.index].id == e.id){
+              e.nombre = nombreBup;
+              e.descripcion = descripcionBup;
+            } 
+          });
+
           let response = await axios.post(this.url + 'categoria/platillo/actualizar/' + this.id, {
             nombre: nombreBup,
             descripcion: descripcionBup
@@ -371,17 +485,44 @@ export default {
       }
     },
 
+    // MODAL PARA ACTIVAR
+    activarModal(index){
+        this.index = index;
+        if(this.categorias[index].condicion){
+          this.activarText = 'desactivar';
+        }else{
+          this.activarText = 'activar';
+        }
+        this.activeDialog = true;
+    },
+
     //  ACTIVAR 
     async activarCategoria(index){
       try {
-        this.index = index;
         this.id = this.categorias[index].id;
+        this.activeDialog = false;
         if(this.categorias[index].condicion){
           this.categorias[index].condicion = 0;
+
+          var self = this;
+          this.allCategorias.forEach(function(e){
+            if(self.categorias[index].id == e.id){
+              e.condicion = 0;
+            } 
+          });
+
           let response = await axios.put(this.url + 'categoria/platillo/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Categoria desactivada correctamente', color: 'success'});
-        }else { 
+        }else {
           this.categorias[index].condicion = 1;
+
+          var self = this;
+          this.allCategorias.forEach(function(e){
+            if(self.categorias[index].id == e.id){
+              e.condicion = 1;
+            } 
+          });
+
           let response = await axios.put(this.url + 'categoria/platillo/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Categoria activada correctamente', color: 'success'});
         }
@@ -399,17 +540,25 @@ export default {
       }
       this.$refs.form.resetValidation();
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+  },
+   watch: {
+    searchQuery(){
+      this.searchCategorias(this.searchQuery);
+    }
   },
   created(){
+    this.getAllCategorias();
     this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    this.breadcrumbMutation('Categorias');
+    this.searchPlaceholderMutation('Nombre de la categoria...');
+    this.searchDisabledMutation(true);
   },
   async mounted(){
-    this.breadcrumbMutation('Categorias');
     await this.getCategorias();
     this.loadingFishMutation(false);
   }
@@ -464,5 +613,10 @@ export default {
   &-detail {
     right: 15%;
   }
+}
+.title-modal {
+  background-image: $primary-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>

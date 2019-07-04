@@ -20,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'cors'], function(){
     //Routas Mesas
     Route::get('/mesa','MesaController@index');
-    Route::get('/mesas','MesaController@getAllMesas');
+    Route::get('/mesas','MesaController@getAllMesas'); // aomine
     Route::post('/mesa/registrar','MesaController@store');
     Route::post('/mesa/actualizar/{id}','MesaController@update');
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');
@@ -28,6 +28,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/mesa/selectMesa','MesaController@selectMesa');
     //Routas Categorias
     Route::get('/categoria/platillo','CategoriaController@index');
+    Route::get('/categoria/platillos','CategoriaController@getAllCategorias');  // aomine
     Route::post('/categoria/platillo/registrar','CategoriaController@store');
     Route::post('/categoria/platillo/actualizar/{id}','CategoriaController@update');
     Route::put('/categoria/platillo/desactivar/{id}','CategoriaController@desactivar');
@@ -35,6 +36,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/categoria/platillo/selectCategoria','CategoriaController@selectCategoria');
      //Platillos
      Route::get('/platillo','PlatilloController@index');
+     Route::get('/platillos','PlatilloController@getAllPlatillos'); //  aomine
      Route::post('/platillo/registrar','PlatilloController@store');
      Route::put('/platillo/actualizar/{id}','PlatilloController@update');
      Route::put('/platillo/desactivar/{id}','PlatilloController@desactivar');
