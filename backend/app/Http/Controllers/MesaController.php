@@ -85,7 +85,7 @@ class MesaController extends Controller
         $mesa->save();
     }
     public function getAllMesas(){
-        $mesas = Mesa::all();
+        $mesas = Mesa::orderBy('id')->get();
         return $mesas;
     }
 }

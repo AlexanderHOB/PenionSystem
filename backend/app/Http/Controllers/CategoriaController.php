@@ -10,7 +10,7 @@ class CategoriaController extends Controller
     {
         //Obtener todas las categorías
         $categorias = Categoria::orderBy('id', 'desc')->paginate(10);
-    
+
         return $categorias;
     }
     public function selectCategoria(Request $request){
@@ -45,7 +45,7 @@ class CategoriaController extends Controller
 
 
     public function update($id, Request $request)
-    {   
+    {
         //Actualizar una categoría
         $categoria = Categoria::findOrFail($id);
         $categoria->nombre = $request->nombre;
@@ -69,5 +69,10 @@ class CategoriaController extends Controller
         $categoria = Categoria::findOrFail($id);
         $categoria->condicion = '1';
         $categoria->save();
+    }
+
+    public function getAllCategorias(){
+        $categorias = Categoria::all();
+        return $categorias;
     }
 }

@@ -84,6 +84,7 @@
                     :rules="[rules.counter]"
                     counter="50"
                     append-icon="clear"
+                    @keydown.enter="formAction"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -125,329 +126,358 @@
 </template>
 
 <script>
-  import axios from 'axios';
-  import LoadingDialog from '../components/loading/LoadingDialog';
-  import LoadingFish from '../components/loading/LoadingFish';
-  import ErrorMessage from '../components/messages/ErrorMessage';
-  import AlertNotifications from '../components/messages/AlertNotifications';
+import axios from 'axios';
+import LoadingDialog from '../components/loading/LoadingDialog';
+import LoadingFish from '../components/loading/LoadingFish';
+import ErrorMessage from '../components/messages/ErrorMessage';
+import AlertNotifications from '../components/messages/AlertNotifications';
 
-  import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 
-  export default {
-    components: {
-      LoadingDialog,
-      LoadingFish,
-      ErrorMessage,
-      AlertNotifications
-    },
-    data:() => ({
-      title: 'Mesas',
-      // Data para las mesas
-      messageMesas: '',
+export default {
+  components: {
+    LoadingDialog,
+    LoadingFish,
+    ErrorMessage,
+    AlertNotifications
+  },
+  data:() => ({
+        title: 'Mesas',
+    // Data para las mesas
+    messageMesas: '',
+    mesas: [],
+    allMesas: [],
+    mesasTotal: 0,
+    // Backup
+    backup: {
       mesas: [],
-      allMesas: [],
-      mesasTotal: 0,
-      backup: {
-        mesas: [],
-        mesasIndex: true,
-        pageTotal: 0
-      },
-      // Data para la paginación
-      pageTotal: 0,
-      page: 1,
-      paginateDisabled: false,
-      // Datos para valdiar formulario
-      valid: true,
-      rules: {
-        required: value => !!value || 'Required.',
-        counter: value => value.length <= 50 || '50 caracteres como maximo',
-        zero: value => value.charAt(0) != 0 || 'el primer digito no puede ser 0',
-        maxValue: value => value <= 30 || 'la capacidad no puede ser más de 30'
-      },
-      // Data para editar Mesa
-      numero: '',
-      capacidad: '',
-      descripcion: '',
-      create: true,
-      index: 0,
-      id: 0
-    }),
-    methods: {
-      // OBTENER MESAS
-      async getMesas(){
-        try {
-          if(this.backup.mesas.length != 0){
-            this.messageMesas = '';
-            this.mesas =this.backup.mesas;
-            this.backup.mesas = [];
-            if(this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
-              this.backup.pageTotal = 0;
-            }
-          }else {
-            this.loadingTitleMutation('Accediendo a la información');
-            this.loadingDialogMutation(true);
-
-            let response = await axios.get(this.url + 'mesa', this.config);
-
-            if(response.data.data){
-              let data = response.data;
-              let mesas = data.data;
-              if(mesas.length > 0){
-                this.mesas = mesas;
-                this.messageMesas = '';
-                this.mesasTotal = data.total;
-
-                if(data.last_page && data.last_page > 1){
-                  this.pageTotal = data.last_page;
-                }
-                this.page = 1;
-              }else {
-                this.messageMesas = 'No se encontraron mesas';
-                this.pageTotal = 0;
-              }
-              this.headerActionsMutation({create: true, report: true});
-              this.searchDisabledMutation(false);
-            }else {
-              this.headerActionsMutation({create: false, report: false});
-              this.searchDisabledMutation(true);
-              this.messageMesas = response.data.message;
-              this.mesas = [];
-              this.pageTotal = 0;
-            }
+      mesasIndex: true,
+      pageTotal: 0
+    },
+    // Data para la paginación
+    pageTotal: 0,
+    page: 1,
+    paginateDisabled: false,
+    // Datos para valdiar formulario
+    valid: true,
+    rules: {
+      required: value => !!value || 'Required.',
+      counter: value => value.length <= 50 || '50 caracteres como maximo',
+      zero: value => value.charAt(0) != 0 || 'el primer digito no puede ser 0',
+      maxValue: value => value <= 30 || 'la capacidad no puede ser más de 30'
+    },
+    // Data para editar Mesa
+    numero: '',
+    capacidad: '',
+    descripcion: '',
+    create: true,
+    index: 0,
+    id: 0
+  }),
+  methods: {
+    // OBTENER MESAS
+    async getMesas(){
+      try {
+        if(this.backup.mesas.length != 0){
+          this.messageMesas = '';
+          this.mesas =this.backup.mesas;
+          this.backup.mesas = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
           }
-        } catch (error) {
-          this.headerActionsMutation({create: false, report: false});
-          this.searchDisabledMutation(true);
-          this.pageTotal = 0;
-          this.messageMesas = 'Error al conctar con el servidor';
-        }finally {
-          this.loadingDialogMutation(false);
-        }
-      },
-      
-      // OBTENER TODAS LAS MESAS
-      async getAllMesas(){
-        try {
-          let response = await axios.get(this.url + 'mesas', this.config);
-          if(response.data){
-            let mesas = response.data;
-            if(mesas.length > 0){
-              this.allMesas = mesas;
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      },
-
-      // ACTUALIZANDO MESAS
-      async refreshMesas(page = this.page, loadingTitle ='Accediendo a la información', create = false){
-        try {
-          if(this.backup.mesas.length != 0){
-            this.mesas =this.backup.mesas;
-            this.backup.mesas = [];
-            if(this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
-              this.backup.pageTotal = 0;
-            }
-          }else {
-            this.paginateDisabled = true;
-            this.loadingTitleMutation(loadingTitle);
-            if(!create){
-              this.loadingDialogMutation(true);
-            }
-
-            let response = await axios.get(this.url + 'mesa', {
-              params: {
-                page: this.page
-              },
-              headers: {
-                Authorization: this.config.headers.Authorization,
-                'Content-Type': 'application/json'
-              }
-            });
-
-            if(response.data.data){
-              let data = response.data;
-              let mesas = data.data;
-              if(mesas.length > 0){
-                this.mesas = mesas;
-                this.messageMesas = '';
-                if(data.total != this.mesasTotal){
-                  this.mesasTotal = data.total;
-                }
-                if(data.last_page != this.pageTotal){
-                  this.pageTotal = data.last_page;
-                }
-              }else {
-                this.messageMesas = 'No se encontraron mesas';
-                this.pageTotal = 0;
-              }
-              this.headerActionsMutation({create: true, report: true});
-              this.searchDisabledMutation(false);
-            }else {
-              this.headerActionsMutation({create: false, report: false});
-              this.searchDisabledMutation(true);
-              this.messageMesas = response.data.message;
-              this.mesas = [];
-              this.pageTotal = 0;
-            }
-          }
-        }catch(error) {
-          this.headerActionsMutation({create: false, report: false});
-              this.searchDisabledMutation(true);
-          this.pageTotal = 0;
-          this.messageMesas = 'Error al conctar con el servidor';
-        }finally {
-          this.loadingDialogMutation(false);
-          this.paginateDisabled = false;
-        }
-      },
-
-      // SEARCH MESAS
-      async searchMesas(query){
-        if(this.mesas.length != 0 && this.backup.mesasIndex){
-          this.backup.mesas = this.mesas;
-          if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
-          }
-          this.backup.mesasIndex = false;
-        }
-
-        this.mesas = this.allMesas.filter(function(e){
-          return  e.id == query;
-        });
-        if(this.mesas.length == 0){
-          this.messageMesas = 'No se encontraron mesas con ese número';
-        }
-        this.pageTotal = 0;
-      },
-
-      // MODAL PARA EDITAR MESA
-      editarMesaModal(index){
-        this.numero = this.mesas[index].numero;
-        this.capacidad = this.mesas[index].capacidad;
-        this.descripcion = this.mesas[index].descripcion;
-        this.index = index;
-        this.id = this.mesas[index].id;
-        this.create = false;
-        this.$refs.form.resetValidation();
-        this.createModalMutation(true);
-      },
-
-      // CERRAR MODAL
-      closeModal(){
-        this.createModalMutation(false);
-        setTimeout(this.resetForm, 100);
-      },
-
-      // LIMPIAR FORMULARIO
-      resetForm(){
-        this.numero = '';
-        this.capacidad = '';
-        this.descripcion = '';
-        this.create = true;
-        this.$refs.form.resetValidation();
-      },
-
-      // CREAR MESAS
-      async crearMesa(){
-        try {
-          if (this.$refs.form.validate()) {
-            this.loadingTitleMutation('Subiendo informacón de la mesa');
-            this.createModalMutation(false);
-            this.loadingDialogMutation(true);
-
-            let response = await axios.post(this.url + 'mesa/registrar', {
-              numero: parseInt(this.numero),
-              capacidad: parseInt(this.capacidad),
-              descripcion: this.descripcion
-            }, this.config);
-
-            this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
-
-            this.resetForm();    
-            
-            if(this.mesasTotal % 10 == 0){
-              this.pageTotal++;
-            }
-            this.page = this.pageTotal;
-            await this.refreshMesas(null, 'Creando Mesa', true);
-          }
-        } catch (error) {
-          this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
-          this.resetForm();
-        }
-      },
-
-      // EDITAR MESA
-      async editarMesa(){
-        try {
-          if (this.$refs.form.validate()) {
-            if(this.descripcion == '' || this.descripcion == null){
-              this.descripcion = 'Mesa sin descripción';
-            }
-
-            let numeroBup = parseInt(this.numero);
-            let capacidadBup = parseInt(this.capacidad);
-            let descripcionBup = this.descripcion;
-
-            this.closeModal();
-
-            this.mesas[this.index].numero = numeroBup;
-            this.mesas[this.index].capacidad = capacidadBup;
-            this.mesas[this.index].descripcion = descripcionBup;
-
-            let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
-              numero: numeroBup,
-              capacidad: capacidadBup,
-              descripcion: descripcionBup
-            }, this.config);
-            this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'});
-          }
-        } catch (error) {
-          this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la mesa', color: 'error'});
-        }
-      },
-
-      // ACCION DEL FORMULARIO
-      async formAction(){
-        if(this.create){
-          await this.crearMesa();
+          this.backup.mesasIndex = true;
         }else {
-          await this.editarMesa();
-        }
-        this.$refs.form.resetValidation();
-      },
+          this.loadingTitleMutation('Accediendo a la información');
+          this.loadingDialogMutation(true);
 
-      ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
-    },
-    computed: {
-      ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
-    },
-    watch: {
-      searchQuery(){
-        this.searchMesas(this.searchQuery);
+          let response = await axios.get(this.url + 'mesa', this.config);
+
+          if(response.data.data){
+            let data = response.data;
+            let mesas = data.data;
+            if(mesas.length > 0){
+              this.mesas = mesas;
+              this.messageMesas = '';
+              this.mesasTotal = data.total;
+
+              if(data.last_page && data.last_page > 1){
+                this.pageTotal = data.last_page;
+              }
+              this.page = 1;
+            }else {
+              this.messageMesas = 'No se encontraron mesas';
+              this.pageTotal = 0;
+            }
+            this.headerActionsMutation({create: true, report: true});
+            this.searchDisabledMutation(false);
+          }else {
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messageMesas = response.data.message;
+            this.mesas = [];
+            this.pageTotal = 0;
+          }
+        }
+      } catch (error) {
+        this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
+        this.pageTotal = 0;
+        this.messageMesas = 'Error al conctar con el servidor';
+      }finally {
+        this.loadingDialogMutation(false);
       }
     },
-    created() {
-      this.headerActionsMutation({create: false, report: false});
-      this.loadingFishMutation(true);
+    
+    // OBTENER TODAS LAS MESAS
+    async getAllMesas(){
+      try {
+        let response = await axios.get(this.url + 'mesas', this.config);
+        if(response.data){
+          let mesas = response.data;
+          if(mesas.length > 0){
+            this.allMesas = mesas;
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
-    // AL CREAR LA INSTANCIA DE VUE
-    async mounted(){
-      this.getAllMesas();
-      this.breadcrumbMutation('Mesas');
-      this.searchPlaceholderMutation('Número de mesa...');
-      await this.getMesas();
-      this.loadingFishMutation(false);
+
+    // ACTUALIZANDO MESAS
+    async refreshMesas(page = this.page, loadingTitle ='Accediendo a la información', create = false){
+      try {
+        if(this.backup.mesas.length != 0){
+          this.mesas =this.backup.mesas;
+          this.backup.mesas = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.mesasIndex = true;
+        }else {
+          this.paginateDisabled = true;
+          this.loadingTitleMutation(loadingTitle);
+          if(!create){
+            this.loadingDialogMutation(true);
+          }
+
+          let response = await axios.get(this.url + 'mesa', {
+            params: {
+              page: this.page
+            },
+            headers: {
+              Authorization: this.config.headers.Authorization,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(response.data.data){
+            let data = response.data;
+            let mesas = data.data;
+            if(mesas.length > 0){
+              this.mesas = mesas;
+              this.messageMesas = '';
+              if(data.total != this.mesasTotal){
+                this.mesasTotal = data.total;
+              }
+              if(data.last_page != this.pageTotal){
+                this.pageTotal = data.last_page;
+              }
+            }else {
+              this.messageMesas = 'No se encontraron mesas';
+              this.pageTotal = 0;
+            }
+            this.headerActionsMutation({create: true, report: true});
+            this.searchDisabledMutation(false);
+          }else {
+            this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+            this.messageMesas = response.data.message;
+            this.mesas = [];
+            this.pageTotal = 0;
+          }
+        }
+      }catch(error) {
+        this.headerActionsMutation({create: false, report: false});
+            this.searchDisabledMutation(true);
+        this.pageTotal = 0;
+        this.messageMesas = 'Error al conctar con el servidor';
+      }finally {
+        this.loadingDialogMutation(false);
+        this.paginateDisabled = false;
+      }
+    },
+
+    // SEARCH MESAS
+    searchMesas(query){
+      if(!isNaN(query)){
+        if(query != '' && query != null){
+          if(this.mesas.length != 0 && this.backup.mesasIndex){
+            this.backup.mesas = this.mesas;
+            if(this.pageTotal != 0){
+              this.backup.pageTotal = this.pageTotal;
+            }
+            this.backup.mesasIndex = false;
+          }
+
+          if(this.messageMesas.length != 0){
+            this.messageMesas = '';
+          }
+
+          this.mesas = this.allMesas.filter(function(e){
+            return  e.id == query;
+          });
+          if(this.mesas.length == 0){
+            this.messageMesas = 'No se encontraron mesas con el número ' + query;
+          }
+          this.pageTotal = 0;
+        }
+      }else {
+        this.snackbarMutation({value: true, text: 'Solo valores numericos', color: 'error'});
+      }
+    },
+
+    // MODAL PARA EDITAR MESA
+    editarMesaModal(index){
+      this.numero = this.mesas[index].numero;
+      this.capacidad = this.mesas[index].capacidad;
+      this.descripcion = this.mesas[index].descripcion;
+      this.index = index;
+      this.id = this.mesas[index].id;
+      this.create = false;
+      this.$refs.form.resetValidation();
+      this.createModalMutation(true);
+    },
+
+    // CERRAR MODAL
+    closeModal(){
+      this.createModalMutation(false);
+      setTimeout(this.resetForm, 100);
+    },
+
+    // LIMPIAR FORMULARIO
+    resetForm(){
+      this.numero = '';
+      this.capacidad = '';
+      this.descripcion = '';
+      this.create = true;
+      this.$refs.form.resetValidation();
+    },
+
+    // CREAR MESAS
+    async crearMesa(){
+      try {
+        if (this.$refs.form.validate()) {
+          this.loadingTitleMutation('Subiendo informacón de la mesa');
+          this.createModalMutation(false);
+          this.loadingDialogMutation(true);
+
+          let response = await axios.post(this.url + 'mesa/registrar', {
+            numero: parseInt(this.numero),
+            capacidad: parseInt(this.capacidad),
+            descripcion: this.descripcion
+          }, this.config);
+          this.getAllMesas();
+
+          this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
+
+          this.resetForm();
+
+          if(this.pageTotal == 0 && this.backup.pageTotal != 0){
+              this.pageTotal = this.backup.pageTotal;
+          }
+          
+          if(this.mesasTotal % 10 == 0){
+              this.pageTotal++;
+          }
+
+          this.page = this.pageTotal;
+          this.backup.mesas = [];
+          await this.refreshMesas(null, 'Creando Mesa', true);
+        }
+      } catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
+        this.resetForm();
+      }
+    },
+
+    // EDITAR MESA
+    async editarMesa(){
+      try {
+        if (this.$refs.form.validate()) {
+          if(this.descripcion == '' || this.descripcion == null){
+            this.descripcion = 'Mesa sin descripción';
+          }
+
+          let numeroBup = parseInt(this.numero);
+          let capacidadBup = parseInt(this.capacidad);
+          let descripcionBup = this.descripcion;
+
+          this.closeModal();
+
+          this.mesas[this.index].numero = numeroBup;
+          this.mesas[this.index].capacidad = capacidadBup;
+          this.mesas[this.index].descripcion = descripcionBup;
+
+          let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
+            numero: numeroBup,
+            capacidad: capacidadBup,
+            descripcion: descripcionBup
+          }, this.config);
+          this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'});
+        }
+      } catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la mesa', color: 'error'});
+      }
+    },
+
+    // ACCION DEL FORMULARIO
+    async formAction(){
+      if(this.create){
+        await this.crearMesa();
+      }else {
+        await this.editarMesa();
+      }
+      this.$refs.form.resetValidation();
+    },
+
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchPlaceholderMutation', 'searchQueryMutation', 'searchDisabledMutation', 'searchItemsMutation']),
+  },
+  computed: {
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+  },
+  watch: {
+    searchQuery(){
+        this.searchMesas(this.searchQuery);
     }
+  },
+  created() {
+    this.getAllMesas();
+    this.headerActionsMutation({create: false, report: false});
+    this.loadingFishMutation(true);
+    this.breadcrumbMutation('Mesas');
+    this.searchPlaceholderMutation('Número de mesa...');
+    this.searchDisabledMutation(true);
+  },
+  // AL CREAR LA INSTANCIA DE VUE
+  async mounted(){
+    this.getAllMesas();
+    await this.getMesas();
+    this.loadingFishMutation(false);
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  .mesa {
-    transform: translateY(25px);
-  }
+.mesa {
+  transform: translateY(25px);
+}
+.title-modal {
+  background-image: $primary-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 </style>

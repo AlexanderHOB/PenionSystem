@@ -7,32 +7,32 @@ use App\Platillo;
 class PlatilloController extends Controller
 {
     public function index(Request $request )
-    {        
+    {
         //listar platillos
         $platillos   = Platillo::paginate(10);
         $categorias  = [];
         foreach($platillos as $platillo){
             array_push($categorias,$platillo->categoria);
         }
-        return $platillos;   
+        return $platillos;
     }
     public function buscarPlatillo(Request $request){
-        
- 
+
+
         $filtro = $request->filtro;
         $platillos = Platillo::where('codigo','=', $filtro)
         ->select('id','nombre','precio')
         ->orderBy('nombre', 'asc')->take(1)->get();
- 
+
         return ['platillos' => $platillos];
     }
     public function listarPlatillo(Request $request)
     {
-        
+
 
         $buscar = $request->buscar;
         $criterio = $request->criterio;
-        
+
         if ($buscar==''){
             $platillos = Platillo::join('categorias','platillos.idcategoria','=','categorias_platillos.id')
             ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre'
@@ -45,10 +45,10 @@ class PlatilloController extends Controller
             ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre'
             ,'categorias_platillos.nombre as nombre_categoria','platillos.precio',
             'platillos.descripcion','platillos.condicion')
-            ->where('platillos.'.$criterio, 'like', '%'. $buscar . '%')   
+            ->where('platillos.'.$criterio, 'like', '%'. $buscar . '%')
             ->orderBy('platillos.id', 'desc')->paginate(15);
         }
-        
+
 
         return [
             'platillos' => $platillos
@@ -58,7 +58,7 @@ class PlatilloController extends Controller
     {
         //validar datos
         $v = \Validator::make($request->all(), [
-            
+
             'categoria_id' => 'required|integer',
             'codigo' => 'required|string|max:5',
             'nombre'    => 'required|string|max:60',
@@ -66,7 +66,7 @@ class PlatilloController extends Controller
             'precio' => 'required|numeric',
 
         ]);
- 
+
         if ($v->fails())
         {
             return response()->json(['message'=>'Errores de validación de datos en el servidor']);
@@ -91,7 +91,7 @@ class PlatilloController extends Controller
     {
         //VALIDACION DE ACTUALIZACIÓN
         $v = \Validator::make($request->all(), [
-            
+
             'categoria_id' => 'required|integer',
             'codigo' => 'required|string|max:5',
             'nombre'    => 'required|string|max:60',
@@ -99,7 +99,7 @@ class PlatilloController extends Controller
             'precio' => 'required|integer',
 
         ]);
- 
+
         if ($v->fails())
         {
             return response()->json(['message'=>'Errores de validación de datos en el servidor']);
@@ -126,5 +126,10 @@ class PlatilloController extends Controller
         $platillo = Platillo::findOrFail($id);
         $platillo->condicion='1';
         $platillo->save();
+    }
+
+    public function getAllPlatillos(){
+        $platillos = Platillo::orderBy('id')->get();
+        return $platillos;
     }
 }

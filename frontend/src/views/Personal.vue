@@ -28,7 +28,7 @@
             </div>
             <img src="../assets/iconos/edit.svg" alt="edit" class="personal-edit" @click="editarPersonalModal(i)">
             <img src="../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="detailPersonalModal(i)">
-            <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarPersonal" :index="i" />
+            <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
       </template>
@@ -271,6 +271,27 @@
       </v-container>
     </v-dialog>
 
+    <v-dialog
+      v-model="activeDialog"
+      max-width="350"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Confirmación</h3>
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-card-text>¿Realmente deseas <strong>{{ activarText }}</strong> al personal?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click="activarPersonal(index)">Aceptar</v-btn>
+          <v-spacer></v-spacer>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <template v-if="pageTotal">
       <div class="text-xs-center mt-4">
         <v-pagination
@@ -369,7 +390,10 @@ export default {
       // Datos para Selects
       puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
       areas: ['Área de almacen', 'Área Caliente', 'Área Fría','Área mixta', 'Área de Ventas'],
-      tipo_contratos: ['Semanal', 'Quincenal', 'Mensual']
+      tipo_contratos: ['Semanal', 'Quincenal', 'Mensual'],
+      // Datos para activar/desactivar el modal
+      activeDialog: false,
+      activarText: ''
     }
   },
   methods: {
@@ -605,11 +629,22 @@ export default {
       }
     },
 
+    // MODAL PARA ACTIVAR
+    activarModal(index){
+        this.index = index;
+        if(this.personal[index].condicion){
+          this.activarText = 'desactivar';
+        }else{
+          this.activarText = 'activar';
+        }
+        this.activeDialog = true;
+    },    
+
     //  ACTIVAR 
     async activarPersonal(index){
       try {
-        this.index = index;
         this.id = this.personal[index].id;
+        this.activeDialog = false;
         if(this.personal[index].condicion){
           this.personal[index].condicion = 0;
           let response = await axios.put(this.url + 'empleado/desactivar/' + this.id, {},this.config);

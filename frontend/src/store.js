@@ -77,8 +77,8 @@ export default new Vuex.Store({
       state.searchPlaceholder = value;
     },
     searchDisabledMutation(state, value){
-      state.searchDisabled = value
-    }
+      state.searchDisabled = value;
+    },
   },
   actions: {
 
