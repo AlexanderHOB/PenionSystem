@@ -27,13 +27,13 @@ class TransaccionController extends Controller
 
             return [$historiales,$total];    
     }
-    public function descuento(Request $request)
+    public function stateSalary(Request $request)
     {
        //Buscar sueldo restante de la semana  por ID 
         $buscar =   $request->id;
 
         $empleado   =Empleado::join('personas','personas.id','=','empleados.id')
-                    ->select('personas.nombres','personas.apellidos','empleados.sueldo','empleados.tipo_contrato')
+                    ->select('personas.nombres','personas.apellidos','personas.dni','personas.celular','empleados.sueldo','empleados.puesto_trabajo','empleados.area_trabajo','empleados.tipo_contrato')
                     ->where('empleados.id','=',$buscar)->first();
         $sueldo     =Transaccion::where('persona_id','=',$buscar)
                     ->where('persona_id','=',$buscar)
@@ -54,8 +54,35 @@ class TransaccionController extends Controller
         $saldo  = $sueldo-$adelanto;
         //asignamos saldo al objeto
         $empleado['restante'] = round($saldo,2);
+        $empleado['fecha_inicio'] = $fecha;
 
         return [$empleado];
     }
+    public function discount(Request $request){
+        //validation
+        $v = \Validator::make($request->all(), [
+            
+            'persona_id' => 'required|integer',
+            'fecha_inicio' => 'required|date',
+            'fecha_transaccion'    => 'required|date',
+            'tipo' => 'required|max:60',
+            'monto' => 'required|numeric',
+            'motivo'=> 'max:254'
+        ]);
+ 
+        if ($v->fails())
+        {
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
+        }
+        //transaccion
+        $transaccion = new Transaccion();
+        $transaccion->persona_id = $request->persona_id;
+        $transaccion->fecha_inicio = $request->fecha_inicio;
+        $transaccion->fecha_transaccion = $request->fecha_transaccion;
+        $transaccion->tipo = $request->tipo;
+        $transaccion->monto = $request->monto;
+        $transaccion->motivo = $request->motivo;
+        $transaccion->save();
 
+    }
 }
