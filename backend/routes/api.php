@@ -57,6 +57,8 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/empleado/activar/{id}', 'EmpleadoController@activar');
      //Transacciones de pagos y adelantos de los empleados
      Route::get('/historial','TransaccionController@historial');
+     Route::get('/descuento','TransaccionController@descuento');
+
 
 
 });
