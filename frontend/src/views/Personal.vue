@@ -693,6 +693,11 @@ export default {
       this.$refs.form.resetValidation();  
     },
 
+    async getHistorial(){
+      // let response = await axios.get
+      // console.log(res)
+    },
+
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
   },
   computed: {
@@ -711,6 +716,7 @@ export default {
     this.breadcrumbMutation('Recursos Humanos \\ Personal');
     await this.getPersonal();
     this.loadingFishMutation(false);
+    this.getHistorial();
   }
 }
 </script>
