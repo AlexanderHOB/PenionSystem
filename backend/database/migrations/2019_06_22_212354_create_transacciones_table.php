@@ -21,6 +21,7 @@ class CreateTransaccionesTable extends Migration
             $table->date('fecha_transaccion');
             $table->string('tipo',60);
             $table->decimal('monto',11,2);
+            $table->decimal('bono',11,2);
             $table->string('motivo',254);
             $table->timestamps();
         });

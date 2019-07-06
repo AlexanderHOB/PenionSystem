@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\{Transaccion,Empleado};
+use App\Http\Request\TransaccionStoreRequest;
 
 class TransaccionController extends Controller
 {
@@ -54,6 +55,7 @@ class TransaccionController extends Controller
         $saldo  = $sueldo-$adelanto;
         //asignamos saldo al objeto
         $empleado['restante'] = round($saldo,2);
+        $empleado['adelanto'] = round($adelanto,2);
         $empleado['fecha_inicio'] = $fecha;
 
         return [$empleado];
@@ -84,5 +86,29 @@ class TransaccionController extends Controller
         $transaccion->motivo = $request->motivo;
         $transaccion->save();
 
+    }
+    public function pay(Request $request){
+        //transaccion
+        $transaccion = new Transaccion();
+        $transaccion->persona_id            = $request->persona_id;
+        $transaccion->fecha_inicio          = $request->fecha_inicio;
+        $transaccion->fecha_transaccion     = $request->fecha_transaccion;
+        $transaccion->tipo                  = $request->tipo;
+        $transaccion->monto                 = $request->monto;
+        $transaccion->bono                  = $request->bono;
+        $transaccion->motivo                = 'Pago de su sueldo';
+        $transaccion->save();
+
+        if($request->continuidad=='si'){
+            $transaccion = new Transaccion();
+            $transaccion->persona_id    =   $request->persona_id;
+            $transaccion->fecha_inicio  =   $request->fecha_nueva; //la nueva fecha que empieza!
+            $transaccion->fecha_transaccion     = $request->fecha_nueva;
+            $transaccion->tipo                  = 'Renovacion';
+            $transaccion->monto                 = $request->monto;
+            $transaccion->bono                  = $request->bono;
+            $transaccion->motivo                = 'Pago de su sueldo';
+            $transaccion->save();
+        }
     }
 }
