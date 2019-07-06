@@ -610,17 +610,41 @@ export default {
       try {
         if (this.$refs.form.validate()) {
 
-          let nombreBup = this.nombre;
-          let descripcionBup = this.descripcion;
+          let apellidosBup = this.apellidos;
+          let nombresBup = this.nombre;
+          let dniBup = this.dni;
+          let celularBup = this.celular;
+          let emailBup = this.email;
+          let direccionBup = this.direccion;
+          let area_trabajoBup = this.area;
+          let puesto_trabajoBup = this.puesto;
+          let tipo_contratoBup = this.tipo_contrato;
+          let sueldoBup =  this.sueldo;
 
           this.closeModal();
 
-          this.categorias[this.index].nombre = nombreBup;
-          this.categorias[this.index].descripcion = descripcionBup;
+            this.personal[this.index].apellidos = apellidosBup;
+            this.personal[this.index].nombres = nombresBup;
+            this.personal[this.index].dni = dniBup;
+            this.personal[this.index].celular = celularBup;
+            this.personal[this.index].email = emailBup;
+            this.personal[this.index].direccion = direccionBup;
+            this.personal[this.index].area_trabajo = area_trabajoBup;
+            this.personal[this.index].puesto_trabajo = puesto_trabajoBup;
+            this.personal[this.index].tipo_contrato = tipo_contratoBup;
+            this.personal[this.index].sueldo = sueldoBup;
 
-          let response = await axios.post(this.url + 'categoria/platillo/actualizar/' + this.id, {
-            nombre: nombreBup,
-            descripcion: descripcionBup
+          let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
+            apellidos: apellidosBup,
+            nombres: nombresBup,
+            dni: dniBup,
+            celular: celularBup,
+            email: emailBup,
+            direccion: direccionBup,
+            area_trabajo: area_trabajoBup,
+            puesto_trabajo: puesto_trabajoBup,
+            tipo_contrato: tipo_contratoBup,
+            sueldo: sueldoBup
           }, this.config);
           this.snackbarMutation({value: true, text: 'Categoria editada correctamente', color: 'success'});
         }

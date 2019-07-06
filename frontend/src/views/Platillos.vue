@@ -162,7 +162,7 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 class="headline title-modal">Confirmación</h3>
+          <h3 class="headline title-modal ">Confirmación</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text>Confirma que quieres <strong>{{ activarText }}</strong> el platillo</v-card-text>
