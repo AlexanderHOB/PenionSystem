@@ -103,11 +103,11 @@ class TransaccionController extends Controller
             $transaccion = new Transaccion();
             $transaccion->persona_id    =   $request->persona_id;
             $transaccion->fecha_inicio  =   $request->fecha_nueva; //la nueva fecha que empieza!
-            $transaccion->fecha_transaccion     = $request->fecha_nueva;
-            $transaccion->tipo                  = 'Renovacion';
-            $transaccion->monto                 = $request->monto;
-            $transaccion->bono                  = $request->bono;
-            $transaccion->motivo                = 'Pago de su sueldo';
+            $transaccion->fecha_transaccion = $request->fecha_nueva;
+            $transaccion->tipo              = 'Renovacion';
+            $transaccion->monto             = $request->monto;
+            $transaccion->bono              = $request->bono;
+            $transaccion->motivo            = 'Pago de su sueldo';
             $transaccion->save();
         }
     }
