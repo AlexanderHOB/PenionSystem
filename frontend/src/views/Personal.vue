@@ -216,6 +216,22 @@
               </v-flex>
             </v-layout>
           </v-flex>
+          <v-flex xs12>
+            <v-layout>
+              <v-flex xs3><strong>Dirección</strong></v-flex>
+              <v-flex xs9>
+                <p>{{ direccionDetail }}</p>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <v-flex xs12>
+            <v-layout>
+              <v-flex xs3><strong>Tipo de Contrato</strong></v-flex>
+              <v-flex xs9>
+                <p>{{ tipo_contratoDetail }}</p>
+              </v-flex>
+            </v-layout>
+          </v-flex>
           <v-flex xs6>
             <v-layout>
               <v-flex xs3><strong>DNI</strong></v-flex>
@@ -252,7 +268,7 @@
             <v-layout>
               <v-flex xs5><strong>Fecha de inicio</strong></v-flex>
               <v-flex xs7>
-                <p>{{ fechaRegistroDetail }}</p>
+                <p>{{ fechaRegistroFormatDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -263,6 +279,46 @@
                 <p>{{ sueldoDetail }}</p>
               </v-flex>
             </v-layout>
+          </v-flex>
+          <v-flex xs12>
+            <v-card flat>
+              <v-card-title>
+                Transacciones
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="historialSearch"
+                  append-icon="search"
+                  label="Search"
+                  single-line
+                  hide-details
+                  color="blue"
+                ></v-text-field>
+              </v-card-title>
+              <v-data-table
+                :headers="headers"
+                :items="historial"
+                :search="historialSearch"
+                :loading="historialLoading"
+              >
+                <v-progress-linear v-slot:progress class="blue" color="blue" indeterminate></v-progress-linear>
+                <template v-slot:items="props">
+                  <td class="text-xs-right">{{ props.item.tipo }}</td>
+                  <td class="text-xs-right">{{ props.item.fecha_transaccion }}</td>
+                  <td class="text-xs-right">{{ props.item.monto }}</td>
+                  <td class="text-xs-right">{{ props.item.motivo }}</td>
+                </template>
+                <template v-slot:no-results>
+                  <v-alert :value="true" color="error" icon="warning">
+                    Your search for "{{ historialSearch }}" found no results.
+                  </v-alert>
+                </template>
+                <template v-slot:footer>
+                  <td :colspan="headers.length">
+                    <strong>Monto total a descontar {{ montoDescontar }}</strong>
+                  </td>
+                </template>
+              </v-data-table>
+            </v-card>
           </v-flex>
           <v-flex xs12 class="py-0 text-xs-right">
             <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
@@ -365,7 +421,7 @@ export default {
       puesto: '',
       area: '',
       tipo_contrato: '',
-      fechaRegistro: '',
+      fechaRegistro: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
       date: new Date().toISOString().substr(0, 10),
       sueldo: '',
       menuDate: false,
@@ -377,23 +433,37 @@ export default {
       // Detail
       apellidosDetail: '',
       nombreDetail: '',
+      direccionDetail: '',
       emailDetail: '',
       dniDetail: '',
       celularDetail: '',
       puestoDetail: '',
       areaDetail: '',
+      tipo_contratoDetail: '',
       fechaRegistroDetail: '',
+      fechaRegistroFormatDetail: '',
       sueldoDetail: '',
       disabledDate: false,
       // Datos para detalles del personal
       personalDetail: false,
       // Datos para Selects
       puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
-      areas: ['Área de almacen', 'Área Caliente', 'Área Fría','Área mixta', 'Área de Ventas'],
-      tipo_contratos: ['Semanal', 'Quincenal', 'Mensual'],
+      areas: ['Área de almacen', 'Área Caliente', 'Área Fria','Área mixta', 'Área de Ventas'],
+      tipo_contratos: ['planilla','mensual','semanal'],
       // Datos para activar/desactivar el modal
       activeDialog: false,
-      activarText: ''
+      activarText: '',
+      // Datos para el historial de transacciones
+      historialSearch: '',
+      historialLoading: false,
+      headers: [
+        { text: 'Tipo', value: 'tipo' },
+        { text: 'Fecha', value: 'fecha_transaccion' },
+        { text: 'Monto', value: 'monto' },
+        { text: 'Motivo', value: 'motivo' },
+      ],
+      historial: [],
+      montoDescontar: 0
     }
   },
   methods: {
@@ -490,17 +560,47 @@ export default {
     },
 
     // MODAL DE DETALLE
-    detailPersonalModal(index){
-      this.apellidosDetail = this.personal[index].apellidos;
-      this.nombreDetail = this.personal[index].nombres;
-      this.emailDetail = this.personal[index].email;
-      this.dniDetail = this.personal[index].dni;
-      this.celularDetail = this.personal[index].celular;
-      this.puestoDetail = this.personal[index].puesto_trabajo;
-      this.areaDetail = this.personal[index].area_trabajo;
-      this.fechaRegistroDetail = this.personal[index].fecha_registro.split('-').reverse().join('-');
-      this.sueldoDetail = this.personal[index].sueldo;
-      this.personalDetail = true;
+    async detailPersonalModal(index){
+      try {
+        this.historial = [];
+        this.montoDescontar = 0;
+        //
+        this.apellidosDetail = this.personal[index].apellidos;
+        this.nombreDetail = this.personal[index].nombres;
+        this.direccionDetail = this.personal[index].direccion;
+        this.emailDetail = this.personal[index].email;
+        this.dniDetail = this.personal[index].dni;
+        this.celularDetail = this.personal[index].celular;
+        this.puestoDetail = this.personal[index].puesto_trabajo;
+        this.areaDetail = this.personal[index].area_trabajo;
+        this.tipo_contratoDetail = this.personal[index].tipo_contrato;
+        this.fechaRegistroDetail = this.personal[index].fecha_registro;
+        this.fechaRegistroFormatDetail = this.personal[index].fecha_registro.split('-').reverse().join('-');
+        this.sueldoDetail = this.personal[index].sueldo;
+        // 
+        this.id = this.personal[index].id;
+        this.historialLoading = true;
+        this.personalDetail = true;
+        let response = await axios.get(this.url + 'historial', {
+          params: {
+            id: this.id,
+            fecha: this.fechaRegistroDetail
+          },
+          headers: {
+            Authorization: this.config.headers.Authorization,
+            'Content-Type': 'application/json'
+          }
+        });
+        this.historialLoading = false;
+        this.historial = response.data[0][0].transacciones;
+        if(typeof response.data[1][0] != 'undefined'){
+          this.montoDescontar = response.data[1][0].total;
+        }
+      } catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al traer la información', color: 'error'});
+        this.historial = [];
+        this.montoDescontar = 0;
+      }
     },
 
     // CERRAR MODAL DE DETALLE
@@ -517,6 +617,8 @@ export default {
         self.areaDetail = '';
         self.fechaRegistroDetail = '';
         self.sueldoDetail = '';
+        self.historial = [];
+        self.montoDescontar = 0;
       }, 100);
     },
 
@@ -532,7 +634,7 @@ export default {
       this.area = this.personal[index].area_trabajo;
       this.tipo_contrato = this.personal[index].tipo_contrato;
       this.sueldo = this.personal[index].sueldo;
-      this.fechaRegistro = this.personal[index].fecha_registro;
+      this.fechaRegistro = this.personal[index].fecha_registro.split('-').reverse().join('-');
       this.index = index;
       this.id = this.personal[index].id;
       this.create = false;
@@ -559,7 +661,7 @@ export default {
       this.area = '';
       this.tipo_contrato = '';
       this.date = new Date().toISOString().substr(0, 10);
-      this.fechaRegistro = '';
+      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
       this.sueldo = '';
       this.create = true;
       this.disabledDate = false;
@@ -693,11 +795,6 @@ export default {
       this.$refs.form.resetValidation();  
     },
 
-    async getHistorial(){
-      // let response = await axios.get
-      // console.log(res)
-    },
-
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
   },
   computed: {
@@ -716,7 +813,6 @@ export default {
     this.breadcrumbMutation('Recursos Humanos \\ Personal');
     await this.getPersonal();
     this.loadingFishMutation(false);
-    this.getHistorial();
   }
 }
 </script>
@@ -784,5 +880,23 @@ export default {
   background-image: $primary-gradient;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+.v-dialog.v-dialog--active {
+    // Scroll
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  &::-webkit-scrollbar-track {
+    border-radius: 50px;
+    background-color: rgba(0, 0, 0, .05);
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 50px;
+    background-color: rgba(0, 0, 0, .25);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, .45);
+  }
 }
 </style>
