@@ -51,6 +51,7 @@ Route::group(['middleware' => 'cors'], function(){
      Route::put('/user/activar/{id}', 'UserController@activar');
      //Empleados
     Route::get('/empleado','EmpleadoController@index');
+    Route::get('/empleados','EmpleadoController@getAllEmpleados');
     Route::post('/empleado/registrar','EmpleadoController@store');
     Route::put('/empleado/actualizar/{id}','EmpleadoController@update');
     Route::put('/empleado/desactivar/{id}', 'EmpleadoController@desactivar');
