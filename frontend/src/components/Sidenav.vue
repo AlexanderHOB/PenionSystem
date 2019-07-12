@@ -6,7 +6,7 @@
     class="elevation-8 sidenav"
   >
 
-    <v-list>
+    <v-list class="elevation-4 sidenav-logo">
       <v-list-tile>
         <v-img 
           :src="require('../assets/logo.svg')"
@@ -255,5 +255,9 @@
 </script>
 
 <style lang="scss" scoped>
-  
+  .sidenav {
+    &-logo {
+      position: relative;
+    }
+  }
 </style>

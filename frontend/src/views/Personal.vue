@@ -394,7 +394,14 @@ export default {
       //Datos para el personal
       messagePersonal: '',
       personal: [],
+      allPersonal: [],
       personalTotal: 0,
+      // Backup
+      backup: {
+        personal: [],
+        personalIndex: true,
+        pageTotal: 0
+      },
       // Datos para la paginación
       pageTotal: 0,
       page: 1,
@@ -470,6 +477,19 @@ export default {
     // OBTENER PERSONAL
     async getPersonal(){
       try {
+        if(this.backup.personal.length != 0){
+          this.messagePersonal = '';
+          this.personal = this.backup.personal;
+          this.backup.personal = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.personalIndex = true;
+          return;
+        }
+
         this.loadingTitleMutation('Accediendo a la información');
         this.loadingDialogMutation(true);
 
@@ -490,23 +510,53 @@ export default {
             this.pageTotal = 0;
           }
           this.headerActionsMutation({create: true, report: false});
+          this.searchDisabledMutation(false);
         }else {
           this.headerActionsMutation({create: false, report: false});
+          this.searchDisabledMutation(true);
           this.messagePersonal = response.data.message;
           this.personal = [];
           this.pageTotal = 0;
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.messagePersonal = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
       }
     },
 
+    // OBTENER TODAS LAS PERSONAS
+    async getAllPersonal(){
+      try {
+        let response = await axios.get(this.url + 'empleados', this.config);
+        if(response.data){
+          let personal = response.data;
+          if(personal.length > 0){
+            this.allPersonal = personal;
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
     // ACTUALIZAR PERSONAL
     async refreshPersonal(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
+        if(this.backup.personal.length != 0){
+          this.personal = this.backup.personal;
+          this.backup.personal = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.personalIndex = true;
+          return;
+        }
+
         this.paginateDisabled = true;
         this.loadingTitleMutation(loadingTitle);
         if(!create){
@@ -542,8 +592,10 @@ export default {
             this.pageTotal = 0;
           }
           this.headerActionsMutation({create: true, report: false});
+          this.searchDisabledMutation(false);
         }else {
           this.headerActionsMutation({create: false, report: false});
+          this.searchDisabledMutation(true);
           this.messagePersonal = response.data.message;
           this.personal = [];
           this.pageTotal = 0;
@@ -551,11 +603,38 @@ export default {
 
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
+        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messagePersonal = 'Error al conectar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
         this.paginateDisabled = false;
+      }
+    },
+
+    // SEARCH PERSONAL
+    searchPersonal(query){
+      if(query != '' && query != null){
+        if(this.personal.length != 0 && this.backup.personalIndex){
+          this.backup.personal = this.personal;
+          if(this.pageTotal != 0){
+            this.backup.pageTotal = this.pageTotal;
+          }
+          this.backup.personalIndex = false;
+        }
+
+        if(this.messagePersonal.length != 0){
+          this.messagePersonal = '';
+        }
+        console.log(query);
+        this.personal = this.allPersonal.filter(function(e){
+          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1;
+        });
+
+        if(this.personal.length == 0){
+          this.messagePersonal = 'No se encontro personal con el nombre ' + query;
+        }
+        this.pageTotal = 0;
       }
     },
 
@@ -606,6 +685,7 @@ export default {
     // CERRAR MODAL DE DETALLE
     closeDetailModal(){
       this.personalDetail = false;
+      
       let self = this;
       setTimeout(function(){
         self.apellidosDetail = '';
@@ -618,6 +698,7 @@ export default {
         self.fechaRegistroDetail = '';
         self.sueldoDetail = '';
         self.historial = [];
+        self.historialSearch = '';
         self.montoDescontar = 0;
       }, 100);
     },
@@ -689,15 +770,20 @@ export default {
             fecha_registro: this.date,
             sueldo: this.sueldo
           }, this.config);
+          this.getAllPersonal();
+          this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
 
-        this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
+          this.resetForm();
 
-        this.resetForm();
+          if(this.pageTotal == 0 && this.backup.pageTotal != 0){
+                this.pageTotal = this.backup.pageTotal;
+            }
 
-        if(this.personalTotal % 10 == 0){
-            this.pageTotal++;
+          if(this.personalTotal % 10 == 0){
+              this.pageTotal++;
           }
           this.page = 1;
+          this.backup.personal = [];
           await this.refreshPersonal(null, 'Registrando personal', true);
         }
       } catch (error) {
@@ -735,6 +821,22 @@ export default {
             this.personal[this.index].puesto_trabajo = puesto_trabajoBup;
             this.personal[this.index].tipo_contrato = tipo_contratoBup;
             this.personal[this.index].sueldo = sueldoBup;
+
+            var self = this;
+            this.allPersonal.forEach(function(e){
+              if(self.personal[self.index].id == e.id){
+                e.apellidos = apellidosBup;
+                e.nombres = nombresBup;
+                e.dni = dniBup;
+                e.celular = celularBup;
+                e.email = emailBup;
+                e.direccion = direccionBup;
+                e.area_trabajo = area_trabajoBup;
+                e.puesto_trabajo = puesto_trabajoBup;
+                e.tipo_contrato = tipo_contratoBup;
+                e.sueldo = sueldoBup;
+              } 
+            });
 
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
             apellidos: apellidosBup,
@@ -795,22 +897,28 @@ export default {
       this.$refs.form.resetValidation();  
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
   },
   watch: {
     date(val) {
       this.fechaRegistro = val.split('-').reverse().join('-');
+    },
+    searchQuery(){
+      this.searchPersonal(this.searchQuery);
     }
   },
   created(){
+    this.getAllPersonal();
     this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    this.breadcrumbMutation('Recursos Humanos \\ Personal');
+    this.searchPlaceholderMutation('Nombre del personal...');
+    this.searchDisabledMutation(true);
   },
   async mounted(){
-    this.breadcrumbMutation('Recursos Humanos \\ Personal');
     await this.getPersonal();
     this.loadingFishMutation(false);
   }
