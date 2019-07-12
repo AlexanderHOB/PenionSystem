@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\{Persona,Empleado};
 
+use App\Http\Requests\{EmpleadoStoreRequest,EmpleadoUpdateRequest};
+
 class EmpleadoController extends Controller
 {
     public function index(Request $request)
@@ -13,44 +15,26 @@ class EmpleadoController extends Controller
         //listar personas
         $personas = Persona::join('empleados','personas.id','=','empleados.id')
         ->select('personas.id','personas.nombres','personas.apellidos','personas.dni','personas.direccion','personas.celular','personas.email',
-        'empleados.area_trabajo','empleados.puesto_trabajo','empleados.tipo_contrato','empleados.sueldo','empleados.fecha_registro','empleados.condicion')
-        ->orderBy('id', 'desc')->paginate(10);
+                    'empleados.area_trabajo','empleados.puesto_trabajo','empleados.tipo_contrato','empleados.sueldo','empleados.fecha_registro','empleados.condicion')
+        ->orderBy('id', 'desc')
+        ->paginate(10);
 
         return  $personas;
     }
-    public function store(Request $request)
+    public function store(EmpleadoStoreRequest $request)
     {
         //validar datos de empleados
-        $v = \Validator::make($request->all(), [
-           
-            'nombres'           =>  'required|string',
-            'apellidos'         =>  'required|string',
-            'dni'               =>  'required|string|max:8',
-            'celular'           =>  'string|max:9',
-            'email'             =>  'email',
-            'area_trabajo'      =>  'required|string|max:80',
-            'puesto_trabajo'    =>  'required|string|max:80',
-            'tipo_contrato'     =>  'required|string|max:80',
-            'fecha_registro'    =>  'required',
-            'sueldo'            =>  'required|numeric',
-
-        ]);
- 
-        if ($v->fails())
-        {
-            return response()->json(['message'  =>'Errores de validación de datos en el servidor']);
-        }
         try{
             DB::beginTransaction();
 
             //crear un mozo
             $persona = new Persona();
-            $persona->nombres = $request->nombres;
-            $persona->apellidos = $request->apellidos;
-            $persona->dni = $request->dni;
-            $persona->direccion = $request->direccion;
-            $persona->celular = $request->celular;
-            $persona->email = $request->email;
+            $persona->nombres       = $request->nombres;
+            $persona->apellidos     = $request->apellidos;
+            $persona->dni           = $request->dni;
+            $persona->direccion     = $request->direccion;
+            $persona->celular       = $request->celular;
+            $persona->email         = $request->email;
             $persona->save();
 
             $empleado = new Empleado();
@@ -69,27 +53,9 @@ class EmpleadoController extends Controller
         }
         
     }
-    public function update($id,Request $request)
+    public function update($id,EmpleadoUpdateRequest $request)
     {
-        //validar datos de empleados
-        $v = \Validator::make($request->all(), [
-           
-            'nombres'           =>  'required|string',
-            'apellidos'         =>  'required|string',
-            'dni'               =>  'required|string|max:8',
-            'celular'           =>  'max:9',
-            'email'             =>  'email',
-            'area_trabajo'      =>  'required|string|max:80',
-            'puesto_trabajo'    =>  'required|string|max:80',
-            'tipo_contrato'     =>  'required|string|max:80',
-            'sueldo'            =>  'required|numeric',
-
-        ]);
- 
-        if ($v->fails())
-        {
-            return response()->json(['message'  =>'Errores de validación de datos en el servidor']);
-        }
+        
         //actualizar los datos de los empleados
         try{
             DB::beginTransaction();

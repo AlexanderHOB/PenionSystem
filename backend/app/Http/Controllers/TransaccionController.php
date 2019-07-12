@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\{Transaccion,Empleado};
-use App\Http\Request\TransaccionStoreRequest;
+use App\Http\Requests\TransaccionStoreRequest;
 
 class TransaccionController extends Controller
 {
@@ -60,22 +60,8 @@ class TransaccionController extends Controller
 
         return [$empleado];
     }
-    public function discount(Request $request){
-        //validation
-        $v = \Validator::make($request->all(), [
-            
-            'persona_id' => 'required|integer',
-            'fecha_inicio' => 'required|date',
-            'fecha_transaccion'    => 'required|date',
-            'tipo' => 'required|max:60',
-            'monto' => 'required|numeric',
-            'motivo'=> 'max:254'
-        ]);
- 
-        if ($v->fails())
-        {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
-        }
+    public function discount(TransaccionStoreRequest $request){
+        
         //transaccion
         $transaccion = new Transaccion();
         $transaccion->persona_id = $request->persona_id;

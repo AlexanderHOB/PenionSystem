@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\CategoriaStoreRequest;
+
 use App\Categoria;
+
 class CategoriaController extends Controller
 {
     public function index(Request $request)
@@ -16,23 +19,14 @@ class CategoriaController extends Controller
     public function selectCategoria(Request $request){
         //listar las categorias disponibles en el modulo platillo
         $categorias = Categoria::where('condicion','=','1')
-        ->select('id','nombre')->orderBy('id', 'asc')->get();
+                    ->select('id','nombre')->orderBy('id', 'asc')->get();
+        
         return $categorias;
     }
 
-    public function store(Request $request)
+    public function store(CategoriaStoreRequest $request)
     {
-        //Validar datos de creacion
-        $v = \Validator::make($request->all(), [
-
-            'nombre' => 'required|string|max:60',
-
-        ]);
-
-        if ($v->fails())
-        {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
-        }
+        
         //Crear una categoria nueva
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
