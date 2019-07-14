@@ -95,14 +95,14 @@
                   ></v-select>
                 </v-flex>
                 <v-flex xs4>
-                <v-text-field 
+                  <v-text-field 
                     color="blue"
                     label="DNI"
                     v-model="n_documento"
                     :rules="[rules.required, rules.counterDni]"
                     counter="8"
                     mask="########"
-                    v-show="tipo_documento === 'DNI'"
+                    v-if="tipo_documento === 'Dni'"
                   ></v-text-field>
                   <v-text-field 
                     color="blue"
@@ -111,7 +111,7 @@
                     :rules="[rules.required, rules.counterExtranjero]"
                     counter="11"
                     mask="###########"
-                    v-show="tipo_documento === 'Extranjero'"
+                    v-else
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs4>
@@ -251,32 +251,32 @@
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>N° Documento</strong></v-flex>
-              <v-flex xs9>
+              <v-flex xs5><strong>N° Documento</strong></v-flex>
+              <v-flex xs7>
                 <p>{{ n_documentoDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>Celular</strong></v-flex>
-              <v-flex xs9>
+              <v-flex xs5><strong>Celular</strong></v-flex>
+              <v-flex xs7>
                 <p>{{ celularDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>Puesto</strong></v-flex>
-              <v-flex xs9>
+              <v-flex xs5><strong>Puesto</strong></v-flex>
+              <v-flex xs7>
                 <p>{{ puestoDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>Area</strong></v-flex>
-              <v-flex xs9>
+              <v-flex xs5><strong>Area</strong></v-flex>
+              <v-flex xs7>
                 <p>{{ areaDetail }}</p>
               </v-flex>
             </v-layout>
@@ -291,8 +291,8 @@
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>Sueldo</strong></v-flex>
-              <v-flex xs9>
+              <v-flex xs5><strong>Sueldo</strong></v-flex>
+              <v-flex xs7>
                 <p>{{ sueldoDetail }}</p>
               </v-flex>
             </v-layout>
@@ -445,7 +445,7 @@ export default {
       celular: '',
       puesto: '',
       area: '',
-      tipo_documento: 'DNI',
+      tipo_documento: 'Dni',
       tipo_contrato: '',
       fechaRegistro: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
       date: new Date().toISOString().substr(0, 10),
@@ -476,7 +476,7 @@ export default {
       puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
       areas: ['Área de almacen', 'Área Caliente', 'Área Fria','Área mixta', 'Área de Ventas'],
       tipo_contratos: ['planilla','mensual','semanal'],
-      documentos: ['DNI', 'Extranjero'],
+      documentos: ['Dni', 'Extranjero'],
       // Datos para activar/desactivar el modal
       activeDialog: false,
       activarText: '',
@@ -587,7 +587,7 @@ export default {
             page: this.page
           },
           headers: {
-            Authorization: this.config.headers.Authorization,
+            Authorizations: this.config.headers.Authorizations,
             'Content-Type': 'application/json'
           }
         });
@@ -678,7 +678,7 @@ export default {
         this.nombreDetail = this.personal[index].nombres;
         this.direccionDetail = this.personal[index].direccion;
         this.emailDetail = this.personal[index].email;
-        this.n_documentoDetail = this.personal[index].dni;
+        this.n_documentoDetail = this.personal[index].documento;
         this.celularDetail = this.personal[index].celular;
         this.puestoDetail = this.personal[index].puesto_trabajo;
         this.areaDetail = this.personal[index].area_trabajo;
@@ -696,12 +696,11 @@ export default {
             fecha: this.fechaRegistroDetail
           },
           headers: {
-            Authorization: this.config.headers.Authorization,
+            Authorizations: this.config.headers.Authorizations,
             'Content-Type': 'application/json'
           }
         });
         this.historialLoading = false;
-        console.log(response);
         this.historial = response.data[0][0].transacciones;
         if(typeof response.data[1][0] != 'undefined'){
           this.montoDescontar = response.data[1][0].total;
@@ -740,10 +739,11 @@ export default {
       this.nombre = this.personal[index].nombres;
       this.direccion = this.personal[index].direccion;
       this.email = this.personal[index].email;
-      this.n_documento = this.personal[index].dni;
+      this.n_documento = this.personal[index].documento;
       this.celular = this.personal[index].celular;
       this.puesto = this.personal[index].puesto_trabajo;
       this.area = this.personal[index].area_trabajo;
+      this.tipo_documento = this.personal[index].tipo_documento;
       this.tipo_contrato = this.personal[index].tipo_contrato;
       this.sueldo = this.personal[index].sueldo;
       this.fechaRegistro = this.personal[index].fecha_registro.split('-').reverse().join('-');
@@ -771,6 +771,7 @@ export default {
       this.celular = '';
       this.puesto = '';
       this.area = '';
+      this.tipo_documento = 'Dni';
       this.tipo_contrato = '';
       this.date = new Date().toISOString().substr(0, 10);
       this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
@@ -833,6 +834,7 @@ export default {
           let apellidosBup = this.apellidos;
           let nombresBup = this.nombre;
           let n_documentoBup = this.n_documento;
+          let tipo_documentoBup = this.tipo_documento;
           let celularBup = this.celular;
           let emailBup = this.email;
           let direccionBup = this.direccion;
@@ -845,7 +847,8 @@ export default {
 
           this.personal[this.index].apellidos = apellidosBup;
           this.personal[this.index].nombres = nombresBup;
-          this.personal[this.index].dni = n_documentoBup;
+          this.personal[this.index].documento = n_documentoBup;
+          this.personal[this.index].tipo_documento = tipo_documentoBup;
           this.personal[this.index].celular = celularBup;
           this.personal[this.index].email = emailBup;
           this.personal[this.index].direccion = direccionBup;
@@ -859,7 +862,8 @@ export default {
             if(self.personal[self.index].id == e.id){
               e.apellidos = apellidosBup;
               e.nombres = nombresBup;
-              e.dni = n_documentoBup;
+              e.documento = n_documentoBup;
+              e.tipo_documento = tipo_documentoBup;
               e.celular = celularBup;
               e.email = emailBup;
               e.direccion = direccionBup;
@@ -873,7 +877,8 @@ export default {
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
             apellidos: apellidosBup,
             nombres: nombresBup,
-            dni: n_documentoBup,
+            documento: n_documentoBup,
+            tipo_documento: tipo_documentoBup,
             celular: celularBup,
             email: emailBup,
             direccion: direccionBup,
@@ -882,10 +887,11 @@ export default {
             tipo_contrato: tipo_contratoBup,
             sueldo: sueldoBup
           }, this.config);
-          this.snackbarMutation({value: true, text: 'Categoria editada correctamente', color: 'success'});
+          this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'});
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un erro al editar la categoria', color: 'error'});
+        console.log(error)
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'});
       }
     },
 
@@ -905,12 +911,23 @@ export default {
       try {
         this.id = this.personal[index].id;
         this.activeDialog = false;
+        var self = this;
         if(this.personal[index].condicion){
           this.personal[index].condicion = 0;
+          this.allPersonal.forEach(function(e){
+            if(self.personal[index].id == e.id){
+              e.condicion = 0;
+            } 
+          });
           let response = await axios.put(this.url + 'empleado/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'});
         }else { 
           this.personal[index].condicion = 1;
+          this.allPersonal.forEach(function(e){
+            if(self.personal[index].id == e.id){
+              e.condicion = 1;
+            } 
+          });
           let response = await axios.put(this.url + 'empleado/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'});
         }
@@ -1020,23 +1037,5 @@ export default {
   background-image: $primary-gradient;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-.v-dialog.v-dialog--active {
-    // Scroll
-  &::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-  }
-  &::-webkit-scrollbar-track {
-    border-radius: 50px;
-    background-color: rgba(0, 0, 0, .05);
-  }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 50px;
-    background-color: rgba(0, 0, 0, .25);
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, .45);
-  }
 }
 </style>

@@ -180,5 +180,20 @@ img {
                         0 7px 8px -5px rgba(244,67,54,.2)!important;
   }
 }
+
+.v-dialog.v-dialog--active {
+    // Scroll
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: #fff;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 50px;
+    background-color: rgba(0, 0, 0, .25);
+  }
+}
 </style>
 

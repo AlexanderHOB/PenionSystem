@@ -491,7 +491,7 @@ export default {
           this.snackbarMutation({value: true, text: 'Categoria editada correctamente', color: 'success'});
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un erro al editar la categoria', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la categoria', color: 'error'});
       }
     },
 

@@ -34,6 +34,11 @@ export default new Router({
       component: () => import('./views/RecursosHumanos/Personal.vue')
     },
     {
+      path: '/adelantos',
+      name: 'adelantos',
+      component: () => import('./views/RecursosHumanos/Adelantos.vue')
+    }, 
+    {
       path: '*',
       component: () => import('./views/NotFound.vue')
     }
