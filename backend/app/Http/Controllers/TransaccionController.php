@@ -97,4 +97,10 @@ class TransaccionController extends Controller
             $transaccion->save();
         }
     }
+    public function getAdelantoDescuento(Request $request){
+        $tipo=$request->tipo;
+        $adelantos  =   Transaccion::where('tipo','=',$tipo)->orderBy('id','desc')->paginate(10);
+        return $adelantos;
+    }
+
 }

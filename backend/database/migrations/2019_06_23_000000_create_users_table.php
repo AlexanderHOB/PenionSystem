@@ -22,12 +22,13 @@ class CreateUsersTable extends Migration
             
             $table->integer('empleado_id');
             $table->foreign('empleado_id')->references('id')->on('empleados');
-
+            
+            $table->integer('rol_id')->unsigned();
+            $table->foreign('rol_id')->references('id')->on('roles');
+            
             $table->rememberToken();
             $table->timestamps();
 
-            $table->integer('rol_id')->unsigned();
-            $table->foreign('rol_id')->references('id')->on('roles');
         });
     }
 

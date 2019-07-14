@@ -6,7 +6,7 @@ use App\Transaccion;
 use Faker\Generator as Faker;
 
 $factory->define(Transaccion::class, function (Faker $faker) {
-    $tipo=['planilla','semanal'];
+    $tipo=['Adelanto','Descuento'];
     $semana=['2019-06-15','2019-06-8','2019-06-1'];
     return [
         'fecha_inicio'      =>$semana[rand(0,2)],
