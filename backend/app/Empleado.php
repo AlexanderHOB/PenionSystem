@@ -21,8 +21,8 @@ class Empleado extends Model
     public function transacciones(){
         return $this->hasMany('App\Transaccion','persona_id','id');
     }
-    protected $casts = [
-        'fecha_registro' => 'date_format:d/m/yyyy   ',
-    ];
+    public function user(){
+        return $this->hasOne('App\User');
+    }
     
 }

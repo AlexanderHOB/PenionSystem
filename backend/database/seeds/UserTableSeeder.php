@@ -11,14 +11,15 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        for($i=1;$i<=40;$i++){
+        for($i=1;$i<=10;$i++){
 
             DB::table('users')->insert([
                 'id'               =>$i,
                 'email'            => 'usuario-'.$i.'@gmail.com',
                 'password'         => bcrypt('admin'),
-                'color'            => '#'.rand(111111,999999),  
+                'color'            => '#'.rand(111111,999999), 
                 'condicion'        => 1,
+                'empleado_id'       =>$i,
                 'rol_id'            =>rand(1,6),
 
             ]);

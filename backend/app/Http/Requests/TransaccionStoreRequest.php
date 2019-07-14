@@ -3,7 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class TransaccionStoreRequest extends FormRequest
 {
@@ -14,7 +15,7 @@ class TransaccionStoreRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -52,5 +53,8 @@ class TransaccionStoreRequest extends FormRequest
 
             'motivo.max'    =>  'El motivo debe tener máximo 255 letras',
         ];
+    }
+    protected function failedValidation(Validator $validator) {
+        throw new HttpResponseException(response()->json(['message'=>'Errores de validación de datos en el servidor'], 422));
     }
 }

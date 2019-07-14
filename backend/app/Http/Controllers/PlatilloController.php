@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Platillo;
+use App\Http\Requests\PlatilloStoreRequest;
 class PlatilloController extends Controller
 {
     public function index(Request $request )
@@ -21,8 +22,8 @@ class PlatilloController extends Controller
 
         $filtro = $request->filtro;
         $platillos = Platillo::where('codigo','=', $filtro)
-        ->select('id','nombre','precio')
-        ->orderBy('nombre', 'asc')->take(1)->get();
+                    ->select('id','nombre','precio')
+                    ->orderBy('nombre', 'asc')->take(1)->get();
 
         return ['platillos' => $platillos];
     }
@@ -35,16 +36,16 @@ class PlatilloController extends Controller
 
         if ($buscar==''){
             $platillos = Platillo::join('categorias','platillos.idcategoria','=','categorias_platillos.id')
-            ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre'
-            ,'categorias_platillos.nombre as nombre_categoria','platillos.precio',
-            'platillos.descripcion','platillos.condicion')
+            ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre',
+                    'categorias_platillos.nombre as nombre_categoria','platillos.precio',
+                    'platillos.descripcion','platillos.condicion')
             ->orderBy('platillos.id', 'desc')->paginate(15);
         }
         else{
             $platillos = Platillo::join('categorias_platillos','platillos.idcategoria','=','categorias_platillos.id')
-            ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre'
-            ,'categorias_platillos.nombre as nombre_categoria','platillos.precio',
-            'platillos.descripcion','platillos.condicion')
+            ->select('platillos.id','platillos.idcategoria','platillos.codigo','platillos.nombre',
+                    'categorias_platillos.nombre as nombre_categoria','platillos.precio',
+                    'platillos.descripcion','platillos.condicion')
             ->where('platillos.'.$criterio, 'like', '%'. $buscar . '%')
             ->orderBy('platillos.id', 'desc')->paginate(15);
         }
@@ -54,30 +55,15 @@ class PlatilloController extends Controller
             'platillos' => $platillos
         ];
     }
-    public function store(Request $request)
+    public function store(PlatilloStoreRequest $request)
     {
-        //validar datos
-        $v = \Validator::make($request->all(), [
-
-            'categoria_id' => 'required|integer',
-            'codigo' => 'required|string|max:5',
-            'nombre'    => 'required|string|max:60',
-            'area' => 'required|max:150',
-            'precio' => 'required|numeric',
-
-        ]);
-
-        if ($v->fails())
-        {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
-        }
-
         $platillo = new Platillo();
         $platillo->categoria_id =$request->categoria_id;
         $platillo->codigo       =$request->codigo;
         $platillo->nombre       =$request->nombre;
         $platillo->area         =$request->area;
         $platillo->precio       =$request->precio;
+
         if($request->descripcion!=''||$request->descripcion!=null){
             $platillo->descripcion=$request->descripcion;
         }
@@ -87,24 +73,8 @@ class PlatilloController extends Controller
         return ['Platillo creado correctamente'];
 
     }
-    public function update($id, Request $request)
+    public function update($id, PlatilloStoreRequest $request)
     {
-        //VALIDACION DE ACTUALIZACIÓN
-        $v = \Validator::make($request->all(), [
-
-            'categoria_id' => 'required|integer',
-            'codigo' => 'required|string|max:5',
-            'nombre'    => 'required|string|max:60',
-            'area' => 'required|max:150',
-            'precio' => 'required|integer',
-
-        ]);
-
-        if ($v->fails())
-        {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
-        }
-
         $platillo = Platillo::findOrFail($id);
         $platillo->categoria_id =$request->categoria_id;
         $platillo->codigo       =$request->codigo;
