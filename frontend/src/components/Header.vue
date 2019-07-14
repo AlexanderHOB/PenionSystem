@@ -37,11 +37,11 @@
           </div>
         </v-flex>
       </v-layout>
-      <v-layout row wrap  class="header-layout">
+      <v-layout row wrap class="header-layout">
         <v-flex xs12 sm6 class="pt-4">
-          <form action="" @submit.prevent="search">
+          <form @submit.prevent="search">
             <v-text-field
-              v-model="searchQuery"
+              v-model="searchQueryModel"
               solo
               :label="searchPlaceholder"
               color="blue"
@@ -85,18 +85,26 @@ export default {
   name: 'Header',
   data() {
     return {
-      searchQuery: ''
+      
     }
   },
   methods: {
     search(){
-      this.searchQueryMutation(this.searchQuery);
-      this.searchQuery = '';
+      // this.searchQueryMutation(this.searchQuery);
+      // this.searchQuery = '';
     },
     ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation']),
   },
   computed: {
-    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchDisabled'])
+    ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),
+    searchQueryModel: {
+      get() {
+        return this.searchQuery
+      },
+      set(value) {
+        this.searchQueryMutation(value)
+      }
+    },
   }
 }
 </script>

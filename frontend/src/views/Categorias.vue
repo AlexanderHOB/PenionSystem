@@ -242,10 +242,8 @@ export default {
               this.pageTotal = 0;
             }
             this.headerActionsMutation({create: true, report: false});
-            this.searchDisabledMutation(false);
           }else {
             this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
             this.messageCategorias = response.data.message;
             this.categorias = [];
             this.pageTotal = 0;
@@ -253,7 +251,6 @@ export default {
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messageCategorias = 'Error al conctar con el servidor';
       }finally {
@@ -269,9 +266,11 @@ export default {
             let cateogrias = response.data;
             if(cateogrias.length > 0){
               this.allCategorias = cateogrias;
+              this.searchDisabledMutation(false);
             }
           }
         } catch (error) {
+        this.searchDisabledMutation(true);
           console.log(error);
         }
     },
@@ -369,7 +368,18 @@ export default {
           this.messageCategorias = 'No se encontraron categorias con el nombre ' + query;
         }
         this.pageTotal = 0;   
-      }   
+      }else {
+        if(this.backup.categorias.length != 0){
+          this.categorias =this.backup.categorias;
+          this.backup.categorias = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.cateogriasIndex = true;
+        }
+      }
     },
 
     // MODAL DE DETALLE
@@ -550,17 +560,17 @@ export default {
       this.searchCategorias(this.searchQuery);
     }
   },
-  created(){
+  async created(){
     this.getAllCategorias();
-    this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    await this.getCategorias();
+    this.loadingFishMutation(false);
+  },
+  beforeMount(){
+    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Categorias');
     this.searchPlaceholderMutation('Nombre de la categoria...');
     this.searchDisabledMutation(true);
-  },
-  async mounted(){
-    await this.getCategorias();
-    this.loadingFishMutation(false);
   }
 }
 </script>

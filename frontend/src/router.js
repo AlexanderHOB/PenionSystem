@@ -31,7 +31,7 @@ export default new Router({
     {
       path: '/personal',
       name: 'personal',
-      component: () => import('./views/Personal.vue')
+      component: () => import('./views/RecursosHumanos/Personal.vue')
     },
     {
       path: '*',

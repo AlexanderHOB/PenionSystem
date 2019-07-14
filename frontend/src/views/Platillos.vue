@@ -309,10 +309,8 @@ export default {
               this.pageTotal = 0;
             }
             this.headerActionsMutation({create: true, report: false});
-            this.searchDisabledMutation(false);
           }else {
             this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
             this.messagePlatillos = response.data.message;
             this.platillos = [];
             this.pageTotal = 0;
@@ -320,7 +318,6 @@ export default {
         }
       }catch (error) {
         this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
@@ -336,9 +333,11 @@ export default {
           let platillos = response.data;
           if(platillos.length > 0){
             this.allPlatillos = platillos;
+            this.searchDisabledMutation(false);
           }
         }
       } catch (error) {
+        this.searchDisabledMutation(true);
         console.log(error);
       }
     },
@@ -431,6 +430,17 @@ export default {
           this.messagePlatillos = 'No se encontraron platillos con el nombre ' + query;
         }
         this.pageTotal = 0;
+      }else {
+        if(this.backup.platillos.length != 0){
+          this.platillos =this.backup.platillos;
+          this.backup.platillos = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.platillosIndex = true;
+        }
       }
     },
 
@@ -668,18 +678,18 @@ export default {
       this.searchPlatillos(this.searchQuery);
     }
   },
-  created(){
+  async created(){
     this.getAllPlatillos();
-    this.headerActionsMutation({create: false, report: false});
+    this.getCategorias();
     this.loadingFishMutation(true);
+    await this.getPlatillos();
+    this.loadingFishMutation(false);
+  },
+  beforeMount(){
+    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Platillos');
     this.searchPlaceholderMutation('Nombre del platillo...');
     this.searchDisabledMutation(true);
-  },
-  async mounted(){
-    this.getCategorias();
-    await this.getPlatillos();
-    this.loadingFishMutation(false);
   }
 }
 </script>

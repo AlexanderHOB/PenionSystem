@@ -211,10 +211,8 @@ export default {
               this.pageTotal = 0;
             }
             this.headerActionsMutation({create: true, report: true});
-            this.searchDisabledMutation(false);
           }else {
             this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
             this.messageMesas = response.data.message;
             this.mesas = [];
             this.pageTotal = 0;
@@ -222,7 +220,6 @@ export default {
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messageMesas = 'Error al conctar con el servidor';
       }finally {
@@ -238,9 +235,11 @@ export default {
           let mesas = response.data;
           if(mesas.length > 0){
             this.allMesas = mesas;
+            this.searchDisabledMutation(false);
           }
         }
       } catch (error) {
+        this.searchDisabledMutation(true);
         console.log(error);
       }
     },
@@ -334,6 +333,17 @@ export default {
             this.messageMesas = 'No se encontraron mesas con el número ' + query;
           }
           this.pageTotal = 0;
+        }else {
+          if(this.backup.mesas.length != 0){
+            this.mesas =this.backup.mesas;
+            this.backup.mesas = [];
+            this.searchQueryMutation('');
+            if(this.backup.pageTotal != 0){
+              this.pageTotal = this.backup.pageTotal;
+              this.backup.pageTotal = 0;
+            }
+            this.backup.mesasIndex = true;
+          }
         }
       }else {
         this.snackbarMutation({value: true, text: 'Solo valores numericos', color: 'error'});
@@ -454,19 +464,17 @@ export default {
         this.searchMesas(this.searchQuery);
     }
   },
-  created() {
+  async created() {
     this.getAllMesas();
-    this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    await this.getMesas();
+    this.loadingFishMutation(false);
+  },
+  beforeMount(){
+    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Mesas');
     this.searchPlaceholderMutation('Número de mesa...');
     this.searchDisabledMutation(true);
-  },
-  // AL CREAR LA INSTANCIA DE VUE
-  async mounted(){
-    this.getAllMesas();
-    await this.getMesas();
-    this.loadingFishMutation(false);
   }
 }
 </script>

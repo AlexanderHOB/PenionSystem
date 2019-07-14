@@ -26,8 +26,8 @@
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
-            <img src="../assets/iconos/edit.svg" alt="edit" class="personal-edit" @click="editarPersonalModal(i)">
-            <img src="../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="detailPersonalModal(i)">
+            <img src="../../assets/iconos/edit.svg" alt="edit" class="personal-edit" @click="editarPersonalModal(i)">
+            <img src="../../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="detailPersonalModal(i)">
             <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
@@ -87,17 +87,34 @@
                     counter="60"
                   ></v-text-field>
                 </v-flex>
-                <v-flex xs6>
-                  <v-text-field 
+                <v-flex xs4>
+                  <v-select
+                    v-model="tipo_documento"
+                    :items="documentos"
+                    label="Tipo de documento"
+                  ></v-select>
+                </v-flex>
+                <v-flex xs4>
+                <v-text-field 
                     color="blue"
                     label="DNI"
-                    v-model="dni"
+                    v-model="n_documento"
                     :rules="[rules.required, rules.counterDni]"
                     counter="8"
                     mask="########"
+                    v-show="tipo_documento === 'DNI'"
+                  ></v-text-field>
+                  <v-text-field 
+                    color="blue"
+                    label="N° Extranjero"
+                    v-model="n_documento"
+                    :rules="[rules.required, rules.counterExtranjero]"
+                    counter="11"
+                    mask="###########"
+                    v-show="tipo_documento === 'Extranjero'"
                   ></v-text-field>
                 </v-flex>
-                <v-flex xs6>
+                <v-flex xs4>
                   <v-text-field 
                     color="blue"
                     label="Celular"
@@ -234,9 +251,9 @@
           </v-flex>
           <v-flex xs6>
             <v-layout>
-              <v-flex xs3><strong>DNI</strong></v-flex>
+              <v-flex xs3><strong>N° Documento</strong></v-flex>
               <v-flex xs9>
-                <p>{{ dniDetail }}</p>
+                <p>{{ n_documentoDetail }}</p>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -372,14 +389,14 @@
 
 <script>
 import axios from 'axios';
-import LoadingDialog from '../components/loading/LoadingDialog';
-import LoadingFish from '../components/loading/LoadingFish';
-import PersonalBox from '../components/box/PersonalBox';
-import ErrorMessage from '../components/messages/ErrorMessage';
-import AlertNotifications from '../components/messages/AlertNotifications';
+import LoadingDialog from '../../components/loading/LoadingDialog';
+import LoadingFish from '../../components/loading/LoadingFish';
+import PersonalBox from '../../components/box/PersonalBox';
+import ErrorMessage from '../../components/messages/ErrorMessage';
+import AlertNotifications from '../../components/messages/AlertNotifications';
 
 import { mapState, mapMutations } from 'vuex';
-import { setTimeout } from 'timers';
+
 export default {
   components: {
     LoadingDialog,
@@ -415,6 +432,7 @@ export default {
         counterDirección: value => value.length <= 100 || '100 caracteres como maximo',
         counterEmail: value => value.length <= 60 || '60 caracteres como maximo',
         counterDni: value => value.length == 8 || '8 caracteres como minimo',
+        counterExtranjero: value => value.length == 11 || '11 caracteres como minimo',
         counterCelular: value => value.length == 9 || '9 caracteres como minimo',
         emailRules: value => /.+@.+/.test(value) || 'E-mail invalido'
       },
@@ -423,10 +441,11 @@ export default {
       nombre: '',
       direccion: '',
       email: '',
-      dni: '',
+      n_documento: '',
       celular: '',
       puesto: '',
       area: '',
+      tipo_documento: 'DNI',
       tipo_contrato: '',
       fechaRegistro: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
       date: new Date().toISOString().substr(0, 10),
@@ -442,7 +461,7 @@ export default {
       nombreDetail: '',
       direccionDetail: '',
       emailDetail: '',
-      dniDetail: '',
+      n_documentoDetail: '',
       celularDetail: '',
       puestoDetail: '',
       areaDetail: '',
@@ -457,6 +476,7 @@ export default {
       puestos: ['Caja', 'Mozo', 'Cocinero', 'Ayudante de Cocina', 'Almacen'],
       areas: ['Área de almacen', 'Área Caliente', 'Área Fria','Área mixta', 'Área de Ventas'],
       tipo_contratos: ['planilla','mensual','semanal'],
+      documentos: ['DNI', 'Extranjero'],
       // Datos para activar/desactivar el modal
       activeDialog: false,
       activarText: '',
@@ -510,17 +530,14 @@ export default {
             this.pageTotal = 0;
           }
           this.headerActionsMutation({create: true, report: false});
-          this.searchDisabledMutation(false);
         }else {
           this.headerActionsMutation({create: false, report: false});
-          this.searchDisabledMutation(true);
           this.messagePersonal = response.data.message;
           this.personal = [];
           this.pageTotal = 0;
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
         this.messagePersonal = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
@@ -535,10 +552,12 @@ export default {
           let personal = response.data;
           if(personal.length > 0){
             this.allPersonal = personal;
+            this.searchDisabledMutation(false);
           }
         }
       } catch (error) {
         console.log(error);
+        this.searchDisabledMutation(true);
       }
     },
 
@@ -626,21 +645,32 @@ export default {
         if(this.messagePersonal.length != 0){
           this.messagePersonal = '';
         }
-        console.log(query);
         this.personal = this.allPersonal.filter(function(e){
-          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1;
+          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 ;
         });
 
         if(this.personal.length == 0){
           this.messagePersonal = 'No se encontro personal con el nombre ' + query;
         }
         this.pageTotal = 0;
+      }else {
+        if(this.backup.personal.length != 0){
+          this.personal = this.backup.personal;
+          this.backup.personal = [];
+          this.searchQueryMutation('');
+          if(this.backup.pageTotal != 0){
+            this.pageTotal = this.backup.pageTotal;
+            this.backup.pageTotal = 0;
+          }
+          this.backup.personalIndex = true;
+        }
       }
     },
 
     // MODAL DE DETALLE
     async detailPersonalModal(index){
       try {
+        this.historialSearch = '';
         this.historial = [];
         this.montoDescontar = 0;
         //
@@ -648,7 +678,7 @@ export default {
         this.nombreDetail = this.personal[index].nombres;
         this.direccionDetail = this.personal[index].direccion;
         this.emailDetail = this.personal[index].email;
-        this.dniDetail = this.personal[index].dni;
+        this.n_documentoDetail = this.personal[index].dni;
         this.celularDetail = this.personal[index].celular;
         this.puestoDetail = this.personal[index].puesto_trabajo;
         this.areaDetail = this.personal[index].area_trabajo;
@@ -671,6 +701,7 @@ export default {
           }
         });
         this.historialLoading = false;
+        console.log(response);
         this.historial = response.data[0][0].transacciones;
         if(typeof response.data[1][0] != 'undefined'){
           this.montoDescontar = response.data[1][0].total;
@@ -691,7 +722,7 @@ export default {
         self.apellidosDetail = '';
         self.nombreDetail = '';
         self.emailDetail = '';
-        self.dniDetail = '';
+        self.n_documentoDetail = '';
         self.celularDetail = '';
         self.puestoDetail = '';
         self.areaDetail = '';
@@ -709,7 +740,7 @@ export default {
       this.nombre = this.personal[index].nombres;
       this.direccion = this.personal[index].direccion;
       this.email = this.personal[index].email;
-      this.dni = this.personal[index].dni;
+      this.n_documento = this.personal[index].dni;
       this.celular = this.personal[index].celular;
       this.puesto = this.personal[index].puesto_trabajo;
       this.area = this.personal[index].area_trabajo;
@@ -736,7 +767,7 @@ export default {
       this.nombre = '';
       this.direccion = '';
       this.email = '';
-      this.dni = '';
+      this.n_documento = '';
       this.celular = '';
       this.puesto = '';
       this.area = '';
@@ -760,7 +791,8 @@ export default {
           let response = await axios.post(this.url + 'empleado/registrar', {
             apellidos: this.apellidos,
             nombres: this.nombre,
-            dni: this.dni,
+            documento: this.n_documento,
+            tipo_documento: this.tipo_documento,
             celular: this.celular,
             email: this.email,
             direccion: this.direccion,
@@ -800,7 +832,7 @@ export default {
 
           let apellidosBup = this.apellidos;
           let nombresBup = this.nombre;
-          let dniBup = this.dni;
+          let n_documentoBup = this.n_documento;
           let celularBup = this.celular;
           let emailBup = this.email;
           let direccionBup = this.direccion;
@@ -811,37 +843,37 @@ export default {
 
           this.closeModal();
 
-            this.personal[this.index].apellidos = apellidosBup;
-            this.personal[this.index].nombres = nombresBup;
-            this.personal[this.index].dni = dniBup;
-            this.personal[this.index].celular = celularBup;
-            this.personal[this.index].email = emailBup;
-            this.personal[this.index].direccion = direccionBup;
-            this.personal[this.index].area_trabajo = area_trabajoBup;
-            this.personal[this.index].puesto_trabajo = puesto_trabajoBup;
-            this.personal[this.index].tipo_contrato = tipo_contratoBup;
-            this.personal[this.index].sueldo = sueldoBup;
+          this.personal[this.index].apellidos = apellidosBup;
+          this.personal[this.index].nombres = nombresBup;
+          this.personal[this.index].dni = n_documentoBup;
+          this.personal[this.index].celular = celularBup;
+          this.personal[this.index].email = emailBup;
+          this.personal[this.index].direccion = direccionBup;
+          this.personal[this.index].area_trabajo = area_trabajoBup;
+          this.personal[this.index].puesto_trabajo = puesto_trabajoBup;
+          this.personal[this.index].tipo_contrato = tipo_contratoBup;
+          this.personal[this.index].sueldo = sueldoBup;
 
-            var self = this;
-            this.allPersonal.forEach(function(e){
-              if(self.personal[self.index].id == e.id){
-                e.apellidos = apellidosBup;
-                e.nombres = nombresBup;
-                e.dni = dniBup;
-                e.celular = celularBup;
-                e.email = emailBup;
-                e.direccion = direccionBup;
-                e.area_trabajo = area_trabajoBup;
-                e.puesto_trabajo = puesto_trabajoBup;
-                e.tipo_contrato = tipo_contratoBup;
-                e.sueldo = sueldoBup;
-              } 
-            });
+          var self = this;
+          this.allPersonal.forEach(function(e){
+            if(self.personal[self.index].id == e.id){
+              e.apellidos = apellidosBup;
+              e.nombres = nombresBup;
+              e.dni = n_documentoBup;
+              e.celular = celularBup;
+              e.email = emailBup;
+              e.direccion = direccionBup;
+              e.area_trabajo = area_trabajoBup;
+              e.puesto_trabajo = puesto_trabajoBup;
+              e.tipo_contrato = tipo_contratoBup;
+              e.sueldo = sueldoBup;
+            } 
+          });
 
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
             apellidos: apellidosBup,
             nombres: nombresBup,
-            dni: dniBup,
+            dni: n_documentoBup,
             celular: celularBup,
             email: emailBup,
             direccion: direccionBup,
@@ -910,17 +942,17 @@ export default {
       this.searchPersonal(this.searchQuery);
     }
   },
-  created(){
+  async created(){
     this.getAllPersonal();
-    this.headerActionsMutation({create: false, report: false});
     this.loadingFishMutation(true);
+    await this.getPersonal();
+    this.loadingFishMutation(false);
+  },
+  beforeMount(){
+    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Personal');
     this.searchPlaceholderMutation('Nombre del personal...');
     this.searchDisabledMutation(true);
-  },
-  async mounted(){
-    await this.getPersonal();
-    this.loadingFishMutation(false);
   }
 }
 </script>
