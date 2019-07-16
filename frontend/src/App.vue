@@ -1,10 +1,16 @@
 <template>
   <v-app>
-    <Sidenav />
-    <v-content>
-      <Header />
+    <template v-if="token !== 'token'">
       <router-view />
-    </v-content>
+    </template>
+
+    <template v-else>
+      <Sidenav />
+      <v-content>
+        <Header />
+        <router-view />
+      </v-content>
+    </template>
   </v-app>
 </template>
 
@@ -28,23 +34,8 @@
       ...mapMutations(['drawerMutation', 'miniMutation'])
     },
     computed: {
-      ...mapState(['drawerState', 'miniState']),
-      drawer: {
-        get() {
-          return this.drawerState
-        },
-        set(value) {
-          this.drawerMutation(value)
-        }
-      },
-      mini: {
-        get() {
-          return this.miniState
-        },
-        set(value) {
-          this.miniMutation(value)
-        }
-      }
+      ...mapState(['token', 'drawerState', 'miniState']),
+
     }
   }
 </script>
@@ -68,7 +59,6 @@ body {
     height: 12px;
   }
   &::-webkit-scrollbar-track {
-    border-radius: 50px;
     background-color: rgba(0, 0, 0, .05);
   }
   &::-webkit-scrollbar-thumb {

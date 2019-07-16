@@ -82,17 +82,8 @@
 import { mapState, mapMutations } from 'vuex';
 
 export default {
-  name: 'Header',
-  data() {
-    return {
-      
-    }
-  },
   methods: {
-    search(){
-      // this.searchQueryMutation(this.searchQuery);
-      // this.searchQuery = '';
-    },
+    search(){},
     ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation']),
   },
   computed: {
@@ -104,7 +95,7 @@ export default {
       set(value) {
         this.searchQueryMutation(value)
       }
-    },
+    }
   }
 }
 </script>

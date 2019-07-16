@@ -279,15 +279,7 @@ export default {
     async getPlatillos(){
       try {
         if(this.backup.platillos.length != 0){
-          this.messagePlatillos = '';
-          this.platillos =this.backup.platillos;
-          this.backup.platillos = [];
           this.searchQueryMutation('');
-          if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
-          }
-          this.backup.platillosIndex = true;
         }else {
           this.loadingTitleMutation('Accediendo a la información');
           this.loadingDialogMutation(true);
@@ -346,14 +338,7 @@ export default {
     async refreshPlatillos(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
         if(this.backup.platillos.length != 0){
-          this.platillos =this.backup.platillos;
-          this.backup.platillos = [];
           this.searchQueryMutation('');
-          if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
-          }
-          this.backup.platillosIndex = true;
         }else {
           this.paginateDisabled = true;
           this.loadingTitleMutation(loadingTitle);
@@ -366,7 +351,7 @@ export default {
               page: this.page
             },
             headers: {
-              Authorization: this.config.headers.Authorization,
+              Authorizations: this.config.headers.Authorizations,
               'Content-Type': 'application/json'
             }
           });
@@ -434,7 +419,7 @@ export default {
         if(this.backup.platillos.length != 0){
           this.platillos =this.backup.platillos;
           this.backup.platillos = [];
-          this.searchQueryMutation('');
+          this.messagePlatillos = '';
           if(this.backup.pageTotal != 0){
             this.pageTotal = this.backup.pageTotal;
             this.backup.pageTotal = 0;

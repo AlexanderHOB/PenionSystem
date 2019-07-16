@@ -164,13 +164,19 @@
         </v-list-tile>
 
         <v-list-tile
-          @click=""
+          @click="group1Active('.group1')"
+          active-class="sidenav-subitems-active"
+          ripple
+          :to="{name: 'descuentos'}"
         >
           <v-list-tile-title class="pl-3">Descuentos</v-list-tile-title>
         </v-list-tile>
             
         <v-list-tile
-          @click=""
+          @click="group1Active('.group1')"
+          active-class="sidenav-subitems-active"
+          ripple
+          :to="{name: 'pagos'}"
         >
           <v-list-tile-title class="pl-3">Pagos</v-list-tile-title>
         </v-list-tile>

@@ -9,6 +9,11 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: () => import( './views/Login.vue')
+    },
+    {
       path: '/',
       name: 'home',
       component: Home
@@ -37,7 +42,17 @@ export default new Router({
       path: '/adelantos',
       name: 'adelantos',
       component: () => import('./views/RecursosHumanos/Adelantos.vue')
-    }, 
+    },
+    {
+      path: '/descuentos',
+      name: 'descuentos',
+      component: () => import('./views/RecursosHumanos/Descuentos.vue')
+    },
+    {
+      path: '/pagos',
+      name: 'pagos',
+      component: () => import('./views/RecursosHumanos/Pagos.vue')
+    },
     {
       path: '*',
       component: () => import('./views/NotFound.vue')

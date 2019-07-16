@@ -13,7 +13,7 @@ class TransaccionController extends Controller
        //Buscar Historial por ID y Fecha
         $buscar =   $request->id;
         $fecha  =   $request->fecha;
-        
+
         $empleado=Empleado::where('empleados.id','=',$buscar)->first();
         $descuentos=Transaccion::whereDate('fecha_inicio',$fecha)->where('persona_id','=',$buscar)->get();
         //Agregamos los datos a un arreglo
@@ -26,11 +26,11 @@ class TransaccionController extends Controller
             ->whereDate('fecha_inicio', $fecha)
             ->get();
 
-            return [$historiales,$total];    
+            return [$historiales,$total];
     }
     public function stateSalary(Request $request)
     {
-       //Buscar sueldo restante de la semana  por ID 
+       //Buscar sueldo restante de la semana  por ID
         $buscar =   $request->id;
 
         $empleado   =Empleado::join('personas','personas.id','=','empleados.id')
@@ -61,7 +61,7 @@ class TransaccionController extends Controller
         return [$empleado];
     }
     public function discount(TransaccionStoreRequest $request){
-        
+
         //transaccion
         $transaccion = new Transaccion();
         $transaccion->persona_id = $request->persona_id;
@@ -99,7 +99,7 @@ class TransaccionController extends Controller
     }
     public function getAdelantoDescuento(Request $request){
         $tipo=$request->tipo;
-        $adelantos  =   Transaccion::where('tipo','=',$tipo)->orderBy('id','desc')->paginate(10);
+        $adelantos  =   Transaccion::where('tipo','=',$tipo)->orderBy('id','desc')->get();
         return $adelantos;
     }
 

@@ -317,10 +317,10 @@
                 :search="historialSearch"
                 :loading="historialLoading"
               >
-                <v-progress-linear v-slot:progress class="blue" color="blue" indeterminate></v-progress-linear>
+                <v-progress-linear v-slot:progress indeterminate></v-progress-linear>
                 <template v-slot:items="props">
                   <td class="text-xs-right">{{ props.item.tipo }}</td>
-                  <td class="text-xs-right">{{ props.item.fecha_transaccion }}</td>
+                  <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
                   <td class="text-xs-right">{{ props.item.monto }}</td>
                   <td class="text-xs-right">{{ props.item.motivo }}</td>
                 </template>
@@ -484,10 +484,10 @@ export default {
       historialSearch: '',
       historialLoading: false,
       headers: [
-        { text: 'Tipo', value: 'tipo' },
-        { text: 'Fecha', value: 'fecha_transaccion' },
-        { text: 'Monto', value: 'monto' },
-        { text: 'Motivo', value: 'motivo' },
+        { text: 'Tipo', align: 'center', sortable: false, value: '' },
+        { text: 'Fecha', align: 'center', value: 'fecha_transaccion' },
+        { text: 'Monto', align: 'center', sortable: false, value: '' },
+        { text: 'Motivo', align: 'center', sortable: false, value: '' },
       ],
       historial: [],
       montoDescontar: 0
@@ -498,15 +498,7 @@ export default {
     async getPersonal(){
       try {
         if(this.backup.personal.length != 0){
-          this.messagePersonal = '';
-          this.personal = this.backup.personal;
-          this.backup.personal = [];
           this.searchQueryMutation('');
-          if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
-          }
-          this.backup.personalIndex = true;
           return;
         }
 
@@ -565,14 +557,7 @@ export default {
     async refreshPersonal(page = this.page, loadingTitle ='Accediendo a la información', create = false){
       try {
         if(this.backup.personal.length != 0){
-          this.personal = this.backup.personal;
-          this.backup.personal = [];
           this.searchQueryMutation('');
-          if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
-          }
-          this.backup.personalIndex = true;
           return;
         }
 
@@ -657,7 +642,7 @@ export default {
         if(this.backup.personal.length != 0){
           this.personal = this.backup.personal;
           this.backup.personal = [];
-          this.searchQueryMutation('');
+          this.messagePersonal = '';
           if(this.backup.pageTotal != 0){
             this.pageTotal = this.backup.pageTotal;
             this.backup.pageTotal = 0;

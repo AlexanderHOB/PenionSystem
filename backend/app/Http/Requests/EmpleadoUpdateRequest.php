@@ -27,7 +27,8 @@ class EmpleadoUpdateRequest extends FormRequest
         return [
             'nombres'           =>  'required|string',
             'apellidos'         =>  'required|string',
-            'dni'               =>  'required|string|max:8',
+            'tipo_documento'    =>  'required|string',
+            'documento'               =>  'required|string|max:11',
             'celular'           =>  'max:9',
             'email'             =>  'email',
             'area_trabajo'      =>  'required|string|max:80',

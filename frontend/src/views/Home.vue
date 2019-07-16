@@ -30,7 +30,7 @@
 </template>
 
 <script>
-  import { mapMutations } from 'vuex';
+  import { mapMutations, mapState } from 'vuex';
 
   export default {
     data(){
@@ -40,6 +40,14 @@
     },
     methods: {
       ...mapMutations(['headerActionsMutation', 'breadcrumbMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    },
+    computed: {
+      ...mapState(['token'])
+    },
+    created(){
+      if(this.token !== 'token'){
+        this.$router.push({ name: 'login'})
+      }
     },
     mounted(){
       this.headerActionsMutation({create: false, report: false});

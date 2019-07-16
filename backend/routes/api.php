@@ -60,13 +60,13 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/historial','TransaccionController@historial');
     Route::get('/stateSalary','TransaccionController@stateSalary');
     Route::post('/discount','TransaccionController@discount');
-    Route::get('/historial/adelantos','TransaccionController@getAdelantoDescuento');
+    Route::get('/historial/{tipo}','TransaccionController@getAdelantoDescuento');
 });
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('signup', 'AuthController@signup');
-  
+
     Route::group(['middleware' => 'auth:api'], function() {
         Route::get('logout', 'AuthController@logout');
         Route::get('user', 'AuthController@user');

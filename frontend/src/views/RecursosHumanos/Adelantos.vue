@@ -8,9 +8,20 @@
         </div>
       </v-flex>
       <v-flex xs12>
-        <v-alert :value="true" color="error" icon="warning" v-show="messageAdelantos">
-          {{ messageAdelantos }}
-        </v-alert>
+         <v-data-table
+          :headers="headers"
+          :items="adelantos"
+          :loading="isLoad"
+          class="elevation-1"
+        >
+          <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
+          <template v-slot:items="props">
+            <td>{{ props.item.tipo }}</td>
+            <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
+            <td class="text-xs-right">{{ props.item.monto }}</td>
+            <td class="text-xs-right">{{ props.item.motivo }}</td>
+          </template>
+        </v-data-table>
       </v-flex>
     </v-layout>
 
@@ -116,10 +127,14 @@ export default {
     return {
       title: 'Adelantos',
       //Datos para los adelantos
-      messageAdelantos: '',
       adelantos: [],
-      allAdelantos: [],
-      isLoad: false,
+      headers: [
+        { text: 'Personal',align: 'left',  value: 'tipo' },
+        { text: 'Fecha', align: 'center', width: 120, value: 'fecha_transaccion' },
+        { text: 'Monto',align: 'center', value: 'monto' },
+        { text: 'Motivo',align: 'center', value: 'motivo' },
+      ],
+      isLoad: true,
       // Backup
       backup: {
         adelantos: [],
@@ -147,17 +162,14 @@ export default {
     async getAdelantos(){
       try {
         if(this.backup.adelantos.length != 0){
-          this.adelantos = this.backup.adelantos;
-          this.backup.adelantos = [];
           this.searchQueryMutation('');
-          this.backup.adelantosIndex = true;
           return;
         }
 
         this.searchDisabledMutation(true);
         this.isLoad = true;
 
-        let response = await axios.get(this.url + '', this.config);
+        let response = await axios.get(this.url + 'historial/adelanto', this.config);
         if(response.data){
           let adelantos = response.data;
           if(adelantos.length > 0){
@@ -190,17 +202,13 @@ export default {
           this.backup.adelantosIndex = false;
         }
 
-        if(this.messageAdelantos.length != 0){
-          this.messageAdelantos = '';
-        }
+        // this.adelantos = this.adelantos.filter(function(e){
+        //   return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1;
+        // });
 
-        this.adelantos = this.allAdelantos.filter(function(e){
-          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1;
+        this.adelantos = this.backup.adelantos.filter(function(e){
+          return e.fecha_transaccion.search(query) != -1;
         });
-
-        if(this.adelantos.length == 0){
-          this.messageAdelantos = 'No se encontro personal con el nombre ' + query;
-        }
 
       }else {
         if(this.backup.adelantos.length != 0){
@@ -281,13 +289,6 @@ export default {
           this.closeModal();
 
           // this.adelantos[this.index].apellidos = apellidosBup;
-
-          var self = this;
-          this.allAdelantos.forEach(function(e){
-            if(self.adelantos[self.index].id == e.id){
-              // e.apellidos = apellidosBup;
-            } 
-          });
 
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
 
