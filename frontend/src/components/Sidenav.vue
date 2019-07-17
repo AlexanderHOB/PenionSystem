@@ -158,6 +158,15 @@
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
+          :to="{name: 'usuarios'}"
+        >
+          <v-list-tile-title class="pl-3">Usuarios</v-list-tile-title>
+        </v-list-tile>
+
+        <v-list-tile
+          @click="group1Active('.group1')"
+          active-class="sidenav-subitems-active"
+          ripple
           :to="{name: 'adelantos'}"
         >
           <v-list-tile-title class="pl-3">Adelantos</v-list-tile-title>

@@ -44,11 +44,6 @@
     computed: {
       ...mapState(['token'])
     },
-    created(){
-      if(this.token !== 'token'){
-        this.$router.push({ name: 'login'})
-      }
-    },
     mounted(){
       this.headerActionsMutation({create: false, report: false});
       this.searchPlaceholderMutation('Texto a buscar...');

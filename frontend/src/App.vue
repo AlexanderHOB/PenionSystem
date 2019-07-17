@@ -4,7 +4,7 @@
       <router-view />
     </template>
 
-    <template v-else>
+    <template  v-else>
       <Sidenav />
       <v-content>
         <Header />

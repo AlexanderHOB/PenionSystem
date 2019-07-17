@@ -83,5 +83,10 @@ export default new Vuex.Store({
   },
   actions: {
 
+  },
+  getters: {
+    getToken(state){
+      return state.token;
+    }
   }
 })

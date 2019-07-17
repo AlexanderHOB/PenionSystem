@@ -22,6 +22,7 @@
             <td class="text-xs-right">{{ props.item.motivo }}</td>
           </template>
         </v-data-table>
+        <v-color-picker></v-color-picker>
       </v-flex>
     </v-layout>
 
@@ -29,8 +30,7 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 v-show="create" class="headline title-modal">Registrar Adelanto</h3>
-          <h3 v-show="!create" class="headline title-modal">Editar Adelanto</h3>
+          <h3 class="headline title-modal">Datos del personal</h3>
           <v-spacer></v-spacer>
         </v-card-title>
         <v-card-text class="pt-0">
@@ -42,13 +42,113 @@
           >
             <v-container>
               <v-layout row wrap>
+                <v-flex xs12>
+                  <v-autocomplete
+                    v-model="personal"
+                    :items="items"
+                    :loading="isLoadingPersonal"
+                    color="blue"
+                    hide-no-data
+                    hide-selected
+                    item-text="fullName"
+                    item-value="id"
+                    label="Personal"
+                    prepend-icon="search"
+                    return-object
+                    @focus="getAllPersonal"
+                    @input="asignPersonal"
+                  ></v-autocomplete>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Apellidos</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ apellidos }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Nombres</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ nombres }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>N° Documento</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ n_documento }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Celular</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ celular }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Puesto</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ puesto }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Área</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ area }}</p>
+                </v-flex>
+                <v-flex xs12>
+                  <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Adelanto</h3>
+                  <h3 v-show="!create" class="headline title-modal text-xs-center">Editar Adelanto</h3>
+                </v-flex>
+                <v-flex xs6>
+                  <v-menu
+                    v-model="menuDate"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    lazy
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      color="blue"
+                      v-model="fechaAdelanto"
+                      label="Fecha de adelanto"
+                      prepend-inner-icon="event"
+                      readonly
+                      :rules="[rules.required]"
+                      v-on="on"
+                      :disabled="disabledDate"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker header-color="blue" color="green lighten-1" :max="maxDate" :min="minDate" locale="es-pe" v-model="date" @input="menuDate = false"></v-date-picker>
+                  </v-menu>
+                </v-flex>
                 <v-flex xs6>
                   <v-text-field 
                     color="blue"
-                    label="..."
+                    label="Monto"
+                    v-model="monto"
                     :rules="[rules.required]"
-                    counter="50"
+                    type="number"
+                    prefix="$"
+                    :disabled="disabled"
                   ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-textarea
+                    color="blue"
+                    label="Descripción"
+                    auto-grow
+                    @click:append="descripcion = ''"
+                    v-model="descripcion"
+                    :rules="[rules.counter]"
+                    counter="50"
+                    append-icon="clear"
+                    @keydown.enter="formAction"
+                    :disabled="disabled"
+                  ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
                   <v-btn type="submit"></v-btn>
@@ -87,27 +187,6 @@
       </v-container>
     </v-dialog>
 
-    <v-dialog
-      v-model="deleteDialog"
-      max-width="350"
-    >
-      <v-card>
-        <v-card-title>
-          <v-spacer></v-spacer>
-          <h3 class="headline title-modal">Confirmación</h3>
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-card-text>¿Realmente deseas eliminar el adelanto?</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="deleteDialog = false">Cancelar</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="deleteAdelanto(index)">Aceptar</v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
     <AlertNotifications />
 
   </v-container>
@@ -143,18 +222,37 @@ export default {
       // Datos para valdiar formulario
       valid: true,
       rules: {
-        required: value => !!value || 'Required.'
+        required: value => !!value || 'Required.',
+        counter: value => value.length <= 50 || '50 carácteres como máximo'
       },
       // Data para editar el adelanto
+      fechaAdelanto: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
+      monto: '',
+      descripcion: '',
       create: true,
       index: 0,
       id: 0,
+      disabled: true,
       // Detail
 
       // Datos para detalles del adelanto
       adelantoDetail: false,
-      // Datos para activar/desactivar el modal
-      deleteDialog: false,
+      //Datos para el personal
+      personal: {},
+      allPersonal: [],
+      isLoadingPersonal: false,
+      apellidos: '',
+      nombres: '',
+      n_documento: '',
+      celular: '',
+      puesto: '',
+      area: '',
+      // Datos para el data picker
+      date: new Date().toISOString().substr(0, 10),
+      menuDate: false,
+      maxDate: new Date().toISOString().substr(0, 10),
+      minDate: '2010',
+      disabledDate: true
     }
   },
   methods: {
@@ -192,6 +290,46 @@ export default {
       }finally {
         this.isLoad = false;
       }
+    },
+
+    // OBTENER TODO EL PERSONAL
+    async getAllPersonal(){
+      try {
+        if(this.allPersonal.length != 0){
+          return;
+        }
+
+        this.isLoadingPersonal = true;
+
+        let response = await axios.get(this.url + 'empleados', this.config);
+        if(response.data){
+          let personal = response.data;
+          if(personal.length > 0){
+            this.allPersonal = personal.filter(function(e){
+              return e.condicion
+            });
+          }else {
+            this.allPersonal = [];
+          }
+        }else {
+          this.allPersonal = [];
+        }
+      } catch (error) {
+        this.allPersonal = [];
+      }finally {
+        this.isLoadingPersonal = false;
+      }
+    },
+
+    asignPersonal(){
+      this.apellidos = this.personal.apellidos;
+      this.nombres = this.personal.nombres;
+      this.n_documento = this.personal.documento;
+      this.celular = this.personal.celular;
+      this.puesto = this.personal.puesto_trabajo;
+      this.area = this.personal.area_trabajo;
+      this.disabled = false;
+      this.disabledDate = false;
     },
 
     // SEARCH ADELANTOS
@@ -250,7 +388,20 @@ export default {
 
     // LIMPIAR FORMUALRIO
     resetForm(){
-
+      this.personal = {};
+      this.apellidos = '';
+      this.nombres = '';
+      this.n_documento = '';
+      this.celular = '';
+      this.puesto = '';
+      this.area = '';
+      this.date = new Date().toISOString().substr(0, 10);
+      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
+      this.disabled = true;
+      this.disabledDate = true;
+      this.monto = '';
+      this.descripcion = '';
+      this.create = true;
       this.$refs.form.resetValidation();
     },
 
@@ -329,9 +480,19 @@ export default {
     ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
   computed: {
-    ...mapState(['url', 'config', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'createModalState', 'searchQuery']),
+    items(){
+      return this.allPersonal.map(entry => {
+        const fullName = `${entry.apellidos} ${entry.nombres}`
+
+        return Object.assign({}, entry, { fullName })
+      })
+    }
   },
   watch: {
+    date(val) {
+      this.fechaAdelanto = val.split('-').reverse().join('-');
+    },
     searchQuery(){
       this.searchAdelantos(this.searchQuery);
     }
@@ -342,7 +503,7 @@ export default {
   beforeMount(){
     this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Adelantos');
-    this.searchPlaceholderMutation('Nombre del personal...');
+    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
     this.searchDisabledMutation(true);
   }
 }

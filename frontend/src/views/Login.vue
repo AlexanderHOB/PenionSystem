@@ -13,11 +13,6 @@ export default {
 computed: {
   ...mapState(['token'])
 },
-created(){
-  if(this.token === 'token'){
-    this.$router.push({ name: 'home'})
-  }
-},
 }
 </script>
 
