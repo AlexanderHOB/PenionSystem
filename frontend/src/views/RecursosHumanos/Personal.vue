@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="refreshPersonal(page, 'Actualizando información')"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="getPersonal"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
@@ -41,6 +41,9 @@
           <h3 v-show="create" class="headline title-modal">Registrar Personal</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Personal</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -58,6 +61,7 @@
                     v-model="apellidos"
                     :rules="[rules.required, rules.counterApellidos]"
                     counter="50"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
@@ -67,6 +71,7 @@
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
                     counter="30"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs5>
@@ -76,6 +81,7 @@
                     v-model="direccion"
                     :rules="[rules.required, rules.counterDirección]"
                     counter="100"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs7>
@@ -85,6 +91,7 @@
                     v-model="email"
                     :rules="[rules.required, rules.counterEmail, rules.emailRules]"
                     counter="60"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs4>
@@ -92,6 +99,7 @@
                     v-model="tipo_documento"
                     :items="documentos"
                     label="Tipo de documento"
+                    :disabled="disabled"
                   ></v-select>
                 </v-flex>
                 <v-flex xs4>
@@ -103,6 +111,7 @@
                     counter="8"
                     mask="########"
                     v-if="tipo_documento === 'Dni'"
+                    :disabled="disabled"
                   ></v-text-field>
                   <v-text-field 
                     color="blue"
@@ -112,6 +121,7 @@
                     counter="11"
                     mask="###########"
                     v-else
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs4>
@@ -122,6 +132,7 @@
                     :rules="[rules.required, rules.counterCelular]"
                     counter="9"
                     mask="#########"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
@@ -131,6 +142,7 @@
                     v-model="puesto"
                     :items="puestos"
                     :rules="[rules.required]"
+                    :disabled="disabled"
                   ></v-select>
                 </v-flex>
                 <v-flex xs6>
@@ -140,6 +152,7 @@
                     v-model="area"
                     :items="areas"
                     :rules="[rules.required]"
+                    :disabled="disabled"
                   ></v-select>
                 </v-flex>
                 <v-flex xs4>
@@ -149,6 +162,7 @@
                     v-model="tipo_contrato"
                     :items="tipo_contratos"
                     :rules="[rules.required]"
+                    :disabled="disabled"
                   ></v-select>
                 </v-flex>
                 <v-flex xs4>
@@ -185,6 +199,7 @@
                     :rules="[rules.required]"
                     type="number"
                     prefix="$"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -196,152 +211,162 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarPersonal">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPersonal">Editar</v-btn>
+            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarPersonal" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPersonal" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog v-model="personalDetail" max-width="600px">
-      <v-container class="white" grid-list-md>
-        <v-layout row wrap>
-          <v-flex xs12>
-            <h3 class="title-modal headline text-xs-center pb-3">Detalle del empleado</h3>
-          </v-flex>
-          <v-flex xs12>
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="title-modal headline">Detalle del empleado</h3>
+          <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeDetailModal">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="py-0">
+          <v-container class="white" grid-list-md>
             <v-layout row wrap>
-              <v-flex xs3><strong>Apellidos</strong></v-flex>
-              <v-flex xs9>
-                <p>{{ apellidosDetail }}</p>
+              <v-flex xs12>
+                <v-layout row wrap>
+                  <v-flex xs3><strong>Apellidos</strong></v-flex>
+                  <v-flex xs9>
+                    <p>{{ apellidosDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs12>
+                  <v-layout>
+                  <v-flex xs3><strong>Nombre</strong></v-flex>
+                  <v-flex xs9>
+                    <p>{{ nombreDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs12>
+                <v-layout>
+                  <v-flex xs3><strong>Email</strong></v-flex>
+                  <v-flex xs9>
+                    <p>{{ emailDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs12>
+                <v-layout>
+                  <v-flex xs3><strong>Dirección</strong></v-flex>
+                  <v-flex xs9>
+                    <p>{{ direccionDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs12>
+                <v-layout>
+                  <v-flex xs3><strong>Tipo de Contrato</strong></v-flex>
+                  <v-flex xs9>
+                    <p>{{ tipo_contratoDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>N° Documento</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ n_documentoDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>Celular</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ celularDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>Puesto</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ puestoDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>Area</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ areaDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>Fecha de inicio</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ fechaRegistroFormatDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs6>
+                <v-layout>
+                  <v-flex xs5><strong>Sueldo</strong></v-flex>
+                  <v-flex xs7>
+                    <p>{{ sueldoDetail }}</p>
+                  </v-flex>
+                </v-layout>
+              </v-flex>
+              <v-flex xs12>
+                <v-card flat>
+                  <v-card-title>
+                    Transacciones
+                    <v-spacer></v-spacer>
+                    <v-text-field
+                      v-model="historialSearch"
+                      append-icon="search"
+                      label="Search"
+                      single-line
+                      hide-details
+                      color="blue"
+                    ></v-text-field>
+                  </v-card-title>
+                  <v-data-table
+                    :headers="headers"
+                    :items="historial"
+                    :search="historialSearch"
+                    :loading="historialLoading"
+                  >
+                    <v-progress-linear v-slot:progress indeterminate></v-progress-linear>
+                    <template v-slot:items="props">
+                      <td class="text-xs-right">{{ props.item.tipo }}</td>
+                      <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
+                      <td class="text-xs-right">{{ props.item.monto }}</td>
+                      <td class="text-xs-right">{{ props.item.motivo }}</td>
+                    </template>
+                    <template v-slot:no-results>
+                      <v-alert :value="true" color="error" icon="warning">
+                        Your search for "{{ historialSearch }}" found no results.
+                      </v-alert>
+                    </template>
+                    <template v-slot:footer>
+                      <td :colspan="headers.length">
+                        <strong>Monto total a descontar {{ montoDescontar }}</strong>
+                      </td>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-flex>
+              <v-flex xs12 class="text-xs-right pt-3">
+                <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
               </v-flex>
             </v-layout>
-          </v-flex>
-          <v-flex xs12>
-              <v-layout>
-              <v-flex xs3><strong>Nombre</strong></v-flex>
-              <v-flex xs9>
-                <p>{{ nombreDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12>
-            <v-layout>
-              <v-flex xs3><strong>Email</strong></v-flex>
-              <v-flex xs9>
-                <p>{{ emailDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12>
-            <v-layout>
-              <v-flex xs3><strong>Dirección</strong></v-flex>
-              <v-flex xs9>
-                <p>{{ direccionDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12>
-            <v-layout>
-              <v-flex xs3><strong>Tipo de Contrato</strong></v-flex>
-              <v-flex xs9>
-                <p>{{ tipo_contratoDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>N° Documento</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ n_documentoDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>Celular</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ celularDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>Puesto</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ puestoDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>Area</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ areaDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>Fecha de inicio</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ fechaRegistroFormatDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs6>
-            <v-layout>
-              <v-flex xs5><strong>Sueldo</strong></v-flex>
-              <v-flex xs7>
-                <p>{{ sueldoDetail }}</p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12>
-            <v-card flat>
-              <v-card-title>
-                Transacciones
-                <v-spacer></v-spacer>
-                <v-text-field
-                  v-model="historialSearch"
-                  append-icon="search"
-                  label="Search"
-                  single-line
-                  hide-details
-                  color="blue"
-                ></v-text-field>
-              </v-card-title>
-              <v-data-table
-                :headers="headers"
-                :items="historial"
-                :search="historialSearch"
-                :loading="historialLoading"
-              >
-                <v-progress-linear v-slot:progress indeterminate></v-progress-linear>
-                <template v-slot:items="props">
-                  <td class="text-xs-right">{{ props.item.tipo }}</td>
-                  <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
-                  <td class="text-xs-right">{{ props.item.monto }}</td>
-                  <td class="text-xs-right">{{ props.item.motivo }}</td>
-                </template>
-                <template v-slot:no-results>
-                  <v-alert :value="true" color="error" icon="warning">
-                    Your search for "{{ historialSearch }}" found no results.
-                  </v-alert>
-                </template>
-                <template v-slot:footer>
-                  <td :colspan="headers.length">
-                    <strong>Monto total a descontar {{ montoDescontar }}</strong>
-                  </td>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-flex>
-          <v-flex xs12 class="py-0 text-xs-right">
-            <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
-          </v-flex>
-        </v-layout>
-      </v-container>
+          </v-container>
+        </v-card-text>
+      </v-card>
+
     </v-dialog>
 
     <v-dialog
@@ -372,10 +397,9 @@
           :length="pageTotal"
           color="blue"
           circle
-          :disabled="paginateDisabled"
-          @input="refreshPersonal"
-          @next="refreshPersonal"
-          @previous="refreshPersonal"
+          @input="paginate"
+          @next="paginate"
+          @previous="paginate"
         ></v-pagination>
       </div>
     </template>
@@ -412,7 +436,8 @@ export default {
       messagePersonal: '',
       personal: [],
       allPersonal: [],
-      personalTotal: 0,
+      isLoadBtn: false,
+      disabled: false,
       // Backup
       backup: {
         personal: [],
@@ -422,7 +447,7 @@ export default {
       // Datos para la paginación
       pageTotal: 0,
       page: 1,
-      paginateDisabled: false,
+      pagination: 10,
       // Datos para valdiar formulario
       valid: true,
       rules: {
@@ -502,101 +527,23 @@ export default {
           return;
         }
 
-        this.loadingTitleMutation('Accediendo a la información');
+        this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'empleado', this.config);
-        if(response.data.data){
-          let data = response.data;
-          let personal = data.data;
-          if(personal.length > 0){
-            this.personal = personal;
-            this.messagePersonal = '';
-            this.personalTotal = data.total;
-            if(data.last_page && data.last_page > 1){
-              this.pageTotal = data.last_page;
-            }
-            this.page = 1;
-          }else {
-            this.messagePersonal = 'No se encontro ningun personal';
-            this.pageTotal = 0;
-          }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messagePersonal = response.data.message;
-          this.personal = [];
-          this.pageTotal = 0;
-        }
-      } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.messagePersonal = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
-      }
-    },
-
-    // OBTENER TODAS LAS PERSONAS
-    async getAllPersonal(){
-      try {
         let response = await axios.get(this.url + 'empleados', this.config);
         if(response.data){
           let personal = response.data;
           if(personal.length > 0){
             this.allPersonal = personal;
-            this.searchDisabledMutation(false);
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        this.searchDisabledMutation(true);
-      }
-    },
-
-    // ACTUALIZAR PERSONAL
-    async refreshPersonal(page = this.page, loadingTitle ='Accediendo a la información', create = false){
-      try {
-        if(this.backup.personal.length != 0){
-          this.searchQueryMutation('');
-          return;
-        }
-
-        this.paginateDisabled = true;
-        this.loadingTitleMutation(loadingTitle);
-        if(!create){
-          this.loadingDialogMutation(true);
-        }
-
-        let response = await axios.get(this.url + 'empleado', {
-          params: {
-            page: this.page
-          },
-          headers: {
-            Authorizations: this.config.headers.Authorizations,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if(response.data.data){
-          let data = response.data;
-          let personal = data.data;
-          if(personal.length > 0){
-            this.personal = personal;
+            this.page = 1;
+            this.paginate();
             this.messagePersonal = '';
-            if(data.total != this.personalTotal){
-              this.personalTotal = data.total;
-            }
-            if(data.last_page && data.last_page > 1){
-                if(data.last_page != this.pageTotal){
-                  this.pageTotal = data.last_page;
-                }
-            }
           }else {
             this.messagePersonal = 'No se encontro ningun personal';
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
           this.searchDisabledMutation(false);
+          this.headerActionsMutation({create: true, report: false});
         }else {
           this.headerActionsMutation({create: false, report: false});
           this.searchDisabledMutation(true);
@@ -604,15 +551,24 @@ export default {
           this.personal = [];
           this.pageTotal = 0;
         }
-
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
         this.searchDisabledMutation(true);
+        this.messagePersonal = 'Error al conctar con el servidor';
         this.pageTotal = 0;
-        this.messagePersonal = 'Error al conectar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
-        this.paginateDisabled = false;
+      }
+    },
+
+    // PAGINAR PESONAL
+    paginate(){
+      if(this.allPersonal.length > this.pagination){
+        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
+        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination);
+      }else {
+         this.personal = this.allPersonal;
+          this.pageTotal = 0;
       }
     },
 
@@ -770,9 +726,9 @@ export default {
     async registrarPersonal() {
       try {
         if (this.$refs.form.validate()) {
-          this.loadingTitleMutation('Subiendo información del personal');
-          this.createModalMutation(false);
-          this.loadingDialogMutation(true);
+          this.isLoadBtn = true;
+          this.disabled = true;
+          this.disabledDate = true;
           this.sueldo = parseFloat(parseFloat(this.sueldo).toFixed(2));
           let response = await axios.post(this.url + 'empleado/registrar', {
             apellidos: this.apellidos,
@@ -788,26 +744,33 @@ export default {
             fecha_registro: this.date,
             sueldo: this.sueldo
           }, this.config);
-          this.getAllPersonal();
-          this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
 
-          this.resetForm();
+          this.closeModal();
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-                this.pageTotal = this.backup.pageTotal;
-            }
-
-          if(this.personalTotal % 10 == 0){
-              this.pageTotal++;
+              this.pageTotal = this.backup.pageTotal;
           }
-          this.page = 1;
-          this.backup.personal = [];
-          await this.refreshPersonal(null, 'Registrando personal', true);
+          if(response.data){
+            this.allPersonal.reverse();
+            this.allPersonal.push(response.data);
+            this.allPersonal.reverse();
+            this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
+            this.paginate();
+            this.page = 1;
+            this.backup.personal = [];
+            this.messagePersonal = '';
+            this.backup.personalIndex = true;
+          }else{
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al personal', color: 'error'});
+          }
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el personal', color: 'error'});
-        this.resetForm();
-        this.loadingDialogMutation(false);
+        this.closeModal();
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+      }finally {
+        this.isLoadBtn = false;
+        this.disabled = false;
+        this.disabledDate = false;
       }
     },
 
@@ -842,23 +805,6 @@ export default {
           this.personal[this.index].tipo_contrato = tipo_contratoBup;
           this.personal[this.index].sueldo = sueldoBup;
 
-          var self = this;
-          this.allPersonal.forEach(function(e){
-            if(self.personal[self.index].id == e.id){
-              e.apellidos = apellidosBup;
-              e.nombres = nombresBup;
-              e.documento = n_documentoBup;
-              e.tipo_documento = tipo_documentoBup;
-              e.celular = celularBup;
-              e.email = emailBup;
-              e.direccion = direccionBup;
-              e.area_trabajo = area_trabajoBup;
-              e.puesto_trabajo = puesto_trabajoBup;
-              e.tipo_contrato = tipo_contratoBup;
-              e.sueldo = sueldoBup;
-            } 
-          });
-
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
             apellidos: apellidosBup,
             nombres: nombresBup,
@@ -875,7 +821,6 @@ export default {
           this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'});
         }
       }catch (error) {
-        console.log(error)
         this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'});
       }
     },
@@ -899,20 +844,10 @@ export default {
         var self = this;
         if(this.personal[index].condicion){
           this.personal[index].condicion = 0;
-          this.allPersonal.forEach(function(e){
-            if(self.personal[index].id == e.id){
-              e.condicion = 0;
-            } 
-          });
           let response = await axios.put(this.url + 'empleado/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'});
         }else { 
           this.personal[index].condicion = 1;
-          this.allPersonal.forEach(function(e){
-            if(self.personal[index].id == e.id){
-              e.condicion = 1;
-            } 
-          });
           let response = await axios.put(this.url + 'empleado/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'});
         }
@@ -928,7 +863,6 @@ export default {
       }else {
         await this.editarPersonal();
       }
-      this.$refs.form.resetValidation();  
     },
 
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
@@ -945,7 +879,6 @@ export default {
     }
   },
   async created(){
-    this.getAllPersonal();
     this.loadingFishMutation(true);
     await this.getPersonal();
     this.loadingFishMutation(false);

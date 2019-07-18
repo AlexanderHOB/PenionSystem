@@ -45,6 +45,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/platillo/listarPlatillo','PlatilloController@listarPlatillo');
      //usuarios
     Route::get('/user','UserController@index');
+    Route::get('/users','UserController@getAllUsers'); // aomine
     Route::post('/user/registrar', 'UserController@store');
     Route::put('/user/actualizar/{id}', 'UserController@update');
     Route::put('/user/desactivar/{id}', 'UserController@desactivar');

@@ -70,7 +70,7 @@ class PlatilloController extends Controller
         $platillo->condicion    ='1';
         $platillo->save();
 
-        return ['Platillo creado correctamente'];
+        return $platillo;
 
     }
     public function update($id, PlatilloStoreRequest $request)
@@ -100,6 +100,10 @@ class PlatilloController extends Controller
 
     public function getAllPlatillos(){
         $platillos = Platillo::orderBy('id')->get();
+        $categorias  = [];
+        foreach($platillos as $platillo){
+            array_push($categorias,$platillo->categoria);
+        }
         return $platillos;
     }
 }

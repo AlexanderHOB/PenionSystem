@@ -20,9 +20,25 @@
             <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
             <td class="text-xs-right">{{ props.item.monto }}</td>
             <td class="text-xs-right">{{ props.item.motivo }}</td>
+            <td class="text-xs-center">
+              <v-menu bottom left>
+                <template v-slot:activator="{ on }">
+                  <v-btn icon v-on="on">
+                    <v-icon>more_vert</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-tile
+                    @click="editarAdelantoModal(props.item.id)"
+                  >
+                    <v-list-tile-title>Editar</v-list-tile-title>
+                  </v-list-tile>
+                </v-list>
+              </v-menu>
+            </td>
           </template>
         </v-data-table>
-        <v-color-picker></v-color-picker>
       </v-flex>
     </v-layout>
 
@@ -32,6 +48,9 @@
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Datos del personal</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -42,7 +61,7 @@
           >
             <v-container>
               <v-layout row wrap>
-                <v-flex xs12>
+                <v-flex xs12  v-show="create">
                   <v-autocomplete
                     v-model="personal"
                     :items="items"
@@ -58,6 +77,9 @@
                     @focus="getAllPersonal"
                     @input="asignPersonal"
                   ></v-autocomplete>
+                </v-flex>
+                <v-flex xs12 v-show="!create && isLoadingPersonal" class="pa-0">
+                  <v-progress-linear :indeterminate="true" height="2"></v-progress-linear>
                 </v-flex>
                 <v-flex xs3>
                   <p><strong>Apellidos</strong></p>
@@ -139,12 +161,12 @@
                 <v-flex xs12>
                   <v-textarea
                     color="blue"
-                    label="Descripción"
+                    label="Motivo"
                     auto-grow
-                    @click:append="descripcion = ''"
-                    v-model="descripcion"
+                    @click:append="motivo = ''"
+                    v-model="motivo"
                     :rules="[rules.counter]"
-                    counter="50"
+                    counter="250"
                     append-icon="clear"
                     @keydown.enter="formAction"
                     :disabled="disabled"
@@ -160,31 +182,10 @@
         <v-card-actions>
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarAdelanto">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarAdelanto">Editar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarAdelanto"  :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="adelantoDetail" max-width="600px">
-      <v-container class="white" grid-list-md>
-        <v-layout row wrap>
-          <v-flex xs12>
-            <h3 class="title-modal headline text-xs-center pb-3">Detalle del Adelanto</h3>
-          </v-flex>
-          <v-flex xs12>
-            <v-layout row wrap>
-              <v-flex xs3><strong>Apellidos</strong></v-flex>
-              <v-flex xs9>
-                <p></p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12 class="py-0 text-xs-right">
-            <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
-          </v-flex>
-        </v-layout>
-      </v-container>
     </v-dialog>
 
     <AlertNotifications />
@@ -212,6 +213,7 @@ export default {
         { text: 'Fecha', align: 'center', width: 120, value: 'fecha_transaccion' },
         { text: 'Monto',align: 'center', value: 'monto' },
         { text: 'Motivo',align: 'center', value: 'motivo' },
+        { text: 'Acciones',align: 'center', sortable: false, value: '' }
       ],
       isLoad: true,
       // Backup
@@ -223,18 +225,17 @@ export default {
       valid: true,
       rules: {
         required: value => !!value || 'Required.',
-        counter: value => value.length <= 50 || '50 carácteres como máximo'
+        counter: value => value.length <= 250 || '250 carácteres como máximo'
       },
       // Data para editar el adelanto
       fechaAdelanto: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
       monto: '',
-      descripcion: '',
+      motivo: '',
       create: true,
       index: 0,
       id: 0,
       disabled: true,
-      // Detail
-
+      isLoadBtn: false,
       // Datos para detalles del adelanto
       adelantoDetail: false,
       //Datos para el personal
@@ -321,6 +322,7 @@ export default {
       }
     },
 
+    // ASIGNAR PERSONAL
     asignPersonal(){
       this.apellidos = this.personal.apellidos;
       this.nombres = this.personal.nombres;
@@ -328,6 +330,7 @@ export default {
       this.celular = this.personal.celular;
       this.puesto = this.personal.puesto_trabajo;
       this.area = this.personal.area_trabajo;
+      this.id = this.personal.id;
       this.disabled = false;
       this.disabledDate = false;
     },
@@ -358,26 +361,32 @@ export default {
       }
     },
 
-    // MODAL DE DETALLE
-    detailAdelantoModal(index){
-      this.adelantoDetail = true;
-    },
-
-    // CERRAR MODAL DE DETALLE
-    closeDetailModal(){
-      this.adelantoDetail = false;
-      
-      let self = this;
-      setTimeout(function(){
-
-      }, 100);
-    },
-
     // MODAL PARA EDITAR ADELANTO
-    editarAdelantoModal(index){
+    async editarAdelantoModal(id){
+      this.create = false;
+      let adelanto = this.adelantos.filter(function(e){
+        return e.id == id;
+      });
+      adelanto = adelanto[0];
+      this.fechaAdelanto = adelanto.fecha_transaccion.split('-').reverse().join('-');
+      this.monto = adelanto.monto;
+      this.motivo = adelanto.motivo;
+      this.disabled = false;
 
-      this.$refs.form.resetValidation();
+      this.isLoadingPersonal = true;
+      var personal = [];
+
       this.createModalMutation(true);
+
+      await this.getAllPersonal();
+
+      personal = this.allPersonal.filter(function(e){
+        return e.id ==  adelanto.persona_id;
+      });
+      this.personal = personal[0];
+
+      this.asignPersonal();
+      this.disabledDate = true;
     },
 
     // CERRAR MODAL
@@ -400,8 +409,9 @@ export default {
       this.disabled = true;
       this.disabledDate = true;
       this.monto = '';
-      this.descripcion = '';
+      this.motivo = '';
       this.create = true;
+      this.isLoadingPersonal = false;
       this.$refs.form.resetValidation();
     },
 
@@ -448,22 +458,6 @@ export default {
         }
       }catch (error) {
         this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el adelanto', color: 'error'});
-      }
-    },
-
-    // MODAL PARA  ELIMINAR
-    deleteModal(index){
-        this.index = index;
-        this.deleteDialog = true;
-    },    
-
-    //  ACTIVAR 
-    async deleteAdelanto(index){
-      try {
-        this.id = this.adelantos[index].id;
-        this.deleteDialog = false;
-      } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
       }
     },
 

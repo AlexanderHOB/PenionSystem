@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="refreshPlatillos(page, 'Actualizando información')"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="getPlatillos"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(platillo, i) of platillos" :key="platillo.id" class="mb-4">
@@ -47,6 +47,9 @@
           <h3 v-show="create" class="headline title-modal">Crear Platillo</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Platillo</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -64,6 +67,7 @@
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
                     counter="30"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6>
@@ -73,6 +77,7 @@
                     v-model="codigo"
                     :rules="[rules.required, rules.counterCodigo]"
                     counter="5"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12 sm6>
@@ -82,6 +87,7 @@
                     v-model="area"
                     :items="areas"
                     label="área"
+                    :disabled="disabled"
                   ></v-select>
                 </v-flex>
                 <v-flex xs12 sm6>
@@ -93,6 +99,8 @@
                     item-text="nombre"
                     item-value="id"
                     label="Categoria"
+                    :disabled="disabled"
+                    return-object
                   ></v-select>
                 </v-flex>
                 <v-flex xs12 sm6>
@@ -103,6 +111,7 @@
                     :rules="[rules.required, rules.positive]"
                     prefix="$"
                     type="number"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
@@ -116,6 +125,7 @@
                     counter="70"
                     append-icon="clear"
                     @keydown.enter="formAction"
+                    :disabled="disabled"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -127,9 +137,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearPlatillo">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPlatillo">Editar</v-btn>
+            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearPlatillo" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPlatillo" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -140,6 +150,9 @@
           <v-spacer></v-spacer>
           <h3 class="headline">{{ nombreDetail }}</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeDetailModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pb-0">
           <p> <strong>Codigo:</strong> {{ codigoDetail }}</p>
@@ -183,10 +196,9 @@
           :length="pageTotal"
           color="blue"
           circle
-          :disabled="paginateDisabled"
-          @input="refreshPlatillos"
-          @next="refreshPlatillos"
-          @previous="refreshPlatillos"
+          @input="paginate"
+          @next="paginate"
+          @previous="paginate"
         ></v-pagination>
       </div>
     </template>
@@ -225,7 +237,8 @@ export default {
       messagePlatillos: '',
       platillos: [],
       allPlatillos: [],
-      platillosTotal: 0,
+      isLoadBtn: false,
+      disabled: false,
       // Backup
       backup: {
         platillos: [],
@@ -235,9 +248,9 @@ export default {
       // Datos para las categorias
       categorias: [],
       // Datos para la paginación
+      pagination: 10,
       pageTotal: 0,
       page: 1,
-      paginateDisabled: false,
       // Datos para valdiar formulario
       valid: true,
       rules: {
@@ -280,116 +293,51 @@ export default {
       try {
         if(this.backup.platillos.length != 0){
           this.searchQueryMutation('');
-        }else {
-          this.loadingTitleMutation('Accediendo a la información');
-          this.loadingDialogMutation(true);
-
-          let response = await axios.get(this.url + 'platillo', this.config);
-          if(response.data.data){
-            let data = response.data;
-            let platillos = data.data;
-            if(platillos.length > 0){
-              this.platillos = platillos;
-              this.messagePlatillos = '';
-              this.platillosTotal = data.total;
-              if(data.last_page && data.last_page > 1){
-                this.pageTotal = data.last_page;
-              }
-              this.page = 1;
-            }else {
-              this.messagePlatillos= 'No se encontraron platillos';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: false});
-          }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.messagePlatillos = response.data.message;
-            this.platillos = [];
-            this.pageTotal = 0;
-          }
+          return;
         }
-      }catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.pageTotal = 0;
-        this.messagePlatillos = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
-      }
-    },
+        this.loadingTitleMutation('Actualizando información');
+        this.loadingDialogMutation(true);
 
-    // OBTENER TODOS LOS PLATILLOS
-    async getAllPlatillos(){
-      try {
         let response = await axios.get(this.url + 'platillos', this.config);
         if(response.data){
           let platillos = response.data;
           if(platillos.length > 0){
             this.allPlatillos = platillos;
-            this.searchDisabledMutation(false);
-          }
-        }
-      } catch (error) {
-        this.searchDisabledMutation(true);
-        console.log(error);
-      }
-    },
-
-    // ACTUALIZANDO PLATILLOS
-    async refreshPlatillos(page = this.page, loadingTitle ='Accediendo a la información', create = false){
-      try {
-        if(this.backup.platillos.length != 0){
-          this.searchQueryMutation('');
-        }else {
-          this.paginateDisabled = true;
-          this.loadingTitleMutation(loadingTitle);
-          if(!create){
-            this.loadingDialogMutation(true);
-          }
-
-          let response = await axios.get(this.url + 'platillo', {
-            params: {
-              page: this.page
-            },
-            headers: {
-              Authorizations: this.config.headers.Authorizations,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if(response.data.data){
-            let data = response.data;
-            let platillos = data.data;
-            if(platillos.length > 0){
-              this.platillos = platillos;
-              this.messagePlatillos = '';
-              if(data.total != this.platillosTotal){
-                this.platillosTotal = data.total;
-              }
-              if(data.last_page != this.pageTotal){
-                this.pageTotal = data.last_page;
-              }
-            }else {
-              this.messagePlatillos= 'No se encontraron platillos';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: false});
-            this.searchDisabledMutation(false);
+            this.page = 1;
+            this.paginate();
+            this.messagePlatillos = '';
           }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
-            this.messagePlatillos = response.data.message;
-            this.platillos = [];
+            this.messagePlatillos= 'No se encontraron platillos';
             this.pageTotal = 0;
           }
+          this.searchDisabledMutation(false);
+          this.headerActionsMutation({create: true, report: false});
+        }else {
+          this.headerActionsMutation({create: false, report: false});
+          this.messagePlatillos = response.data.message;
+          this.platillos = [];
+          this.pageTotal = 0;
+          this.searchDisabledMutation(true);
         }
-      } catch (error) {
+        
+      }catch (error) {
         this.headerActionsMutation({create: false, report: false});
         this.searchDisabledMutation(true);
         this.pageTotal = 0;
         this.messagePlatillos = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
-        this.paginateDisabled = false;
+      }
+    },
+
+    // PAGINAR PLATILLOS
+    paginate(){
+      if(this.allPlatillos.length > this.pagination){
+        this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
+        this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination);
+      }else {
+         this.platillos = this.allPlatillos;
+          this.pageTotal = 0;
       }
     },
 
@@ -441,7 +389,7 @@ export default {
             }
           }
         } catch (error) {
-          console.log(error);
+          this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'});
         }
       },
 
@@ -472,6 +420,7 @@ export default {
 
     // MODAL PARA EDITAR PLATILLO
     editarPlatilloModal(index){
+      console.log(this.platillos[index]);
       this.codigo = this.platillos[index].codigo;
       this.nombre = this.platillos[index].nombre;
       this.area = this.platillos[index].area;
@@ -507,37 +456,50 @@ export default {
     async crearPlatillo(){
       try {
         if (this.$refs.form.validate()) {
-          this.loadingTitleMutation('Subiendo información del platillo');
-          this.createModalMutation(false);
-          this.loadingDialogMutation(true);
+          this.isLoadBtn = true;
+          this.disabled = true;
+          if(this.descripcion == '' || this.descripcion == null){
+            this.descripcion = 'Platillo sin descripción';
+          }
           this.precio = parseFloat(parseFloat(this.precio).toFixed(2));
+          console.log(this.categoria);
           let response = await axios.post(this.url + 'platillo/registrar', {
-            categoria_id: this.categoria,
+            categoria_id: this.categoria.id,
             codigo: this.codigo,
             nombre: this.nombre,
             area: this.area,
             precio: this.precio,
             descripcion: this.descripcion
           }, this.config);
-          this.getAllPlatillos();
-          this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'});
 
-          this.resetForm();
+          this.closeModal();
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-                this.pageTotal = this.backup.pageTotal;
-            }
+              this.pageTotal = this.backup.pageTotal;
+          }
 
-          if(this.platillosTotal % 10 == 0){
+          if(this.allPlatillos.length % 10 === 0){
             this.pageTotal++;
           }
-          this.page = this.pageTotal;
-          await this.refreshPlatillos(null, 'Creando Platillo', true);
+
+          if(response.data){
+            this.allPlatillos.push(response.data);
+            this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'});
+            this.page = this.pageTotal;
+            this.paginate();
+            this.backup.platillos = [];
+            this.messagePlatillos = '';
+            this.backup.platillosIndex = true;
+          }else{
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al crear el paltillo', color: 'error'});
+          }
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
-        this.resetForm();
-        this.loadingDialogMutation(false);
+        this.closeModal();
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+      }finally {
+        this.isLoadBtn = false;
+        this.disabled = false;
       }
     },
 
@@ -548,12 +510,7 @@ export default {
             this.descripcion = 'Platillo sin descripción';
           }
 
-          if (this.categoria.id) {
           var categoriaBup = this.categoria.id;
-          }else {
-          var categoriaBup = this.categoria;
-          }
-
           let codigoBup = this.codigo;
           let nombreBup = this.nombre;
           let areaBup = this.area;
@@ -570,18 +527,6 @@ export default {
           this.platillos[this.index].area = areaBup;
           this.platillos[this.index].precio = precioBup;
           this.platillos[this.index].descripcion = descripcionBup;
-
-          var self = this;
-          this.allPlatillos.forEach(function(e){
-            if(self.platillos[self.index].id == e.id){
-              e.categoria_id = categoriaBup;
-              e.codigo = codigoBup;
-              e.nombre = nombreBup;
-              e.area = areaBup;
-              e.precio = precioBup;
-              e.descripcion = descripcionBup;
-            } 
-          });
 
           let response = await axios.put(this.url + 'platillo/actualizar/' + this.id, {
             categoria_id: categoriaBup,
@@ -617,24 +562,10 @@ export default {
         if(this.platillos[index].condicion){
           this.platillos[index].condicion = 0;
 
-          var self = this;
-          this.allPlatillos.forEach(function(e){
-            if(self.platillos[index].id == e.id){
-              e.condicion = 0;
-            } 
-          });
-
           let response = await axios.put(this.url + 'platillo/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Platillo desactivada correctamente', color: 'success'});
         }else {
           this.platillos[index].condicion = 1;
-
-          var self = this;
-          this.allPlatillos.forEach(function(e){
-            if(self.platillos[index].id == e.id){
-              e.condicion = 1;
-            } 
-          });
 
           let response = await axios.put(this.url + 'platillo/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Platillo activada correctamente', color: 'success'});
@@ -651,7 +582,6 @@ export default {
       }else {
         await this.editarPlatillo();
       }
-      this.$refs.form.resetValidation();
     },
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
@@ -664,7 +594,6 @@ export default {
     }
   },
   async created(){
-    this.getAllPlatillos();
     this.getCategorias();
     this.loadingFishMutation(true);
     await this.getPlatillos();

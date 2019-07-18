@@ -20,6 +20,11 @@
             <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
             <td class="text-xs-right">{{ props.item.monto }}</td>
             <td class="text-xs-right">{{ props.item.motivo }}</td>
+            <td class="text-xs-center">
+              <v-btn icon @click="editarDescuentoModal(props.item.id)">
+                <v-icon>create</v-icon>
+              </v-btn>
+            </td>
           </template>
         </v-data-table>
       </v-flex>
@@ -29,9 +34,11 @@
       <v-card>
         <v-card-title>
           <v-spacer></v-spacer>
-          <h3 v-show="create" class="headline title-modal">Registrar Descuento</h3>
-          <h3 v-show="!create" class="headline title-modal">Editar Descuento</h3>
+          <h3 class="headline title-modal">Datos del personal</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -42,13 +49,116 @@
           >
             <v-container>
               <v-layout row wrap>
+                <v-flex xs12  v-show="create">
+                  <v-autocomplete
+                    v-model="personal"
+                    :items="items"
+                    :loading="isLoadingPersonal"
+                    color="blue"
+                    hide-no-data
+                    hide-selected
+                    item-text="fullName"
+                    item-value="id"
+                    label="Personal"
+                    prepend-icon="search"
+                    return-object
+                    @focus="getAllPersonal"
+                    @input="asignPersonal"
+                  ></v-autocomplete>
+                </v-flex>
+                <v-flex xs12 v-show="!create && isLoadingPersonal" class="pa-0">
+                  <v-progress-linear :indeterminate="true" height="2"></v-progress-linear>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Apellidos</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ apellidos }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Nombres</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ nombres }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>N° Documento</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ n_documento }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Celular</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ celular }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Puesto</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ puesto }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Área</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ area }}</p>
+                </v-flex>
+                <v-flex xs12>
+                  <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Descuento</h3>
+                  <h3 v-show="!create" class="headline title-modal text-xs-center">Editar Descuento</h3>
+                </v-flex>
+                <v-flex xs6>
+                  <v-menu
+                    v-model="menuDate"
+                    :close-on-content-click="false"
+                    :nudge-right="40"
+                    lazy
+                    transition="scale-transition"
+                    offset-y
+                    full-width
+                    min-width="290px"
+                  >
+                  <template v-slot:activator="{ on }">
+                    <v-text-field
+                      color="blue"
+                      v-model="fechaDescuento"
+                      label="Fecha de descuento"
+                      prepend-inner-icon="event"
+                      readonly
+                      :rules="[rules.required]"
+                      v-on="on"
+                      :disabled="disabledDate"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker header-color="blue" color="green lighten-1" :max="maxDate" :min="minDate" locale="es-pe" v-model="date" @input="menuDate = false"></v-date-picker>
+                  </v-menu>
+                </v-flex>
                 <v-flex xs6>
                   <v-text-field 
                     color="blue"
-                    label="..."
+                    label="Monto"
+                    v-model="monto"
                     :rules="[rules.required]"
-                    counter="50"
+                    type="number"
+                    prefix="$"
+                    :disabled="disabled"
                   ></v-text-field>
+                </v-flex>
+                <v-flex xs12>
+                  <v-textarea
+                    color="blue"
+                    label="Motivo"
+                    auto-grow
+                    @click:append="motivo = ''"
+                    v-model="motivo"
+                    :rules="[rules.counter]"
+                    counter="250"
+                    append-icon="clear"
+                    @keydown.enter="formAction"
+                    :disabled="disabled"
+                  ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
                   <v-btn type="submit"></v-btn>
@@ -60,50 +170,8 @@
         <v-card-actions>
           <v-spacer></v-spacer>
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarDescuento">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarDescuento">Editar</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="descuentoDetail" max-width="600px">
-      <v-container class="white" grid-list-md>
-        <v-layout row wrap>
-          <v-flex xs12>
-            <h3 class="title-modal headline text-xs-center pb-3">Detalle del Descuento</h3>
-          </v-flex>
-          <v-flex xs12>
-            <v-layout row wrap>
-              <v-flex xs3><strong>Apellidos</strong></v-flex>
-              <v-flex xs9>
-                <p></p>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <v-flex xs12 class="py-0 text-xs-right">
-            <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
-          </v-flex>
-        </v-layout>
-      </v-container>
-    </v-dialog>
-
-    <v-dialog
-      v-model="deleteDialog"
-      max-width="350"
-    >
-      <v-card>
-        <v-card-title>
-          <v-spacer></v-spacer>
-          <h3 class="headline title-modal">Confirmación</h3>
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-card-text>¿Realmente deseas eliminar el descuento?</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="deleteDialog = false">Cancelar</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="deleteDescuento(index)">Aceptar</v-btn>
-          <v-spacer></v-spacer>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarDescuento"  :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarDescuento"  :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -133,6 +201,7 @@ export default {
         { text: 'Fecha', align: 'center', width: 120, value: 'fecha_transaccion' },
         { text: 'Monto',align: 'center', value: 'monto' },
         { text: 'Motivo',align: 'center', value: 'motivo' },
+        { text: 'Acciones',align: 'center', sortable: false, value: '' }
       ],
       isLoad: true,
       // Backup
@@ -143,18 +212,36 @@ export default {
       // Datos para valdiar formulario
       valid: true,
       rules: {
-        required: value => !!value || 'Required.'
+        required: value => !!value || 'Required.',
+        counter: value => value.length <= 250 || '250 carácteres como máximo'
       },
-      // Data para editar el descuento
+ // Data para editar el descuento
+      fechaDescuento: new Date().toISOString().substr(0, 10).split('-').reverse().join('-'),
+      monto: '',
+      motivo: '',
       create: true,
       index: 0,
       id: 0,
-      // Detail
-
+      disabled: true,
+      isLoadBtn: false,
       // Datos para detalles del descuento
       descuentoDetail: false,
-      // Datos para activar/desactivar el modal
-      deleteDialog: false,
+      //Datos para el personal
+      personal: {},
+      allPersonal: [],
+      isLoadingPersonal: false,
+      apellidos: '',
+      nombres: '',
+      n_documento: '',
+      celular: '',
+      puesto: '',
+      area: '',
+      // Datos para el data picker
+      date: new Date().toISOString().substr(0, 10),
+      menuDate: false,
+      maxDate: new Date().toISOString().substr(0, 10),
+      minDate: '2010',
+      disabledDate: true
     }
   },
   methods: {
@@ -194,6 +281,48 @@ export default {
       }
     },
 
+        // OBTENER TODO EL PERSONAL
+    async getAllPersonal(){
+      try {
+        if(this.allPersonal.length != 0){
+          return;
+        }
+
+        this.isLoadingPersonal = true;
+
+        let response = await axios.get(this.url + 'empleados', this.config);
+        if(response.data){
+          let personal = response.data;
+          if(personal.length > 0){
+            this.allPersonal = personal.filter(function(e){
+              return e.condicion
+            });
+          }else {
+            this.allPersonal = [];
+          }
+        }else {
+          this.allPersonal = [];
+        }
+      } catch (error) {
+        this.allPersonal = [];
+      }finally {
+        this.isLoadingPersonal = false;
+      }
+    },
+
+    // ASIGNAR PERSONAL
+    asignPersonal(){
+      this.apellidos = this.personal.apellidos;
+      this.nombres = this.personal.nombres;
+      this.n_documento = this.personal.documento;
+      this.celular = this.personal.celular;
+      this.puesto = this.personal.puesto_trabajo;
+      this.area = this.personal.area_trabajo;
+      this.id = this.personal.id;
+      this.disabled = false;
+      this.disabledDate = false;
+    },
+
     // SEARCH DESCUENTOS
     searchDescuentos(query){
       if(query != '' && query != null){
@@ -220,26 +349,32 @@ export default {
       }
     },
 
-    // MODAL DE DETALLE
-    detailDescuentoModal(index){
-      this.descuentoDetail = true;
-    },
-
-    // CERRAR MODAL DE DETALLE
-    closeDetailModal(){
-      this.descuentoDetail = false;
-      
-      let self = this;
-      setTimeout(function(){
-
-      }, 100);
-    },
-
     // MODAL PARA EDITAR DESCUENTO
-    editarDescuentoModal(index){
+    async editarDescuentoModal(id){
+      this.create = false;
+      let descuento = this.descuentos.filter(function(e){
+        return e.id == id;
+      });
+      descuento = descuento[0];
+      this.fechaDescuento = descuento.fecha_transaccion.split('-').reverse().join('-');
+      this.monto = descuento.monto;
+      this.motivo = descuento.motivo;
+      this.disabled = false;
 
-      this.$refs.form.resetValidation();
+      this.isLoadingPersonal = true;
+      var personal = [];
+
       this.createModalMutation(true);
+
+      await this.getAllPersonal();
+
+      personal = this.allPersonal.filter(function(e){
+        return e.id ==  descuento.persona_id;
+      });
+      this.personal = personal[0];
+
+      this.asignPersonal();
+      this.disabledDate = true;
     },
 
     // CERRAR MODAL
@@ -250,7 +385,21 @@ export default {
 
     // LIMPIAR FORMUALRIO
     resetForm(){
-
+      this.personal = {};
+      this.apellidos = '';
+      this.nombres = '';
+      this.n_documento = '';
+      this.celular = '';
+      this.puesto = '';
+      this.area = '';
+      this.date = new Date().toISOString().substr(0, 10);
+      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
+      this.disabled = true;
+      this.disabledDate = true;
+      this.monto = '';
+      this.motivo = '';
+      this.create = true;
+      this.isLoadingPersonal = false;
       this.$refs.form.resetValidation();
     },
 
@@ -300,22 +449,6 @@ export default {
       }
     },
 
-    // MODAL PARA  ELIMINAR
-    deleteModal(index){
-        this.index = index;
-        this.deleteDialog = true;
-    },    
-
-    //  ACTIVAR 
-    async deleteDescuento(index){
-      try {
-        this.id = this.descuentos[index].id;
-        this.deleteDialog = false;
-      } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
-      }
-    },
-
     // ACCION DEL FORMULARIO
     async formAction(){
       if(this.create){
@@ -329,7 +462,14 @@ export default {
     ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
   computed: {
-    ...mapState(['url', 'config', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'createModalState', 'searchQuery']),
+    items(){
+      return this.allPersonal.map(entry => {
+        const fullName = `${entry.apellidos} ${entry.nombres}`
+
+        return Object.assign({}, entry, { fullName })
+      })
+    }
   },
   watch: {
     searchQuery(){
@@ -342,7 +482,7 @@ export default {
   beforeMount(){
     this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Descuentos');
-    this.searchPlaceholderMutation('Nombre del personal...');
+    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
     this.searchDisabledMutation(true);
   }
 }

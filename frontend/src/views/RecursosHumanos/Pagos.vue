@@ -25,13 +25,88 @@
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
-            <img src="../../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="detailPersonalModal(i)">
+            <img src="../../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="pagoModal(i)">
             <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
       </template>
     </v-layout>
 
+    <v-dialog v-model="createModalState" persistent max-width="600px">
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Pago del personal</h3>
+          <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pt-0">
+          <v-form
+            ref="form"
+            lazy-validation
+            v-model="valid"
+            @submit.prevent="formAction"
+          >
+            <v-container>
+              <v-layout row wrap>
+                <v-flex xs3>
+                  <p><strong>Apellidos</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ apellidos }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Nombres</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ nombres }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>N° Documento</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ n_documento }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Celular</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ celular }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Sueldo</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>${{ sueldo }}</p>
+                </v-flex>
+                <!-- <v-flex xs6>
+                  <v-text-field 
+                    color="blue"
+                    label="Monto"
+                    v-model="monto"
+                    :rules="[rules.required]"
+                    type="number"
+                    prefix="$"
+                    :disabled="disabled"
+                  ></v-text-field>
+                </v-flex> -->
+                <v-flex x12 class="d-none">
+                  <v-btn type="submit"></v-btn>
+                </v-flex>
+              </v-layout>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarPago"  :loading="isLoadBtn">Crear</v-btn>
+            <!-- <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn> -->
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     
     <template v-if="pageTotal">
       <div class="text-xs-center mt-4">
@@ -40,7 +115,6 @@
           :length="pageTotal"
           color="blue"
           circle
-          :disabled="paginateDisabled"
           @input="paginatePersonal"
           @next="paginatePersonal"
           @previous="paginatePersonal"
@@ -64,6 +138,7 @@ import ErrorMessage from '../../components/messages/ErrorMessage';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
 import { mapState, mapMutations } from 'vuex';
+import { setTimeout } from 'timers';
 
 export default {
   components: {
@@ -80,18 +155,22 @@ export default {
       messagePersonal: '',
       personal: [],
       allPersonal: [],
-      personalTotal: 0,
       // Backup
       backup: {
         personal: [],
         personalIndex: true,
         pageTotal: 0
       },
+      //Datos de personal
+      apellidos: '',
+      nombres: '',
+      n_documento: '',
+      celular: '',
+      sueldo: '',
       // Datos para la paginación
       pagination: 5,
       pageTotal: 0,
-      page: 1,
-      paginateDisabled: false,
+      page: 1
     }
   },
   methods: {
@@ -115,21 +194,19 @@ export default {
             });
             this.paginatePersonal();
             this.messagePersonal = '';
-          this.searchDisabledMutation(false);
+            this.searchDisabledMutation(false);
           }else {
             this.messagePersonal = 'No se encontro ningún personal';
             this.pageTotal = 0;
           }
-          this.headerActionsMutation({create: true, report: false});
         }else {
-          this.headerActionsMutation({create: false, report: false});
           this.messagePersonal = response.data.message;
           this.personal = [];
           this.pageTotal = 0;
           this.searchDisabledMutation(true);
         }
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
+        this.pageTotal = 0;
         this.messagePersonal = 'Error al conctar con el servidor';
         this.searchDisabledMutation(true);
       }finally {
@@ -186,14 +263,26 @@ export default {
       }
     },
 
-    // ABRIR PERSONA DETAIL MODAL
-    detailPersonalModal(){
-
+    pagoModal(index){
+      this.apellidos = this.personal[index].apellidos;
+      this.nombres = this.personal[index].nombres;
+      this.n_documento = this.personal[index].documento;
+      this.celular = this.personal[index].celular;
+      this.sueldo = this.personal[index].sueldo;
+      this.createModalMutation(true);
     },
 
-    // ACTIVAR MODAL / INACTIVE
-    activarModal(){
+    closeModal(){
+      this.createModalMutation(false);
+      setTimeout(this.resetForm, 100);
+    },
 
+    resetForm(){
+      this.apellidos = '';
+      this.nombres = '';
+      this.n_documento = '';
+      this.celular = '';
+      this.sueldo = '';
     },
 
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])

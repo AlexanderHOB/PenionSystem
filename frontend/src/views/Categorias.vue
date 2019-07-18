@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="refreshCategorias(page, 'Actualizando información')"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="getCategorias"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(categoria, i) of categorias" :key="categoria.id" class="mb-4">
@@ -37,6 +37,9 @@
           <h3 v-show="create" class="title-modal headline title-modal">Crear Categoria</h3>
           <h3 v-show="!create" class="title-modal headline title-modal">Editar Categoria</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -54,6 +57,7 @@
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
                     counter="30"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
@@ -67,6 +71,7 @@
                     counter="50"
                     append-icon="clear"
                     @keydown.enter="formAction"
+                    :disabled="disabled"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -78,9 +83,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearCategoria">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarCategoria">Editar</v-btn>
+            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearCategoria" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarCategoria" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -91,6 +96,9 @@
           <v-spacer></v-spacer>
           <h3 class="title-modal headline">{{ nombreDetail }}</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeDetailModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pb-0">
           <p>{{ descripcionDetail }}</p>
@@ -130,10 +138,9 @@
           :length="pageTotal"
           color="blue"
           circle
-          :disabled="paginateDisabled"
-          @input="refreshCategorias"
-          @next="refreshCategorias"
-          @previous="refreshCategorias"
+          @input="paginate"
+          @next="paginate"
+          @previous="paginate"
         ></v-pagination>
       </div>
     </template>
@@ -172,7 +179,8 @@ export default {
       messageCategorias: '',
       categorias: [],
       allCategorias: [],
-      categoriasTotal: 0,
+      isLoadBtn: false,
+      disabled: false,
       // Backup
       backup: {
         categorias: [],
@@ -180,9 +188,9 @@ export default {
         pageTotal: 0
       },
       // Datos para la paginación
+      pagination: 10,
       pageTotal: 0,
       page: 1,
-      paginateDisabled: false,
       // Datos para valdiar formulario
       valid: true,
       rules: {
@@ -212,112 +220,31 @@ export default {
       try {
         if(this.backup.categorias.length != 0){
           this.searchQueryMutation('');
-        }else {
-          this.loadingTitleMutation('Accediendo a la información');
-          this.loadingDialogMutation(true);
+          return;
+        }
+        this.loadingTitleMutation('Actualizando información');
+        this.loadingDialogMutation(true);
 
-          let response = await axios.get(this.url + 'categoria/platillo', this.config);
-          if(response.data.data){
-            let data = response.data;
-            let categorias = data.data;
-            if(categorias.length > 0){
-              this.categorias = categorias;
-              this.messageCategorias = '';
-              this.categoriasTotal = data.total;
-
-              if(data.last_page && data.last_page > 1){
-                this.pageTotal = data.last_page;
-              }
-              this.page = 1;
-            }else {
-              this.messageCategorias = 'No se encontraron categorias';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: false});
+        let response = await axios.get(this.url + 'categoria/platillos', this.config);
+        if(response.data){
+          let categorias = response.data;
+          if(categorias.length > 0){
+            this.allCategorias = categorias;
+            this.page = 1;
+            this.paginate();
+            this.messageCategorias = '';
           }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.messageCategorias = response.data.message;
-            this.categorias = [];
+            this.messageCategorias = 'No se encontraron categorias';
             this.pageTotal = 0;
           }
-        }
-      } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.pageTotal = 0;
-        this.messageCategorias = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
-      }
-    },
-
-    // OBTENER TODAS LAS CATEGORIAS
-    async getAllCategorias(){
-        try {
-          let response = await axios.get(this.url + 'categoria/platillos', this.config);
-          if(response.data){
-            let cateogrias = response.data;
-            if(cateogrias.length > 0){
-              this.allCategorias = cateogrias;
-              this.searchDisabledMutation(false);
-            }
-          }
-        } catch (error) {
-        this.searchDisabledMutation(true);
-          console.log(error);
-        }
-    },
-
-    // ACTUALIZAR CATEGORIAS
-    async refreshCategorias(page = this.page, loadingTitle ='Accediendo a la información', create = false){
-      try {
-        if(this.backup.categorias.length != 0){
-          this.searchQueryMutation('');
+          this.searchDisabledMutation(false);
+          this.headerActionsMutation({create: true, report: false});
         }else {
-          this.paginateDisabled = true;
-          this.loadingTitleMutation(loadingTitle);
-          if(!create){
-            this.loadingDialogMutation(true);
-          }
-
-          let response = await axios.get(this.url + 'categoria/platillo', {
-            params: {
-              page: this.page
-            },
-            headers: {
-              Authorizations: this.config.headers.Authorizations,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if(response.data.data){
-            let data = response.data;
-            let categorias = data.data;
-            if(categorias.length > 0){
-              this.categorias = categorias;
-              this.messageCategorias = '';
-              
-              if(data.total != this.categoriasTotal){
-                this.categoriasTotal = data.total;
-              }
-            
-              if(data.last_page && data.last_page > 1){
-                if(data.last_page != this.pageTotal){
-                  this.pageTotal = data.last_page;
-                }
-              }
-            }else {
-              this.messageCategorias = 'No se encontraron categorias';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: false});
-            this.searchDisabledMutation(false);
-          }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
-            this.messageCategorias = response.data.message;
-            this.categorias = [];
-            this.pageTotal = 0;
-          }
+          this.headerActionsMutation({create: false, report: false});
+          this.messageCategorias = response.data.message;
+          this.categorias = [];
+          this.pageTotal = 0;
+          this.searchDisabledMutation(true);
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
@@ -326,9 +253,20 @@ export default {
         this.messageCategorias = 'Error al conctar con el servidor';
       }finally {
         this.loadingDialogMutation(false);
-        this.paginateDisabled = false;
       }
     },
+
+    // PAGINAR CATEGORIAS
+    paginate(){
+      if(this.allCategorias.length > this.pagination){
+        this.categorias = this.allCategorias.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
+        this.pageTotal = Math.ceil(this.allCategorias.length / this.pagination);
+      }else {
+         this.categorias = this.allCategorias;
+          this.pageTotal = 0;
+      }
+    },
+
 
     // SEARCH CATEGORIAS
     searchCategorias(query){
@@ -413,35 +351,43 @@ export default {
     async crearCategoria() {
       try {
         if (this.$refs.form.validate()) {
-          this.loadingTitleMutation('Subiendo información de la categoria');
-          this.createModalMutation(false);
-          this.loadingDialogMutation(true);
+          this.isLoadBtn = true;
+          this.disabled = true;
+          if(this.descripcion == '' || this.descripcion == null){
+            this.descripcion = 'Categoria sin descripción';
+          }
 
           let response = await axios.post(this.url + 'categoria/platillo/registrar', {
             nombre: this.nombre,
             descripcion: this.descripcion
           }, this.config);
-          this.getAllCategorias();
-          this.snackbarMutation({value: true, text: 'Categoria creada correctamente', color: 'success'});
 
-          this.resetForm();
+          this.closeModal();
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
               this.pageTotal = this.backup.pageTotal;
           }
 
-          if(this.categoriasTotal % 10 == 0){
-            this.pageTotal++;
+          if(response.data){
+            this.allCategorias.reverse();
+            this.allCategorias.push(response.data);
+            this.allCategorias.reverse();
+            this.snackbarMutation({value: true, text: 'Categoria creada correctamente', color: 'success'});
+            this.paginate();
+            this.page = 1;
+            this.backup.categorias = [];
+            this.messageCategorias = '';
+            this.backup.cateogriasIndex = true;
+          }else{
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la categoria', color: 'error'});
           }
-
-          this.page = 1;
-          this.backup.categorias = [];
-          await this.refreshCategorias(null, 'Creando Categoria', true);
-        }  
+        }
       }catch (error) {
-        this.loadingDialogMutation(false);
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
-        this.resetForm();
+        this.closeModal();
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+      }finally {
+        this.isLoadBtn = false;
+        this.disabled = false;
       }
     },
 
@@ -460,14 +406,6 @@ export default {
 
           this.categorias[this.index].nombre = nombreBup;
           this.categorias[this.index].descripcion = descripcionBup;
-
-          var self = this;
-          this.allCategorias.forEach(function(e){
-            if(self.categorias[self.index].id == e.id){
-              e.nombre = nombreBup;
-              e.descripcion = descripcionBup;
-            } 
-          });
 
           let response = await axios.post(this.url + 'categoria/platillo/actualizar/' + this.id, {
             nombre: nombreBup,
@@ -499,24 +437,10 @@ export default {
         if(this.categorias[index].condicion){
           this.categorias[index].condicion = 0;
 
-          var self = this;
-          this.allCategorias.forEach(function(e){
-            if(self.categorias[index].id == e.id){
-              e.condicion = 0;
-            } 
-          });
-
           let response = await axios.put(this.url + 'categoria/platillo/desactivar/' + this.id, {},this.config);
           this.snackbarMutation({value: true, text: 'Categoria desactivada correctamente', color: 'success'});
         }else {
           this.categorias[index].condicion = 1;
-
-          var self = this;
-          this.allCategorias.forEach(function(e){
-            if(self.categorias[index].id == e.id){
-              e.condicion = 1;
-            } 
-          });
 
           let response = await axios.put(this.url + 'categoria/platillo/activar/' + this.id, {}, this.config);
           this.snackbarMutation({value: true, text: 'Categoria activada correctamente', color: 'success'});
@@ -533,7 +457,6 @@ export default {
       }else {
         await this.editarCategoria();
       }
-      this.$refs.form.resetValidation();
     },
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
   },
@@ -546,7 +469,6 @@ export default {
     }
   },
   async created(){
-    this.getAllCategorias();
     this.loadingFishMutation(true);
     await this.getCategorias();
     this.loadingFishMutation(false);

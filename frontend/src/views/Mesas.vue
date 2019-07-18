@@ -11,7 +11,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="refreshMesas(page, 'Actualizando información')"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshMesas"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex v-for="(mesa, i) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
@@ -23,7 +23,7 @@
             class="mesa"
             ></v-img>
             <v-card-title class="pt-0">
-                <h2>{{ mesa.id }}</h2>
+                <h2>{{ mesa.numero }}</h2>
             </v-card-title>
             <v-card-text class="py-0">
               <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad == 1 ? 'persona' : 'personas' }}</strong></p>
@@ -44,6 +44,9 @@
           <h3 v-show="create" class="headline title-modal">Crear Mesa</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Mesa</h3>
           <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeModal">
+            <v-icon>close</v-icon>
+          </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
           <v-form
@@ -59,9 +62,10 @@
                     color="blue"
                     label="Número de mesa"
                     v-model="numero"
-                    :rules="[rules.required, rules.zero]"
+                    :rules="[rules.required, rules.zero, unique]"
                     counter="2"
                     mask="##"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex> 
                 <v-flex xs12 sm6>
@@ -72,6 +76,7 @@
                     :rules="[rules.required, rules.maxValue, rules.zero]"
                     counter="2"
                     mask="##"
+                    :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
@@ -85,6 +90,7 @@
                     counter="50"
                     append-icon="clear"
                     @keydown.enter="formAction"
+                    :disabled="disabled"
                   ></v-textarea>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -96,9 +102,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearMesa">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarMesa">Editar</v-btn>
+            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearMesa" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarMesa" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -110,10 +116,9 @@
           :length="pageTotal"
           color="blue"
           circle
-          :disabled="paginateDisabled"
-          @input="refreshMesas"
-          @next="refreshMesas"
-          @previous="refreshMesas"
+          @input="paginate"
+          @next="paginate"
+          @previous="paginate"
         ></v-pagination>
       </div>
     </template>
@@ -132,7 +137,7 @@ import LoadingFish from '../components/loading/LoadingFish';
 import ErrorMessage from '../components/messages/ErrorMessage';
 import AlertNotifications from '../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -142,12 +147,14 @@ export default {
     AlertNotifications
   },
   data:() => ({
-        title: 'Mesas',
+    title: 'Mesas',
     // Data para las mesas
     messageMesas: '',
     mesas: [],
     allMesas: [],
-    mesasTotal: 0,
+    isLoadBtn: false,
+    disabled: false,
+    refresh: false,
     // Backup
     backup: {
       mesas: [],
@@ -155,9 +162,9 @@ export default {
       pageTotal: 0
     },
     // Data para la paginación
+    pagination: 10,
     pageTotal: 0,
     page: 1,
-    paginateDisabled: false,
     // Datos para valdiar formulario
     valid: true,
     rules: {
@@ -180,118 +187,60 @@ export default {
       try {
         if(this.backup.mesas.length != 0){
           this.searchQueryMutation('');
-        }else {
-          this.loadingTitleMutation('Accediendo a la información');
-          this.loadingDialogMutation(true);
-
-          let response = await axios.get(this.url + 'mesa', this.config);
-
-          if(response.data.data){
-            let data = response.data;
-            let mesas = data.data;
-            if(mesas.length > 0){
-              this.mesas = mesas;
-              this.messageMesas = '';
-              this.mesasTotal = data.total;
-
-              if(data.last_page && data.last_page > 1){
-                this.pageTotal = data.last_page;
-              }
-              this.page = 1;
-            }else {
-              this.messageMesas = 'No se encontraron mesas';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: true});
-          }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.messageMesas = response.data.message;
-            this.mesas = [];
-            this.pageTotal = 0;
-          }
+          return;
         }
-      } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.pageTotal = 0;
-        this.messageMesas = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
-      }
-    },
-    
-    // OBTENER TODAS LAS MESAS
-    async getAllMesas(){
-      try {
-        let response = await axios.get(this.url + 'mesas', this.config);
-        if(response.data){
-          let mesas = response.data;
+        this.loadingTitleMutation('Actualizando información');
+        this.loadingDialogMutation(true);
+
+        // let response = await axios.get(this.url + 'mesas', this.config);
+        if(this.allMesasState.length == 0 || this.refresh){
+          await this.allMesasAction();
+          this.refresh = false;
+        }
+        if(this.allMesasState.data){
+          let mesas = this.allMesasState.data;
           if(mesas.length > 0){
             this.allMesas = mesas;
-            this.searchDisabledMutation(false);
+            this.page = 1;
+            this.paginate();
+            this.messageMesas = '';
+          }else {
+            this.messageMesas = 'No se encontraron mesas';
+            this.pageTotal = 0;
           }
+          this.searchDisabledMutation(false);
+          this.headerActionsMutation({create: true, report: true});
+        }else {
+          this.headerActionsMutation({create: false, report: false});
+          this.messageMesas = response.data.message;
+          this.mesas = [];
+          this.pageTotal = 0;
+          this.searchDisabledMutation(true);
         }
+        
       } catch (error) {
+        this.headerActionsMutation({create: false, report: false});
+        this.pageTotal = 0;
+        this.messageMesas = 'Error al conctar con el servidor';
         this.searchDisabledMutation(true);
-        console.log(error);
+      }finally {
+        this.loadingDialogMutation(false);
       }
     },
 
-    // ACTUALIZANDO MESAS
-    async refreshMesas(page = this.page, loadingTitle ='Accediendo a la información', create = false){
-      try {
-        if(this.backup.mesas.length != 0){
-          this.searchQueryMutation('');
-        }else {
-          this.paginateDisabled = true;
-          this.loadingTitleMutation(loadingTitle);
-          if(!create){
-            this.loadingDialogMutation(true);
-          }
+    refreshMesas(){
+      this.refresh = true;
+      this.getMesas();
+    },
 
-          let response = await axios.get(this.url + 'mesa', {
-            params: {
-              page: this.page
-            },
-            headers: {
-              Authorizations: this.config.headers.Authorizations,
-              'Content-Type': 'application/json'
-            }
-          });
-
-          if(response.data.data){
-            let data = response.data;
-            let mesas = data.data;
-            if(mesas.length > 0){
-              this.mesas = mesas;
-              this.messageMesas = '';
-              if(data.total != this.mesasTotal){
-                this.mesasTotal = data.total;
-              }
-              if(data.last_page != this.pageTotal){
-                this.pageTotal = data.last_page;
-              }
-            }else {
-              this.messageMesas = 'No se encontraron mesas';
-              this.pageTotal = 0;
-            }
-            this.headerActionsMutation({create: true, report: true});
-            this.searchDisabledMutation(false);
-          }else {
-            this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
-            this.messageMesas = response.data.message;
-            this.mesas = [];
-            this.pageTotal = 0;
-          }
-        }
-      }catch(error) {
-        this.headerActionsMutation({create: false, report: false});
-            this.searchDisabledMutation(true);
-        this.pageTotal = 0;
-        this.messageMesas = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
-        this.paginateDisabled = false;
+    // PAGINAR MESAS
+    paginate(){
+      if(this.allMesas.length > this.pagination){
+        this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
+        this.pageTotal = Math.ceil(this.allMesas.length / this.pagination);
+      }else {
+         this.mesas = this.allMesas;
+          this.pageTotal = 0;
       }
     },
 
@@ -312,7 +261,7 @@ export default {
           }
 
           this.mesas = this.allMesas.filter(function(e){
-            return  e.id == query;
+            return  e.numero == query;
           });
           if(this.mesas.length == 0){
             this.messageMesas = 'No se encontraron mesas con el número ' + query;
@@ -366,36 +315,47 @@ export default {
     async crearMesa(){
       try {
         if (this.$refs.form.validate()) {
-          this.loadingTitleMutation('Subiendo informacón de la mesa');
-          this.createModalMutation(false);
-          this.loadingDialogMutation(true);
+          this.isLoadBtn = true;
+          this.disabled = true;
+
+          if(this.descripcion == '' || this.descripcion == null){
+            this.descripcion = 'Mesa sin descripción';
+          }
 
           let response = await axios.post(this.url + 'mesa/registrar', {
             numero: parseInt(this.numero),
             capacidad: parseInt(this.capacidad),
             descripcion: this.descripcion
           }, this.config);
-          this.getAllMesas();
 
-          this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
-
-          this.resetForm();
+          this.closeModal();
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
               this.pageTotal = this.backup.pageTotal;
           }
-          
-          if(this.mesasTotal % 10 == 0){
-              this.pageTotal++;
+
+          if(this.allMesas.length % 10 === 0){
+            this.pageTotal++;
           }
 
-          this.page = this.pageTotal;
-          this.backup.mesas = [];
-          await this.refreshMesas(null, 'Creando Mesa', true);
+          if(response.data){
+            this.allMesas.push(response.data);
+            this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
+            this.page = this.pageTotal;
+            this.paginate();
+            this.messageMesas = '';
+            this.backup.mesas = [];
+             this.backup.mesasIndex = true;
+          }else{
+          this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
+          }
         }
       } catch (error) {
+        this.closeModal();
         this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
-        this.resetForm();
+      }finally {
+        this.isLoadBtn = false;
+        this.disabled = false;
       }
     },
 
@@ -436,13 +396,26 @@ export default {
       }else {
         await this.editarMesa();
       }
-      this.$refs.form.resetValidation();
     },
 
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchPlaceholderMutation', 'searchQueryMutation', 'searchDisabledMutation', 'searchItemsMutation']),
+    ...mapActions(['allMesasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allMesasState']),
+    unique(){
+        var counter = 0;
+        var self = this;
+        for(let i of this.allMesas){
+          if(this.numero == i.numero){
+            counter++;
+            if(!this.create && this.numero == this.mesas[this.index].numero){
+              counter = 0;
+            }
+          }
+        }
+        return !counter || 'Este número ya esta en uso'
+      }
   },
   watch: {
     searchQuery(){
@@ -450,16 +423,15 @@ export default {
     }
   },
   async created() {
-    this.getAllMesas();
     this.loadingFishMutation(true);
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     await this.getMesas();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Mesas');
     this.searchPlaceholderMutation('Número de mesa...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>

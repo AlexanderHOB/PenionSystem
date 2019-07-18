@@ -20,13 +20,13 @@ class CategoriaController extends Controller
         //listar las categorias disponibles en el modulo platillo
         $categorias = Categoria::where('condicion','=','1')
                     ->select('id','nombre')->orderBy('id', 'asc')->get();
-        
+
         return $categorias;
     }
 
     public function store(CategoriaStoreRequest $request)
     {
-        
+
         //Crear una categoria nueva
         $categoria = new Categoria();
         $categoria->nombre = $request->nombre;
@@ -35,6 +35,7 @@ class CategoriaController extends Controller
         }
         $categoria->condicion = '1';
         $categoria->save();
+        return $categoria;
     }
 
 
@@ -66,7 +67,8 @@ class CategoriaController extends Controller
     }
 
     public function getAllCategorias(){
-        $categorias = Categoria::all();
+        $categorias = Categoria::orderBy('id', 'desc')->get();
+        
         return $categorias;
     }
 }

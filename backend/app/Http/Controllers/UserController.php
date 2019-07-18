@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $buscar = $request->buscar;
         $criterio = $request->criterio;
-        
+
         if ($buscar==''){
             $personas = User::join('personas','users.id','=','personas.id')
             ->join('roles','users.rol_id','=','roles.id')
@@ -26,13 +26,13 @@ class UserController extends Controller
             ->select('personas.id','personas.nombre','personas.dni','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
             ->where('personas.'.$criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(10);
         }
-        
+
         return $personas;
     }
     public function store(Request $request)
     {
         $v = \Validator::make($request->all(), [
-            
+
             'nombre' => 'required|string|',
             'dni' => 'required|string|max:5',
             'celular'    => 'required|string|max:60',
@@ -41,10 +41,10 @@ class UserController extends Controller
             'color' => 'required|integer',
 
         ]);
- 
+
         if ($v->fails())
         {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);            
+            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
         }
         try{
             DB::beginTransaction();
@@ -63,7 +63,7 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->password = bcrypt( $request->password);
             $user->color=$request->color;
-            $user->condicion = '1';            
+            $user->condicion = '1';
             $user->save();
 
             DB::commit();
@@ -86,7 +86,7 @@ class UserController extends Controller
             $persona->email     = $request->email;
             $persona->save();
 
-            
+
             $user->email = $request->email;
             $user->password = bcrypt( $request->password);
             $user->condicion = '1';
@@ -112,5 +112,14 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->condicion = '1';
         $user->save();
+    }
+
+    public function getAllUsers(){
+        $personas = User::join('personas','users.id','=','personas.id')
+        ->join('roles','users.rol_id','=','roles.id')
+        ->select('personas.id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
+        ->orderBy('personas.id', 'desc')->get();
+
+        return $personas;
     }
 }

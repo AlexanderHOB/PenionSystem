@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -38,7 +39,9 @@ export default new Vuex.Store({
     // Data de search
     searchPlaceholder: 'Texto a buscar...',
     searchQuery: '',
-    searchDisabled: true
+    searchDisabled: true,
+    // Data Layout
+    allMesasState: []
   },
   mutations: {
     drawerMutation(state, value){
@@ -80,9 +83,15 @@ export default new Vuex.Store({
     searchDisabledMutation(state, value){
       state.searchDisabled = value;
     },
+    allMesasMutation(state, mesasAction){
+      state.allMesasState = mesasAction;
+    }
   },
   actions: {
-
+    allMesasAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'mesas', state.config);
+      commit('allMesasMutation', response)
+    }
   },
   getters: {
     getToken(state){
