@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: 'token',
+    token: '',
     // Sidenav
     drawerState: true,
     miniState: true,
