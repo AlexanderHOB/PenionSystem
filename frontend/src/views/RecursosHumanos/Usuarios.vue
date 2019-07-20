@@ -3,30 +3,30 @@
 
   <v-container v-else grid-list-xl>
     <v-layout row wrap>
-      <v-flex xs12 v-if="messagePersonal">
-        <ErrorMessage :errorMessage="messagePersonal" :refresh="getPersonal" />
+      <v-flex xs12 v-if="messageUsuarios">
+        <ErrorMessage :errorMessage="messageUsuarios" :refresh="getUsuarios" />
       </v-flex>
 
       <template v-else>
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getPersonal"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshUsuarios"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
-        <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
-          <div class="personal-box">
-            <div class="personal-content text-xs-center">
-              <!-- <h2 class="personal-title">{{ empleado.puesto_trabajo }}:</h2> -->
-              <p class="mb-0 personal-apellido">{{ empleado.apellidos }}</p>
-              <p class="mb-0 personal-nombre">{{ empleado.nombres }}</p>
+        <v-flex xs4 v-for="(usuario, i) of usuarios" :key="usuario.id" class="mb-4">
+          <div class="usuarios-box">
+            <div class="usuarios-content text-xs-center">
+              <!-- <h2 class="usuarios-title">{{ usuario.puesto_trabajo }}:</h2> -->
+              <p class="mb-0 usuarios-apellido">{{ usuario.apellidos }}</p>
+              <p class="mb-0 usuarios-nombre">{{ usuario.nombres }}</p>
             </div>
-            <div class="personal-textBox text-xs-center">
-              <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
-              <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
+            <div class="usuarios-textBox text-xs-center">
+              <p class="mb-0 usuarios-text" v-show="usuario.condicion">Activo</p> 
+              <p class="mb-0 usuarios-text" v-show="!usuario.condicion">Inactivo</p>
             </div>
-            <img src="../../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="detailPersonalModal(i)">
-            <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
+            <img src="../../assets/iconos/detail.svg" alt="detail" class="usuarios-detail" @click="detailUsuariolModal(i)">
+            <PersonalBox class="usuarios-bg" :active="usuario.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
       </template>
@@ -40,9 +40,9 @@
           :length="pageTotal"
           color="blue"
           circle
-          @input="paginatePersonal"
-          @next="paginatePersonal"
-          @previous="paginatePersonal"
+          @input="paginate"
+          @next="paginate"
+          @previous="paginate"
         ></v-pagination>
       </div>
     </template>
@@ -62,7 +62,7 @@ import PersonalBox from '../../components/box/PersonalBox';
 import ErrorMessage from '../../components/messages/ErrorMessage';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -75,15 +75,15 @@ export default {
   data(){
     return {
       title: 'Usuarios',
-      //Datos para el personal
-      messagePersonal: '',
-      personal: [],
-      allPersonal: [],
-      personalTotal: 0,
+      //Datos para el usuario
+      messageUsuarios: '',
+      usuarios: [],
+      allUsuarios: [],
+      refresh: false,
       // Backup
       backup: {
-        personal: [],
-        personalIndex: true,
+        usuarios: [],
+        usuariosIndex: true,
         pageTotal: 0
       },
       // Datos para la paginación
@@ -94,10 +94,10 @@ export default {
     }
   },
   methods: {
-    // OBTENER PERSONAL
-    async getPersonal(){
+    // OBTENER USUARIOS
+    async getUsuarios(){
       try {
-        if(this.backup.personal.length != 0){
+        if(this.backup.usuarios.length != 0){
           this.searchQueryMutation('');
           return;
         }
@@ -105,90 +105,99 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'users', this.config);
-        console.log(response);
-        if(response.data){
-          let personal = response.data;
-          if(personal.length > 0){
-            this.allPersonal = personal.filter(function(e){
+        // let response = await axios.get(this.url + 'users', this.config);
+        if(this.allUsuariosState.length == 0 || this.refresh){
+          await this.allUsuariosAction();
+          this.refresh = false;
+        }
+        if(this.allUsuariosState.data){
+          let usuarios = this.allUsuariosState.data;
+          if(usuarios.length > 0){
+            this.allUsuarios = usuarios.filter(function(e){
               return e.condicion
             });
-            this.paginatePersonal();
-            this.messagePersonal = '';
+            this.paginate();
+            this.messageUsuarios = '';
           this.searchDisabledMutation(false);
           }else {
-            this.messagePersonal = 'No se encontro ningún usuario';
+            this.messageUsuarios = 'No se encontro ningún usuario';
             this.pageTotal = 0;
           }
           this.headerActionsMutation({create: true, report: false});
         }else {
           this.headerActionsMutation({create: false, report: false});
-          this.messagePersonal = response.data.message;
-          this.personal = [];
+          this.messageUsuarios = response.data.message;
+          this.usuarios = [];
           this.pageTotal = 0;
           this.searchDisabledMutation(true);
         }
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
         this.pageTotal = 0;
-        this.messagePersonal = 'Error al conctar con el servidor';
+        this.messageUsuarios = 'Error al conctar con el servidor';
         this.searchDisabledMutation(true);
+        console.log(error);
       }finally {
         this.loadingDialogMutation(false);
       }
     },
 
-    // PAGINAR PERSONAL
-    paginatePersonal(){
-      if(this.allPersonal.length > this.pagination){
-        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination);
+    refreshUsuarios(){
+      this.refresh = true;
+      this.getUsuarios();
+    },
+
+    // PAGINAR USUARIOS
+    paginate(){
+      if(this.allUsuarios.length > this.pagination){
+        this.usuarios = this.allUsuarios.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
+        this.pageTotal = Math.ceil(this.allUsuarios.length / this.pagination);
       }else {
-         this.personal = this.allPersonal;
+         this.usuarios = this.allUsuarios;
           this.pageTotal = 0;
       }
     },
 
-    // BUSCAR PERSONAL
-    searchPersonal(query){
+    // BUSCAR USUARIOS
+    searchUsuarios(query){
       if(query != '' && query != null){
-        if(this.personal.length != 0 && this.backup.personalIndex){
-          this.backup.personal = this.personal;
+        if(this.usuarios.length != 0 && this.backup.usuariosIndex){
+          this.backup.usuarios = this.usuarios;
           if(this.pageTotal != 0){
             this.backup.pageTotal = this.pageTotal;
           }
-          this.backup.personalIndex = false;
+          this.backup.usuariosIndex = false;
         }
 
-        if(this.messagePersonal.length != 0){
-          this.messagePersonal = '';
+        if(this.messageUsuarios.length != 0){
+          this.messageUsuarios = '';
         }
 
-        this.personal = this.allPersonal.filter(function(e){
+        this.usuarios = this.allUsuarios.filter(function(e){
           return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 ;
         });
 
-        if(this.personal.length == 0){
-          this.messagePersonal = 'No se encontro usuario con el nombre ' + query;
+        if(this.usuarios.length == 0){
+          this.messageUsuarios = 'No se encontro usuario con el nombre ' + query;
         }
         
         this.pageTotal = 0;
       }else {
-        if(this.backup.personal.length != 0){
-          this.personal = this.backup.personal;
-          this.backup.personal = [];
-          this.messagePersonal = '';
+        if(this.backup.usuarios.length != 0){
+          this.usuarios = this.backup.usuarios;
+          this.backup.usuarios = [];
+          this.messageUsuarios = '';
           if(this.backup.pageTotal != 0){
             this.pageTotal = this.backup.pageTotal;
             this.backup.pageTotal = 0;
           }
-          this.backup.personalIndex = true;
+          this.backup.usuariosIndex = true;
         }
       }
     },
 
-    // ABRIR PERSONA DETAIL MODAL
-    detailPersonalModal(){
+    // ABRIR USUARIO DETAIL MODAL
+    detailUsuariolModal(){
 
     },
 
@@ -197,32 +206,33 @@ export default {
 
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allUsuariosAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allUsuariosState'])
   },
     watch: {
     searchQuery(){
-      this.searchPersonal(this.searchQuery);
+      this.searchUsuarios(this.searchQuery);
     }
   },
   async created(){
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     this.loadingFishMutation(true);
-    await this.getPersonal();
+    await this.getUsuarios();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Usuarios');
     this.searchPlaceholderMutation('Nombre del usuario...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.personal {
+.usuarios {
   &-box {
     position: relative;
     font-family: 'Concert One', cursive;

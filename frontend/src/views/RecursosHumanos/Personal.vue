@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getPersonal"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshPersonal"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
@@ -419,7 +419,7 @@ import PersonalBox from '../../components/box/PersonalBox';
 import ErrorMessage from '../../components/messages/ErrorMessage';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -438,6 +438,7 @@ export default {
       allPersonal: [],
       isLoadBtn: false,
       disabled: false,
+      refresh: false,
       // Backup
       backup: {
         personal: [],
@@ -530,9 +531,13 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'empleados', this.config);
-        if(response.data){
-          let personal = response.data;
+        // let response = await axios.get(this.url + 'empleados', this.config);
+        if(this.allPersonalState.length == 0 || this.refresh){
+          await this.allPersonalAction();
+          this.refresh = false;
+        }
+        if(this.allPersonalState.data){
+          let personal = this.allPersonalState.data;
           if(personal.length > 0){
             this.allPersonal = personal;
             this.page = 1;
@@ -559,6 +564,11 @@ export default {
       }finally {
         this.loadingDialogMutation(false);
       }
+    },
+
+    refreshPersonal(){
+      this.refresh = true;
+      this.getPersonal();
     },
 
     // PAGINAR PESONAL
@@ -865,10 +875,11 @@ export default {
       }
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allPersonalAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allPersonalState'])
   },
   watch: {
     date(val) {
@@ -879,15 +890,15 @@ export default {
     }
   },
   async created(){
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     this.loadingFishMutation(true);
     await this.getPersonal();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Personal');
     this.searchPlaceholderMutation('Nombre del personal...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>

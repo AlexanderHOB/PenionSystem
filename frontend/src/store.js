@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: '',
+    token: 'token',
     // Sidenav
     drawerState: true,
     miniState: true,
@@ -41,7 +41,13 @@ export default new Vuex.Store({
     searchQuery: '',
     searchDisabled: true,
     // Data Layout
-    allMesasState: []
+    allMesasState: [],
+    allCategoriasState: [],
+    allPlatillosState: [],
+    allPersonalState: [],
+    allAdelantosState: [],
+    allDescuentosState: [],
+    allUsuariosState: [],
   },
   mutations: {
     drawerMutation(state, value){
@@ -83,14 +89,56 @@ export default new Vuex.Store({
     searchDisabledMutation(state, value){
       state.searchDisabled = value;
     },
-    allMesasMutation(state, mesasAction){
-      state.allMesasState = mesasAction;
+    allMesasMutation(state, action){
+      state.allMesasState = action;
+    },
+    allCategoriasMutation(state, action){
+      state.allCategoriasState = action;
+    },
+    allPlatillosMutation(state, action){
+      state.allPlatillosState = action;
+    },
+    allPersonalMutation(state, action){
+      state.allPersonalState = action;
+    },
+    allAdelantosMutation(state, action){
+      state.allAdelantosState = action;
+    },
+    allDescuentosMutation(state, action){
+      state.allDescuentosState = action;
+    },
+    allUsuariosMutation(state, action){
+      state.allUsuariosState = action;
     }
   },
   actions: {
     allMesasAction: async function({ state, commit }){
       let response = await axios.get(state.url + 'mesas', state.config);
       commit('allMesasMutation', response)
+    },
+    allCategoriasAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'categoria/platillos', state.config);
+      commit('allCategoriasMutation', response)
+    },
+    allPlatillosAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'platillos', state.config);
+      commit('allPlatillosMutation', response)
+    },
+    allPersonalAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'empleados', state.config);
+      commit('allPersonalMutation', response)
+    },
+    allAdelantosAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'historial/adelanto', state.config);
+      commit('allAdelantosMutation', response)
+    },
+    allDescuentosAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'historial/descuento', state.config);
+      commit('allDescuentosMutation', response)
+    },
+    allUsuariosAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'users', state.config);
+      commit('allUsuariosMutation', response)
     }
   },
   getters: {

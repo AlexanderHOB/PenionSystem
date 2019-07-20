@@ -4,7 +4,7 @@
       <v-flex xs12 class="d-flex align-center">
         <h1 class="display-1">{{ title }}</h1>
         <div class="text-xs-right">
-          <v-btn class="blue" dark fab small @click="getDescuentos"><v-icon>replay</v-icon></v-btn>
+          <v-btn class="blue" dark fab small @click="refreshDescuentos"><v-icon>replay</v-icon></v-btn>
         </div>
       </v-flex>
       <v-flex xs12>
@@ -185,7 +185,7 @@
 import axios from 'axios';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -204,6 +204,7 @@ export default {
         { text: 'Acciones',align: 'center', sortable: false, value: '' }
       ],
       isLoad: true,
+      refresh: false,
       // Backup
       backup: {
         descuentos: [],
@@ -256,9 +257,13 @@ export default {
         this.searchDisabledMutation(true);
         this.isLoad = true;
 
-        let response = await axios.get(this.url + 'historial/descuento', this.config);
-        if(response.data){
-          let descuentos = response.data;
+        // let response = await axios.get(this.url + 'historial/descuento', this.config);
+        if(this.allDescuentosState.length == 0 || this.refresh){
+          await this.allDescuentosAction();
+          this.refresh = false;
+        }
+        if(this.allDescuentosState.data){
+          let descuentos = this.allDescuentosState.data;
           if(descuentos.length > 0){
             this.descuentos = descuentos;
             this.searchDisabledMutation(false);
@@ -281,6 +286,11 @@ export default {
       }
     },
 
+    refreshDescuentos(){
+      this.refresh = true;
+      this.getDescuentos();
+    },
+
         // OBTENER TODO EL PERSONAL
     async getAllPersonal(){
       try {
@@ -290,9 +300,12 @@ export default {
 
         this.isLoadingPersonal = true;
 
-        let response = await axios.get(this.url + 'empleados', this.config);
-        if(response.data){
-          let personal = response.data;
+        // let response = await axios.get(this.url + 'empleados', this.config);
+        if(this.allPersonalState.length == 0){
+          await this.allPersonalAction();
+        }
+        if(this.allPersonalState.data){
+          let personal = this.allPersonalState.data;
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
               return e.condicion
@@ -459,10 +472,11 @@ export default {
       this.$refs.form.resetValidation();  
     },
 
-    ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allDescuentosAction', 'allPersonalAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'createModalState', 'searchQuery']),
+    ...mapState(['url', 'config', 'createModalState', 'searchQuery', 'allDescuentosState', 'allPersonalState']),
     items(){
       return this.allPersonal.map(entry => {
         const fullName = `${entry.apellidos} ${entry.nombres}`
@@ -477,13 +491,13 @@ export default {
     }
   },
   async created(){
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     await this.getDescuentos();
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Descuentos');
     this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>

@@ -11,7 +11,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getPersonal"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshPersonal"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
@@ -25,7 +25,8 @@
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
-            <img src="../../assets/iconos/detail.svg" alt="detail" class="personal-detail" @click="pagoModal(i)">
+            <img src="../../assets/iconos/icono_pagar.svg" alt="detail" class="personal-pagar" @click="pagoModal(i)">
+            <img src="../../assets/iconos/icono_imprimir.svg" alt="detail" class="personal-imprimir" @click="pagoModal(i)">
             <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
@@ -137,8 +138,7 @@ import PersonalBox from '../../components/box/PersonalBox';
 import ErrorMessage from '../../components/messages/ErrorMessage';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
-import { setTimeout } from 'timers';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -155,6 +155,7 @@ export default {
       messagePersonal: '',
       personal: [],
       allPersonal: [],
+      refresh: false,
       // Backup
       backup: {
         personal: [],
@@ -185,9 +186,13 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'empleados', this.config);
-        if(response.data){
-          let personal = response.data;
+        // let response = await axios.get(this.url + 'empleados', this.config);
+        if(this.allPersonalState.length == 0 || this.refresh){
+          await this.allPersonalAction();
+          this.refresh = false;
+        }
+        if(this.allPersonalState.data){
+          let personal = this.allPersonalState.data;
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
               return e.condicion
@@ -212,6 +217,11 @@ export default {
       }finally {
         this.loadingDialogMutation(false);
       }
+    },
+
+    refreshPersonal(){
+      this.refresh = true;
+      this.getPersonal();
     },
 
     // PAGINAR PERSONAL
@@ -285,10 +295,15 @@ export default {
       this.sueldo = '';
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    activarModal(i){
+
+    },
+
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allPersonalAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allPersonalState'])
   },
     watch: {
     searchQuery(){
@@ -296,15 +311,15 @@ export default {
     }
   },
   async created(){
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     this.loadingFishMutation(true);
     await this.getPersonal();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Pagos');
     this.searchPlaceholderMutation('Nombre del personal...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>
@@ -344,8 +359,8 @@ export default {
    &-text{
     color: #fff; 
   }
-  &-edit,
-  &-detail {
+  &-pagar,
+  &-imprimir {
     position: absolute;
     bottom: 0;
     transform: translateY(20px);
@@ -356,10 +371,10 @@ export default {
       transform: translateY(20px) scale(1.1);
     }
   }
-  &-detail {
+  &-pagar {
     left: 50%;
   }
-  &-impresion {
+  &-imprimir {
     left: 79%;
   }
   &-bg {

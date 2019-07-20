@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getCategorias"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshCategorias"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(categoria, i) of categorias" :key="categoria.id" class="mb-4">
@@ -160,7 +160,7 @@ import PrimaryBox from '../components/box/PrimaryBox';
 import ErrorMessage from '../components/messages/ErrorMessage';
 import AlertNotifications from '../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -181,6 +181,7 @@ export default {
       allCategorias: [],
       isLoadBtn: false,
       disabled: false,
+      refresh: false,
       // Backup
       backup: {
         categorias: [],
@@ -225,9 +226,13 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'categoria/platillos', this.config);
-        if(response.data){
-          let categorias = response.data;
+        // let response = await axios.get(this.url + 'categoria/platillos', this.config);
+        if(this.allCategoriasState.length == 0 || this.refresh){
+          await this.allCategoriasAction();
+          this.refresh = false;
+        }
+        if(this.allCategoriasState.data){
+          let categorias = this.allCategoriasState.data;
           if(categorias.length > 0){
             this.allCategorias = categorias;
             this.page = 1;
@@ -254,6 +259,11 @@ export default {
       }finally {
         this.loadingDialogMutation(false);
       }
+    },
+
+    refreshCategorias(){
+      this.refresh = true;
+      this.getCategorias();
     },
 
     // PAGINAR CATEGORIAS
@@ -458,10 +468,12 @@ export default {
         await this.editarCategoria();
       }
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allCategoriasAction'])
+
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allCategoriasState'])
   },
    watch: {
     searchQuery(){
@@ -470,14 +482,14 @@ export default {
   },
   async created(){
     this.loadingFishMutation(true);
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     await this.getCategorias();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Categorias');
     this.searchPlaceholderMutation('Nombre de la categoria...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>

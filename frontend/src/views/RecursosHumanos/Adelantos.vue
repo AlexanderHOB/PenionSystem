@@ -4,7 +4,7 @@
       <v-flex xs12 class="d-flex align-center">
         <h1 class="display-1">{{ title }}</h1>
         <div class="text-xs-right">
-          <v-btn class="blue" dark fab small @click="getAdelantos"><v-icon>replay</v-icon></v-btn>
+          <v-btn class="blue" dark fab small @click="refreshAdelantos"><v-icon>replay</v-icon></v-btn>
         </div>
       </v-flex>
       <v-flex xs12>
@@ -21,21 +21,9 @@
             <td class="text-xs-right">{{ props.item.monto }}</td>
             <td class="text-xs-right">{{ props.item.motivo }}</td>
             <td class="text-xs-center">
-              <v-menu bottom left>
-                <template v-slot:activator="{ on }">
-                  <v-btn icon v-on="on">
-                    <v-icon>more_vert</v-icon>
-                  </v-btn>
-                </template>
-
-                <v-list>
-                  <v-list-tile
-                    @click="editarAdelantoModal(props.item.id)"
-                  >
-                    <v-list-tile-title>Editar</v-list-tile-title>
-                  </v-list-tile>
-                </v-list>
-              </v-menu>
+              <v-btn icon @click="editarAdelantoModal(props.item.id)">
+                <v-icon>create</v-icon>
+              </v-btn>
             </td>
           </template>
         </v-data-table>
@@ -197,7 +185,7 @@
 import axios from 'axios';
 import AlertNotifications from '../../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -216,6 +204,7 @@ export default {
         { text: 'Acciones',align: 'center', sortable: false, value: '' }
       ],
       isLoad: true,
+      refresh: false,
       // Backup
       backup: {
         adelantos: [],
@@ -268,9 +257,13 @@ export default {
         this.searchDisabledMutation(true);
         this.isLoad = true;
 
-        let response = await axios.get(this.url + 'historial/adelanto', this.config);
-        if(response.data){
-          let adelantos = response.data;
+        // let response = await axios.get(this.url + 'historial/adelanto', this.config);
+        if(this.allAdelantosState.length == 0 || this.refresh){
+          await this.allAdelantosAction();
+          this.refresh = false;
+        }
+        if(this.allAdelantosState.data){
+          let adelantos = this.allAdelantosState.data;
           if(adelantos.length > 0){
             this.adelantos = adelantos;
             this.searchDisabledMutation(false);
@@ -293,6 +286,11 @@ export default {
       }
     },
 
+    refreshAdelantos(){
+      this.refresh = true;
+      this.getAdelantos();
+    },
+
     // OBTENER TODO EL PERSONAL
     async getAllPersonal(){
       try {
@@ -302,9 +300,12 @@ export default {
 
         this.isLoadingPersonal = true;
 
-        let response = await axios.get(this.url + 'empleados', this.config);
-        if(response.data){
-          let personal = response.data;
+        // let response = await axios.get(this.url + 'empleados', this.config);
+        if(this.allPersonalState.length == 0){
+          await this.allPersonalAction();
+        }
+        if(this.allPersonalState.data){
+          let personal = this.allPersonalState.data;
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
               return e.condicion
@@ -471,10 +472,11 @@ export default {
       this.$refs.form.resetValidation();  
     },
 
-    ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allAdelantosAction', 'allPersonalAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'createModalState', 'searchQuery']),
+    ...mapState(['url', 'config', 'createModalState', 'searchQuery', 'allAdelantosState', 'allPersonalState']),
     items(){
       return this.allPersonal.map(entry => {
         const fullName = `${entry.apellidos} ${entry.nombres}`
@@ -492,13 +494,13 @@ export default {
     }
   },
   async created(){
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     await this.getAdelantos();
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Recursos Humanos \\ Adelantos');
     this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>

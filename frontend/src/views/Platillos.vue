@@ -12,7 +12,7 @@
         <v-flex xs12 class="d-flex align-center">
           <h1 class="display-1">{{ title }}</h1>
           <div class="text-xs-right">
-            <v-btn class="blue" dark fab small @click="getPlatillos"><v-icon>replay</v-icon></v-btn>
+            <v-btn class="blue" dark fab small @click="refreshPlatillos"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(platillo, i) of platillos" :key="platillo.id" class="mb-4">
@@ -218,7 +218,7 @@ import PrimaryBox from '../components/box/PrimaryBox';
 import ErrorMessage from '../components/messages/ErrorMessage';
 import AlertNotifications from '../components/messages/AlertNotifications';
 
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex';
 
 export default {
   components: {
@@ -239,6 +239,7 @@ export default {
       allPlatillos: [],
       isLoadBtn: false,
       disabled: false,
+      refresh: false,
       // Backup
       backup: {
         platillos: [],
@@ -298,9 +299,13 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        let response = await axios.get(this.url + 'platillos', this.config);
-        if(response.data){
-          let platillos = response.data;
+        // let response = await axios.get(this.url + 'platillos', this.config);
+        if(this.allPlatillosState.length == 0 || this.refresh){
+          await this.allPlatillosAction();
+          this.refresh = false;
+        }
+        if(this.allPlatillosState.data){
+          let platillos = this.allPlatillosState.data;
           if(platillos.length > 0){
             this.allPlatillos = platillos;
             this.page = 1;
@@ -328,6 +333,11 @@ export default {
       }finally {
         this.loadingDialogMutation(false);
       }
+    },
+
+    refreshPlatillos(){
+      this.refresh = true;
+      this.getPlatillos();
     },
 
     // PAGINAR PLATILLOS
@@ -380,16 +390,21 @@ export default {
     // OBTENER CATEGORIAS
     async getCategorias(){
         try {
-          let response = await axios.get(this.url + 'categoria/platillo/selectCategoria', this.config);
-
-          if(response.data){
-            let categorias = response.data;
+          // let response = await axios.get(this.url + 'categoria/platillo/selectCategoria', this.config);
+          if(this.allCategoriasState.length == 0){
+            await this.allCategoriasAction();
+          }
+          if(this.allCategoriasState.data){
+            let categorias = this.allCategoriasState.data;
             if(categorias.length > 0){
-              this.categorias = categorias;
+                this.categorias = categorias.filter(function(e){
+                return e.condicion
+              });
             }
           }
         } catch (error) {
           this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'});
+          console.log(error);
         }
       },
 
@@ -420,7 +435,6 @@ export default {
 
     // MODAL PARA EDITAR PLATILLO
     editarPlatilloModal(index){
-      console.log(this.platillos[index]);
       this.codigo = this.platillos[index].codigo;
       this.nombre = this.platillos[index].nombre;
       this.area = this.platillos[index].area;
@@ -583,10 +597,11 @@ export default {
         await this.editarPlatillo();
       }
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery'])
+    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allPlatillosState', 'allCategoriasState'])
   },
   watch: {
     searchQuery(){
@@ -594,16 +609,16 @@ export default {
     }
   },
   async created(){
-    this.getCategorias();
+    this.headerActionsMutation({create: false, report: false});
+    this.searchDisabledMutation(true);
     this.loadingFishMutation(true);
+    this.getCategorias();
     await this.getPlatillos();
     this.loadingFishMutation(false);
   },
   beforeMount(){
-    this.headerActionsMutation({create: false, report: false});
     this.breadcrumbMutation('Platillos');
     this.searchPlaceholderMutation('Nombre del platillo...');
-    this.searchDisabledMutation(true);
   }
 }
 </script>
