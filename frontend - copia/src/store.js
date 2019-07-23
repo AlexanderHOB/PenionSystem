@@ -8,10 +8,8 @@ export default new Vuex.Store({
   state: {
     token: 'token',
     testApiKey: process.env.VUE_APP_API_KEY,
+    // 
     auth: {},
-    user: {
-      rol: 'mozo'
-    },
     // Sidenav
     drawerState: true,
     miniState: true,

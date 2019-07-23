@@ -15,7 +15,15 @@
       </v-flex>
 
       <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">{{ title }}</h1>
+        <h1 class="display-2 font-weight-bold mb-3">
+          {{ title }}
+        </h1>
+        <p class="subheading font-weight-regular">
+          For help and collaboration with other developers,
+          <br>please join our online
+          <a href="https://community.vuetifyjs.com" target="_blank">Discord Community</a>
+          <v-btn @click="testing">Test</v-btn>
+        </p>
       </v-flex>
 
     </v-layout>
@@ -32,7 +40,14 @@
       }
     },
     methods: {
+      testing(){
+        console.log(this.testApiKey);
+        console.log(process.env.VUE_APP_API_URL);
+      },
       ...mapMutations(['headerActionsMutation', 'breadcrumbMutation', 'searchPlaceholderMutation', 'searchDisabledMutation'])
+    },
+    computed: {
+      ...mapState(['testApiKey'])
     },
     mounted(){
       this.headerActionsMutation({create: false, report: false});

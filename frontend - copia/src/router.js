@@ -78,11 +78,6 @@ export default new Router({
       component: () => import('./views/RecursosHumanos/Pagos.vue')
     },
     {
-      path: '/mozo',
-      name: 'mozo',
-      component: () => import('./views/Mozo.vue')
-    },
-    {
       path: '*',
       component: () => import('./views/NotFound.vue')
     }
