@@ -7,7 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     token: 'token',
-    testApiKey: process.env.VUE_APP_API_KEY,
+    testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
       rol: 'mozo'

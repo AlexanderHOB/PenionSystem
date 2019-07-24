@@ -186,5 +186,12 @@ img {
     background-color: rgba(0, 0, 0, .25);
   }
 }
+
+// MOZO
+.mesas-link.router-link-exact-active.router-link-active {
+	color: #fff;
+  @extend %bg-primary;
+  box-shadow: $primary-shadow;
+}
 </style>
 

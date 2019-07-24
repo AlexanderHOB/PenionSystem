@@ -80,7 +80,38 @@ export default new Router({
     {
       path: '/mozo',
       name: 'mozo',
-      component: () => import('./views/Mozo.vue')
+      component: () => import('./views/Mozo/Mozo.vue'),
+      redirect: { name: 'mozo-mesas' },
+      children: [
+        {
+          path: 'mesas',
+          name: 'mozo-mesas',
+          redirect: { name: 'mozo-mesas-libres' },
+          component: () => import('./views/Mozo/Mesas.vue'),
+          children: [
+            {
+              path: 'mesas-libres',
+              name: 'mozo-mesas-libres',
+              component: () => import('./views/Mozo/Mesas-libres.vue')
+            },
+            {
+              path: 'mesas-ocupadas',
+              name: 'mozo-mesas-ocupadas',
+              component: () => import('./views/Mozo/Mesas-ocupadas.vue')
+            },
+            {
+              path: 'mis-mesas',
+              name: 'mozo-mis-mesas',
+              component: () => import('./views/Mozo/Mis-mesas.vue')
+            }
+          ]
+        },
+        {
+          path: 'menu',
+          name: 'mozo-menu',
+          component: () => import('./views/Mozo/Menu.vue')
+        }
+      ]
     },
     {
       path: '*',

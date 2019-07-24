@@ -13,7 +13,7 @@
             <div class="mozo-header-userBox fill-height">
               <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
               <v-img
-                :src="require('../assets/iconos/administrador.svg')"
+                :src="require('../../assets/iconos/administrador.svg')"
                 alt="user"
                 class="mozo-header-userImg"
                 contain
@@ -22,22 +22,22 @@
             </div>
           </v-flex>
           <v-flex xs4 class="pt-4">
-            <div class="mozo-buttonBox">
-              <img src="../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText">Mesas</p>
-            </div>
+            <router-link class="mozo-buttonBox" :to="{name: 'mozo-mesas'}">
+              <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
+              <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/mesas.svg" alt="mesas" class="mozo-buttonIcon"><span>Mesas</span></p>
+            </router-link>
           </v-flex>
           <v-flex xs4 class="pt-4">
-            <div class="mozo-buttonBox">
-              <img src="../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText">Menú</p>
-            </div>
+            <router-link class="mozo-buttonBox" :to="{name: 'mozo-menu'}">
+              <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
+              <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
+            </router-link>
           </v-flex>
         </v-layout>
       </v-container>
       <div class="mozo-header-waves">
         <v-img
-          :src="require('../assets/img/header/wave.png')"
+          :src="require('../../assets/img/header/wave.png')"
           contain
           height="80"
           class="mozo-header-waves-img"
@@ -45,6 +45,7 @@
         ></v-img>
       </div>
     </header>
+    <router-view />
   </div>
 </template>
 
@@ -60,8 +61,8 @@ export default {
     ...mapState(['breadcrumb'])
   },
   mounted(){
-      this.breadcrumbMutation('Mozo');
-    }
+    this.breadcrumbMutation('Mozo');
+  }
 }
 </script>
 
@@ -114,14 +115,23 @@ export default {
   &-buttonBox {
     position: relative;
     width: 70%;
+    display: block;
   }
   &-buttonText {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: #000;
     font-size: 20px;
+  }
+  &-buttonIcon {
+    width: 40px;
+    margin-right: 16px;
+    transform: translateY(-5px)
   }
 }
 </style>
