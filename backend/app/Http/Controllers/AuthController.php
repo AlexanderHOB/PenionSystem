@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers;
-use App\User;
+use App\{User,Persona};
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -63,6 +64,14 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        $user= $request->user();    
+        $empleado=Persona::join('empleados','personas.id','=','empleados.id')
+        ->join('users','users.empleado_id','=','personas.id')
+        ->join('roles','users.rol_id','=','roles.id')
+        ->select(DB::raw("CONCAT(personas.nombres,roles.nombre) AS fullname"))
+        ->where('personas.id','=',$user->empleado_id)
+        ->get();
+        
+        return response()->json($empleado);
     }
 }

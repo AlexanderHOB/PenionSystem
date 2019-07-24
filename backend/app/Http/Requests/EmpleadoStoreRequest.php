@@ -29,7 +29,7 @@ class EmpleadoStoreRequest extends FormRequest
             'nombres'           =>  'required|string',
             'apellidos'         =>  'required|string',
             'tipo_documento'    =>  'required|string',
-            'documento'               =>  'required|string|max:11',
+            'documento'         =>  'required|string|max:11',
             'celular'           =>  'string|max:9',
             'email'             =>  'email',
             'area_trabajo'      =>  'required|string|max:80',

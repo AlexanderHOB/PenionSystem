@@ -43,6 +43,6 @@ class User extends Authenticatable
         return $this->belongsTo(Rol::class);
     }
     public function empleado(){
-        return $this->belongsTo('App\Empleado');
+        return $this->belongsTo('App\Empleado','empleado_id');
     }
 }

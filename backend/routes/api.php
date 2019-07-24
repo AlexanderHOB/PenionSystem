@@ -62,6 +62,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/stateSalary','TransaccionController@stateSalary');
     Route::post('/discount','TransaccionController@discount');
     Route::get('/historial/{tipo}','TransaccionController@getAdelantoDescuento');
+    
 });
 
 Route::group(['prefix' => 'auth'], function () {

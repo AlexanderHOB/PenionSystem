@@ -49,20 +49,20 @@ class EmpleadoController extends Controller
             $empleado->save();
 
             return $empleador = [
-                'apellidos' => $persona->apellidos,
-                'area_trabajo' => $empleado->area_trabajo,
-                'celular' => $persona->celular,
-                'condicion' => $empleado->condicion,
-                'direccion' => $persona->direccion,
-                'documento' => $persona->documento,
-                'email' => $persona->email,
-                'fecha_registro' => $empleado->fecha_registro,
-                'id' => $persona->id,
-                'nombres' => $persona->nombres,
-                'puesto_trabajo' => $empleado->puesto_trabajo,
-                'sueldo' => $empleado->sueldo,
+                'apellidos'     => $persona->apellidos,
+                'area_trabajo'  => $empleado->area_trabajo,
+                'celular'       => $persona->celular,
+                'condicion'     => $empleado->condicion,
+                'direccion'     => $persona->direccion,
+                'documento'     => $persona->documento,
+                'email'         => $persona->email,
+                'fecha_registro'=> $empleado->fecha_registro,
+                'id'            => $persona->id,
+                'nombres'       => $persona->nombres,
+                'puesto_trabajo'=> $empleado->puesto_trabajo,
+                'sueldo'        => $empleado->sueldo,
                 'tipo_contrato' =>  $empleado->tipo_contrato,
-                'tipo_documento' =>  $persona->tipo_documento
+                'tipo_documento'=>  $persona->tipo_documento
             ];
 
             DB::commit();

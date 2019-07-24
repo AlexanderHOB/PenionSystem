@@ -31,39 +31,24 @@ class UserController extends Controller
     }
     public function store(Request $request)
     {
-        $v = \Validator::make($request->all(), [
-
-            'nombre' => 'required|string|',
-            'dni' => 'required|string|max:5',
-            'celular'    => 'required|string|max:60',
-            'email' => 'required|max:150',
-            'password' => 'required|integer',
-            'color' => 'required|integer',
-
-        ]);
-
-        if ($v->fails())
-        {
-            return response()->json(['message'=>'Errores de validación de datos en el servidor']);
-        }
         try{
             DB::beginTransaction();
 
-            $persona = new Persona();
-            $persona->nombre = $request->nombre;
-            $persona->dni = $request->dni;
+            $persona            = new Persona();
+            $persona->nombre    = $request->nombre;
+            $persona->dni       = $request->dni;
             $persona->direccion = $request->direccion;
-            $persona->celular = $request->celular;
-            $persona->email = $request->email;
+            $persona->celular   = $request->celular;
+            $persona->email     = $request->email;
             $persona->save();
 
             $user = new User();
-            $user->id = $persona->id;
-            $user->rol_id = $request->rol_id;
-            $user->email = $request->email;
-            $user->password = bcrypt( $request->password);
-            $user->color=$request->color;
-            $user->condicion = '1';
+            $user->id           = $persona->id;
+            $user->rol_id       = $request->rol_id;
+            $user->email        = $request->email;
+            $user->password     = bcrypt( $request->password);
+            $user->color        =$request->color;
+            $user->condicion    = '1';
             $user->save();
 
             DB::commit();
@@ -85,13 +70,12 @@ class UserController extends Controller
             $persona->celular   = $request->celular;
             $persona->email     = $request->email;
             $persona->save();
-
-
-            $user->email = $request->email;
+            
+            $user->email    = $request->email;
             $user->password = bcrypt( $request->password);
             $user->condicion = '1';
-            $user->rol_id = $request->rol_id;
-            $user->color = $request->color;
+            $user->rol_id   = $request->rol_id;
+            $user->color    = $request->color;
             $user->save();
 
             DB::commit();
@@ -117,7 +101,7 @@ class UserController extends Controller
     public function getAllUsers(){
         $personas = User::join('personas','users.id','=','personas.id')
         ->join('roles','users.rol_id','=','roles.id')
-        ->select('personas.id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
+        ->select('personas.id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')  
         ->orderBy('personas.id', 'desc')->get();
 
         return $personas;
