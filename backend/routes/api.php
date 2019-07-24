@@ -26,7 +26,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');
     Route::put('/mesa/activar/{id}','MesaController@activar');
     Route::get('/mesa/selectMesa','MesaController@selectMesa');
-    //Routas Categorias
+    //Routas Categorias 
     Route::get('/categoria/platillo','CategoriaController@index');
     Route::get('/categoria/platillos','CategoriaController@getAllCategorias');  // aomine
     Route::post('/categoria/platillo/registrar','CategoriaController@store');

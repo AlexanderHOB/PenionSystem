@@ -5,7 +5,7 @@
   <v-container grid-list-lg v-else>
     <v-layout row wrap>
       <v-flex xs12 v-if="messageMesas">
-        <ErrorMessage :errorMessage="messageMesas" :refresh="getMesas" />
+        <ErrorMessage :errorMessage="messageMesas" :refresh="refreshMesas" />
       </v-flex>
       <template v-else>
         <v-flex xs12 class="d-flex align-center">

@@ -5,7 +5,7 @@
   <v-container v-else grid-list-xl>
     <v-layout row wrap>
       <v-flex xs12 v-if="messageCategorias">
-        <ErrorMessage :errorMessage="messageCategorias" :refresh="getCategorias" />
+        <ErrorMessage :errorMessage="messageCategorias" :refresh="refreshCategorias" />
       </v-flex>
       
       <template v-else>

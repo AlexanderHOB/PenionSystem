@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <template v-if="token !== 'token' || (token === 'token' && user.rol === 'mozo')">
+    <template v-if="token !== 'token' || (token === 'token' && user.rol !== 'administrador')">
       <router-view />
     </template>
 
-    <template  v-if="token === 'token' && user.rol === 'admin'">
+    <template  v-if="token === 'token' && user.rol === 'administrador'">
       <Sidenav />
       <v-content>
         <Header />

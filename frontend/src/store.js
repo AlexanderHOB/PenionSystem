@@ -10,14 +10,14 @@ export default new Vuex.Store({
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
-      rol: 'mozo'
+      rol: 'administrador'
     },
     // Sidenav
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
-    url: 'http://192.168.1.2:8000/api/',
-    // url: 'http://127.0.0.1:8000/api/',
+    // url: 'http://192.168.1.2:8000/api/',
+    url: 'http://127.0.0.1:8000/api/',
     config: {
       headers: {
         Apikey: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
@@ -53,6 +53,7 @@ export default new Vuex.Store({
     allAdelantosState: [],
     allDescuentosState: [],
     allUsuariosState: [],
+    allRolsState: []
   },
   mutations: {
     drawerMutation(state, value){
@@ -120,6 +121,9 @@ export default new Vuex.Store({
     },
     allUsuariosMutation(state, action){
       state.allUsuariosState = action;
+    },
+    allRolsMutation(state, action){
+      state.allRolsState = action;
     }
   },
   actions: {
@@ -150,6 +154,10 @@ export default new Vuex.Store({
     allUsuariosAction: async function({ state, commit }){
       let response = await axios.get(state.url + 'users', state.config);
       commit('allUsuariosMutation', response)
+    },
+    allRolsAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'users', state.config);
+      commit('allRolsMutation', response)
     }
   },
   getters: {

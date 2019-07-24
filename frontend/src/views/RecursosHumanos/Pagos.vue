@@ -4,7 +4,7 @@
   <v-container v-else grid-list-xl>
     <v-layout row wrap>
       <v-flex xs12 v-if="messagePersonal">
-        <ErrorMessage :errorMessage="messagePersonal" :refresh="getPersonal" />
+        <ErrorMessage :errorMessage="messagePersonal" :refresh="refreshPersonal" />
       </v-flex>
 
       <template v-else>
