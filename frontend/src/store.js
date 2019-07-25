@@ -122,6 +122,12 @@ export default new Vuex.Store({
     allUsuariosMutation(state, action){
       state.allUsuariosState = action;
     },
+    allUsuariosMutation(state, action){
+      state.allUsuariosState = action;
+    },
+    allUsuariosDataMutation(state, value){
+      state.allUsuariosState.data = value;
+    },
     allRolsMutation(state, action){
       state.allRolsState = action;
     }

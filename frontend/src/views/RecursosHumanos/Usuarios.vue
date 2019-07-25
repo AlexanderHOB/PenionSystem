@@ -226,7 +226,7 @@ export default {
       // Data para editar el usuario
       password: '',
       color: '#000',
-      rol: {},
+      rol: null,
       allRols: [
         {id: 4, nombre: 'Mozo'},
         {id: 3, nombre: 'Cajero'},
@@ -279,7 +279,7 @@ export default {
             });
             this.paginate();
             this.messageUsuarios = '';
-          this.searchDisabledMutation(false);
+            this.searchDisabledMutation(false);
           }else {
             this.messageUsuarios = 'No se encontro ningún usuario';
             this.pageTotal = 0;
@@ -371,17 +371,16 @@ export default {
         }
         if(this.allPersonalState.data){
           let personal = this.allPersonalState.data;
-          let self = this;
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
-              if(self.allUsuarios.length === 0){
-                return e.condicion && (e.puesto_trabajo === 'Mozo' ||  e.puesto_trabajo === 'Caja')
-              }else {
-                for(let usuario of self.allUsuarios){
-                return e.condicion && e.id != usuario.id && (e.puesto_trabajo === 'Mozo' ||  e.puesto_trabajo === 'Caja')
-                }
-              }
+              return e.condicion && (e.puesto_trabajo === 'Mozo' ||  e.puesto_trabajo === 'Caja')
             });
+
+            for(let usuario of this.allUsuarios){
+                this.allPersonal = this.allPersonal.filter(function(e){
+                  return e.id !== usuario.id
+                });
+            }
           }else {
             this.allPersonal = [];
           }
@@ -439,7 +438,6 @@ export default {
       this.personal = personal[0];
 
       this.asignPersonal();
-      this.disabledDate = true;
     },
 
     // CERRAR MODAL
@@ -452,7 +450,7 @@ export default {
     resetForm(){
       this.password = '',
       this.color = '#000',
-      this.rol = {},
+      this.rol = null,
       this.personal = {};
       this.apellidos = '';
       this.nombres = '';
@@ -495,27 +493,20 @@ export default {
           }
 
           if(response.data){
-            let usuario = {
-              apellidos: response.data.empleado.persona.apellidos,
-              celular:  response.data.empleado.persona.celular,
-              condicion: 1,
-              direccion: response.data.empleado.persona.direccion,
-              documento: response.data.empleado.persona.documento,
-              email: response.data.empleado.persona.email,
-              id: response.data.empleado_id,
-              nombres: response.data.empleado.persona.nombres,
-              rol: response.data.rol.nombre,
-              rol_id: response.data.rol_id
-            }
             this.allUsuarios.reverse();
-            this.allUsuarios.push(usuario);
+            this.allUsuarios.push(response.data);
             this.allUsuarios.reverse();
+            this.allUsuariosDataMutation(this.allUsuarios);
             this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
             this.paginate();
             this.page = 1;
             this.backup.usuarios = [];
             this.messageUsuarios = '';
             this.backup.usuariosIndex = true;
+            let self = this;
+            this.allPersonal = this.allPersonal.filter(function(e){
+              return e.id !== self.id
+            });
           }else{
             this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al personal', color: 'error'});
           }
@@ -526,7 +517,6 @@ export default {
       }finally {
         this.isLoadBtn = false;
         this.disabled = false;
-        this.disabledDate = false;
       }
     },
 
@@ -543,14 +533,13 @@ export default {
     // ACCION DEL FORMULARIO
     async formAction(){
       if(this.create){
-        await this.registrarAdelanto();
+        await this.registrarUsuario();
       }else {
-        await this.editarAdelanto();
+        await this.editarUsuario();
       }
-      this.$refs.form.resetValidation();  
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation', 'allUsuariosDataMutation']),
     ...mapActions(['allUsuariosAction', 'allPersonalAction', 'allRolsAction'])
   },
   computed: {

@@ -25,9 +25,19 @@ class AuthController extends Controller
         $user->save();
         // return response()->json([
         //     'message' => 'Successfully created user!'], 201);
-        $user->empleado->persona;
-        $user->rol;
-        return $user;
+        $newuser = [
+            'apellidos' => $user->empleado->persona->apellidos,
+            'celular' => $user->empleado->persona->celular,
+            'condicion' => 1,
+            'direccion' => $user->empleado->persona->direccion,
+            'documento' => $user->empleado->persona->documento,
+            'email' => $user->empleado->persona->email,
+            'id' => $user->empleado_id,
+            'nombres' => $user->empleado->persona->nombres,
+            'rol' => $user->rol->nombre,
+            'rol_id' => $user->rol_id
+        ];
+        return $newuser;
     }
     public function login(Request $request)
     {
