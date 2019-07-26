@@ -15,7 +15,6 @@ class AuthController extends Controller
             'color'    => 'required|string|max:7'
         ]);
         $user = new User([
-            'id'            => $request->id,
             'email'         => $request->email,
             'color'         => $request->color,
             'empleado_id'   => $request->empleado_id,
@@ -32,7 +31,8 @@ class AuthController extends Controller
             'direccion' => $user->empleado->persona->direccion,
             'documento' => $user->empleado->persona->documento,
             'email' => $user->empleado->persona->email,
-            'id' => $user->empleado_id,
+            'id' => $user->id,
+            'empleado_id' => $user->empleado_id,
             'nombres' => $user->empleado->persona->nombres,
             'rol' => $user->rol->nombre,
             'rol_id' => $user->rol_id

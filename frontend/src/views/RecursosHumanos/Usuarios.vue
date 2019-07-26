@@ -85,6 +85,9 @@
                   <p>{{ nombres }}</p>
                 </v-flex>
                 <v-flex xs3>
+                  <p>{{ email }}</p>
+                </v-flex>
+                <v-flex xs3>
                   <p><strong>N° Documento</strong></p>
                 </v-flex>
                 <v-flex xs3>
@@ -104,9 +107,6 @@
                 </v-flex>
                 <v-flex xs3>
                   <p><strong>Área</strong></p>
-                </v-flex>
-                <v-flex xs3>
-                  <p>{{ area }}</p>
                 </v-flex>
                 <v-flex xs12>
                   <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Usuario</h3>
@@ -159,6 +159,27 @@
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
             <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarUsuario"  :loading="isLoadBtn">Crear</v-btn>
             <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarUsuario"  :loading="isLoadBtn">Editar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="activeDialog"
+      max-width="350"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Confirmación</h3>
+          <v-spacer></v-spacer>
+        </v-card-title>
+        <v-card-text>¿Realmente deseas <strong>{{ activarText }}</strong> al personal?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click="activarUsuario(index)">Aceptar</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -244,14 +265,17 @@ export default {
       isLoadingPersonal: false,
       apellidos: '',
       nombres: '',
+      email: '',
       n_documento: '',
       celular: '',
       puesto: '',
-      area: '',
       // Datos para la paginación
-      pagination: 5,
+      pagination: 10,
       pageTotal: 0,
-      page: 1
+      page: 1,
+      // Datos para activar/desactivar el modal
+      activeDialog: false,
+      activarText: '',
     }
   },
   methods: {
@@ -274,9 +298,7 @@ export default {
         if(this.allUsuariosState.data){
           let usuarios = this.allUsuariosState.data;
           if(usuarios.length > 0){
-            this.allUsuarios = usuarios.filter(function(e){
-              return e.condicion
-            });
+            this.allUsuarios = usuarios;
             this.paginate();
             this.messageUsuarios = '';
             this.searchDisabledMutation(false);
@@ -378,7 +400,7 @@ export default {
 
             for(let usuario of this.allUsuarios){
                 this.allPersonal = this.allPersonal.filter(function(e){
-                  return e.id !== usuario.id
+                  return e.id !== usuario.empleado_id
                 });
             }
           }else {
@@ -400,10 +422,10 @@ export default {
     asignPersonal(){
       this.apellidos = this.personal.apellidos;
       this.nombres = this.personal.nombres;
+      this.email = this.personal.email;
       this.n_documento = this.personal.documento;
       this.celular = this.personal.celular;
       this.puesto = this.personal.puesto_trabajo;
-      this.area = this.personal.area_trabajo;
       this.id = this.personal.id;
       this.disabled = false;
     },
@@ -470,21 +492,13 @@ export default {
         if (this.$refs.form.validate()) {
           this.isLoadBtn = true;
           this.disabled = true;
-          let response = await axios.post(this.url + 'auth/signup', {
-            id: this.id,
-            email: this.personal.email,
+          let response = await axios.post(this.url + 'user/registrar', {
+            email: this.email,
             color: this.color,
-            empleado_id: this.personal.id,
+            empleado_id: this.id,
             rol_id: this.rol.id,
             password: this.password
-          },
-          {
-            headers: {
-              Apikey: this.config.headers.Apikey,
-              'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            }
-          });
+          }, this.config);
 
           this.closeModal();
 
@@ -496,7 +510,7 @@ export default {
             this.allUsuarios.reverse();
             this.allUsuarios.push(response.data);
             this.allUsuarios.reverse();
-            this.allUsuariosDataMutation(this.allUsuarios);
+            // this.allUsuariosDataMutation(this.allUsuarios);
             this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
             this.paginate();
             this.page = 1;
@@ -526,8 +540,34 @@ export default {
     },
 
     // ACTIVAR MODAL / INACTIVE
-    activarModal(){
+    activarModal(index){
+      this.index = index;
+      if(this.usuarios[index].condicion){
+        this.activarText = 'desactivar';
+      }else{
+        this.activarText = 'activar';
+      }
+      this.activeDialog = true;
+    },
 
+    //  ACTIVAR 
+    async activarUsuario(index){
+      try {
+        this.id = this.usuarios[index].id;
+        this.activeDialog = false;
+        var self = this;
+        if(this.usuarios[index].condicion){
+          this.usuarios[index].condicion = 0;
+          let response = await axios.put(this.url + 'user/desactivar/' + this.id, {},this.config);
+          this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'});
+        }else { 
+          this.usuarios[index].condicion = 1;
+          let response = await axios.put(this.url + 'user/activar/' + this.id, {}, this.config);
+          this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'});
+        }
+      } catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
+      }
     },
 
     // ACCION DEL FORMULARIO
@@ -539,7 +579,7 @@ export default {
       }
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation', 'allUsuariosDataMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
     ...mapActions(['allUsuariosAction', 'allPersonalAction', 'allRolsAction'])
   },
   computed: {

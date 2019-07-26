@@ -647,7 +647,7 @@ export default {
             fecha: this.fechaRegistroDetail
           },
           headers: {
-            Authorizations: this.config.headers.Authorizations,
+            Apikey: this.config.headers.Apikey,
             'Content-Type': 'application/json'
           }
         });
@@ -659,6 +659,7 @@ export default {
       } catch (error) {
         this.snackbarMutation({value: true, text: 'Ocurrio un error al traer la información', color: 'error'});
         this.historial = [];
+        this.historialLoading = false;
         this.montoDescontar = 0;
       }
     },
