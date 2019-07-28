@@ -53,6 +53,7 @@ class UserController extends Controller
             'documento' => $user->empleado->persona->documento,
             'email' => $user->empleado->persona->email,
             'id' => $user->id,
+            'color' => $user->color,
             'empleado_id' => $user->empleado_id,
             'nombres' => $user->empleado->persona->nombres,
             'rol' => $user->rol->nombre,
@@ -106,7 +107,7 @@ class UserController extends Controller
     public function getAllUsers(){
         $personas = User::join('personas','users.empleado_id','=','personas.id')
         ->join('roles','users.rol_id','=','roles.id')
-        ->select('users.id', 'personas.id as empleado_id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')
+        ->select('users.id', 'personas.id as empleado_id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol','users.color')
         ->orderBy('personas.id', 'desc')->get();
 
         return $personas;

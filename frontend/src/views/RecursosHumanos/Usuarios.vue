@@ -28,6 +28,7 @@
             <img src="../../assets/iconos/edit.svg" alt="edit" class="usuarios-edit" @click="editUsuarioModal(i)">
             <img src="../../assets/iconos/detail.svg" alt="detail" class="usuarios-detail" @click="detailUsuariolModal(i)">
             <PersonalBox class="usuarios-bg" :active="usuario.condicion" :activeInteraction="activarModal" :index="i" />
+            <div class="usuarios-color" :style="{'background-color': usuario.color}"></div>
           </div>
         </v-flex>
       </template>
@@ -35,7 +36,7 @@
 
      <v-dialog v-model="createModalState" persistent max-width="600px">
       <v-card>
-        <v-card-title>
+        <v-card-title class="pb-0">
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Datos del Usuario</h3>
           <v-spacer></v-spacer>
@@ -85,6 +86,9 @@
                   <p>{{ nombres }}</p>
                 </v-flex>
                 <v-flex xs3>
+                  <p><strong>Email</strong></p>
+                </v-flex>
+                <v-flex xs9>
                   <p>{{ email }}</p>
                 </v-flex>
                 <v-flex xs3>
@@ -105,8 +109,11 @@
                 <v-flex xs3>
                   <p>{{ puesto }}</p>
                 </v-flex>
-                <v-flex xs3>
+                 <v-flex xs3>
                   <p><strong>Área</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ area }}</p>
                 </v-flex>
                 <v-flex xs12>
                   <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Usuario</h3>
@@ -159,6 +166,76 @@
             <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
             <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarUsuario"  :loading="isLoadBtn">Crear</v-btn>
             <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarUsuario"  :loading="isLoadBtn">Editar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="usuarioDetail" max-width="600px">
+      <v-card>
+        <v-card-title class="pb-0">
+          <v-spacer></v-spacer>
+          <h3 class="headline title-modal">Detalles del Usuario</h3>
+          <v-spacer></v-spacer>
+          <v-btn icon color="blue--text" @click="closeDetailModal">
+            <v-icon>close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pt-0">
+            <v-container>
+              <v-layout row wrap>
+                <v-flex xs12 v-show="isLoadingPersonal" class="pa-0">
+                  <v-progress-linear :indeterminate="true" height="2"></v-progress-linear>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Apellidos</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ apellidosDetail }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Nombres</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ nombresDetail }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Email</strong></p>
+                </v-flex>
+                <v-flex xs9>
+                  <p>{{ emailDetail }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>N° Documento</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ n_documentoDetail }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Celular</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ celularDetail }}</p>
+                </v-flex>
+                <v-flex xs3>
+                  <p><strong>Rol</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ rolDetail }}</p>
+                </v-flex>
+                 <v-flex xs3>
+                  <p><strong>Área</strong></p>
+                </v-flex>
+                <v-flex xs3>
+                  <p>{{ areaDetail }}</p>
+                </v-flex>
+              </v-layout>
+            </v-container>
+        
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+            <v-btn color="blue" flat @click="closeDetailModal">Cerrar</v-btn>
+          <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -262,6 +339,7 @@ export default {
       //Datos para el personal
       personal: {},
       allPersonal: [],
+      allValidPersonal: [],
       isLoadingPersonal: false,
       apellidos: '',
       nombres: '',
@@ -269,6 +347,16 @@ export default {
       n_documento: '',
       celular: '',
       puesto: '',
+      area: '',
+      // Datos para el detail
+      usuarioDetail: false,
+      apellidosDetail: '',
+      nombresDetail: '',
+      emailDetail: '',
+      n_documentoDetail: '',
+      celularDetail: '',
+      rolDetail: '',
+      areaDetail: '',
       // Datos para la paginación
       pagination: 10,
       pageTotal: 0,
@@ -381,9 +469,6 @@ export default {
     // OBTENER TODO EL PERSONAL
     async getAllPersonal(){
       try {
-        if(this.allPersonal.length != 0){
-          return;
-        }
 
         this.isLoadingPersonal = true;
 
@@ -394,14 +479,17 @@ export default {
         if(this.allPersonalState.data){
           let personal = this.allPersonalState.data;
           if(personal.length > 0){
-            this.allPersonal = personal.filter(function(e){
+
+            this.allPersonal = personal;
+
+            this.allValidPersonal = personal.filter(function(e){
               return e.condicion && (e.puesto_trabajo === 'Mozo' ||  e.puesto_trabajo === 'Caja')
             });
 
             for(let usuario of this.allUsuarios){
-                this.allPersonal = this.allPersonal.filter(function(e){
-                  return e.id !== usuario.empleado_id
-                });
+              this.allValidPersonal = this.allValidPersonal.filter(function(e){
+                return e.id !== usuario.empleado_id
+              });
             }
           }else {
             this.allPersonal = [];
@@ -426,36 +514,61 @@ export default {
       this.n_documento = this.personal.documento;
       this.celular = this.personal.celular;
       this.puesto = this.personal.puesto_trabajo;
+      this.area = this.personal.area_trabajo;
       this.id = this.personal.id;
       this.disabled = false;
     },
 
     // ABRIR USUARIO DETAIL MODAL
-    detailUsuariolModal(){
+    async detailUsuariolModal(index){
+      let usuario = this.usuarios[index];
+      this.isLoadingPersonal = true;
 
+      this.usuarioDetail = true;
+
+      await this.getAllPersonal();
+
+      let personal = this.allPersonal.filter(function(e){
+        return e.id ==  usuario.empleado_id;
+      });
+      personal = personal[0];
+
+      this.apellidosDetail = personal.apellidos;
+      this.nombresDetail = personal.nombres;
+      this.emailDetail = personal.email;
+      this.n_documentoDetail = personal.documento;
+      this.celularDetail = personal.celular;
+      this.rolDetail = usuario.rol;
+      this.areaDetail = personal.area_trabajo;
+    },
+
+    // CERRAR MODAL DETALE
+    closeDetailModal(){
+      this.usuarioDetail = false;
+      let self = this;
+      setTimeout(function(){
+        self.apellidosDetail = '';
+        self.nombresDetail = '';
+        self.emailDetail = '';
+        self.n_documentoDetail = '';
+        self.celularDetail = '';
+        self.rolDetail = '';
+        self.areaDetail = '';
+      }, 100);
     },
 
     // MODAL PARA EDITAR ADELANTO
-    async editUsuarioModal(id){
+    async editUsuarioModal(index){
       this.create = false;
-      let adelanto = this.adelantos.filter(function(e){
-        return e.id == id;
-      });
-      adelanto = adelanto[0];
-      this.fechaAdelanto = adelanto.fecha_transaccion.split('-').reverse().join('-');
-      this.monto = adelanto.monto;
-      this.motivo = adelanto.motivo;
+      let usuario = this.usuarios[index];
       this.disabled = false;
-
-      this.isLoadingPersonal = true;
-      var personal = [];
 
       this.createModalMutation(true);
 
       await this.getAllPersonal();
 
-      personal = this.allPersonal.filter(function(e){
-        return e.id ==  adelanto.persona_id;
+      let personal = this.allPersonal.filter(function(e){
+        return e.id ==  usuario.empleado_id;
       });
       this.personal = personal[0];
 
@@ -476,6 +589,7 @@ export default {
       this.personal = {};
       this.apellidos = '';
       this.nombres = '';
+      this.email = '',
       this.n_documento = '';
       this.celular = '';
       this.puesto = '';
@@ -510,7 +624,6 @@ export default {
             this.allUsuarios.reverse();
             this.allUsuarios.push(response.data);
             this.allUsuarios.reverse();
-            // this.allUsuariosDataMutation(this.allUsuarios);
             this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
             this.paginate();
             this.page = 1;
@@ -518,7 +631,7 @@ export default {
             this.messageUsuarios = '';
             this.backup.usuariosIndex = true;
             let self = this;
-            this.allPersonal = this.allPersonal.filter(function(e){
+            this.allValidPersonal = this.allValidPersonal.filter(function(e){
               return e.id !== self.id
             });
           }else{
@@ -585,7 +698,7 @@ export default {
   computed: {
     ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allUsuariosState', 'allPersonalState', 'allRolsState']),
     items(){
-      return this.allPersonal.map(entry => {
+      return this.allValidPersonal.map(entry => {
         const fullName = `${entry.apellidos} ${entry.nombres}`
 
         return Object.assign({}, entry, { fullName })
@@ -668,6 +781,14 @@ export default {
     width: 100%;
     box-shadow: 0 0 6px 2px rgba(0, 0, 0, .2);
     border-radius: 20px;
+  }
+  &-color {
+    position: absolute;
+    top: 5%;
+    right: 2.5%;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
   }
 }
 .title-modal {
