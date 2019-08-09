@@ -6,7 +6,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: 'token',
+    token: '',
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
@@ -159,7 +159,7 @@ export default new Vuex.Store({
       commit('allUsuariosMutation', response)
     },
     allRolsAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'users', state.config);
+      let response = await axios.get(state.url + 'roles', state.config);
       commit('allRolsMutation', response)
     }
   },

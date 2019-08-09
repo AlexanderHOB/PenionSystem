@@ -1,7 +1,6 @@
 <template>
     <v-container>
     <v-layout
-      text-xs-center
       wrap
     >
       <v-flex xs12>
@@ -15,7 +14,7 @@
       </v-flex>
 
       <v-flex mb-4>
-        <h1 class="display-2 font-weight-bold mb-3">{{ title }}</h1>
+        <h1 class="display-2 font-weight-bold pt-3 text-center">{{ title }}</h1>
       </v-flex>
 
     </v-layout>

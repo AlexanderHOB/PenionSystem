@@ -7,223 +7,231 @@
   >
 
     <v-list class="elevation-4 sidenav-logo">
-      <v-list-tile>
+      <v-list-item>
         <v-img 
           :src="require('../assets/logo.svg')"
           contain
           height="55"
         >
         </v-img>
-      </v-list-tile>
+      </v-list-item>
     </v-list>
 
-    <v-list class="pt-0">
-      <v-list-tile
+    <v-list dense class="pt-0">
+      <v-list-item
         @click="closeGroups"
         :to="{name: 'home'}"
         active-class="white--text sidenav-items-active"
-        exact
         ripple
+        exact
       >
-        <v-list-tile-action>
+        <v-list-item-icon class="">
           <v-img 
             :src="require('../assets/iconos/home.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Inicio</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Inicio</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-      <v-list-tile
+      <v-list-item
         @click="closeGroups"
         :to="{name: 'mesas'}"
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon class="my-2">
           <v-img 
             :src="require('../assets/iconos/administrador.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Mesas</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Mesas</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
         
-      <v-list-tile
+      <v-list-item
         @click="closeGroups"
         :to="{name: 'categorias'}"
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/almacen.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Categorias</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Categorias</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-      <v-list-tile
+      <v-list-item
         @click=""
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/compras.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Compras</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Compras</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-      <v-list-tile
+      <v-list-item
       @click="closeGroups"
         active-class="white--text sidenav-items-active"
         :to="{name: 'platillos'}"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/platillos.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Platillos</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Platillos</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-      <v-list-tile
+      <v-list-item
         @click=""
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/ventas.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Ventas</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Ventas</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
       <v-list-group
         no-action
         v-model="group1"
+        class="sidenav-group"
         :class="{'group-active': group1active}"
       >
         <template v-slot:activator>
-          <v-list-tile>
-            <v-list-tile-action>
+            <v-list-item-icon>
               <v-img 
                 :src="require('../assets/iconos/acceso.svg')"
                 contain
                 height="32"
+                width="32"
               ></v-img>
-            </v-list-tile-action>
-            <v-list-tile-content class="pl-3">
-              <v-list-tile-title>Recursos Humanos</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
+            </v-list-item-icon>
+            <v-list-item-content>
+              <v-list-item-title class="sidenav-item-title">Recursos Humanos</v-list-item-title>
+            </v-list-item-content>
         </template>
 
-        <v-list-tile
+        <v-list-item
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
           :to="{name: 'personal'}"
         >
-          <v-list-tile-title class="pl-3">Personal</v-list-tile-title>
-        </v-list-tile>
+          <v-list-item-title class="pl-3">Personal</v-list-item-title>
+        </v-list-item>
 
-        <v-list-tile
+        <v-list-item
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
           :to="{name: 'usuarios'}"
         >
-          <v-list-tile-title class="pl-3">Usuarios</v-list-tile-title>
-        </v-list-tile>
+          <v-list-item-title class="pl-3">Usuarios</v-list-item-title>
+        </v-list-item>
 
-        <v-list-tile
+        <v-list-item
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
           :to="{name: 'adelantos'}"
         >
-          <v-list-tile-title class="pl-3">Adelantos</v-list-tile-title>
-        </v-list-tile>
+          <v-list-item-title class="pl-3">Adelantos</v-list-item-title>
+        </v-list-item>
 
-        <v-list-tile
+        <v-list-item
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
           :to="{name: 'descuentos'}"
         >
-          <v-list-tile-title class="pl-3">Descuentos</v-list-tile-title>
-        </v-list-tile>
+          <v-list-item-title class="pl-3">Descuentos</v-list-item-title>
+        </v-list-item>
             
-        <v-list-tile
+        <v-list-item
           @click="group1Active('.group1')"
           active-class="sidenav-subitems-active"
           ripple
           :to="{name: 'pagos'}"
         >
-          <v-list-tile-title class="pl-3">Pagos</v-list-tile-title>
-        </v-list-tile>
+          <v-list-item-title class="pl-3">Pagos</v-list-item-title>
+        </v-list-item>
       </v-list-group>
 
-      <v-list-tile
+      <v-list-item
         @click=""
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/reportes.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Reportes</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Reportes</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
 
-      <v-list-tile
+      <v-list-item
         @click=""
         active-class="white--text sidenav-items-active"
         ripple
       >
-        <v-list-tile-action>
+        <v-list-item-icon>
           <v-img 
             :src="require('../assets/iconos/soportes.svg')"
             contain
             height="32"
+            width="32"
           ></v-img>
-        </v-list-tile-action>
-        <v-list-tile-content class="pl-3">
-          <v-list-tile-title>Soporte</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-title class="sidenav-item-title">Soporte</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
     </v-list>
   </v-navigation-drawer> 
 </template>
@@ -276,6 +284,11 @@
   .sidenav {
     &-logo {
       position: relative;
+    }
+    &-item {
+      &-title {
+        font-size: 14px !important;
+      }
     }
   }
 </style>

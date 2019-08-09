@@ -9,20 +9,20 @@
       </v-flex>
 
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div
             <v-btn class="blue" dark fab small @click="refreshPersonal"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
           <div class="personal-box">
-            <div class="personal-content text-xs-center">
+            <div class="personal-content text-center">
               <h2 class="personal-title">{{ empleado.puesto_trabajo }}:</h2>
               <p class="mb-0 personal-apellido">{{ empleado.apellidos }}</p>
               <p class="mb-0 personal-nombre">{{ empleado.nombres }}</p>
             </div>
-            <div class="personal-textBox text-xs-center">
+            <div class="personal-textBox text-center">
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
@@ -41,22 +41,22 @@
           <h3 v-show="create" class="headline title-modal">Registrar Personal</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Personal</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs6>
                   <v-text-field 
-                    color="blue"
                     label="Apellidos"
                     v-model="apellidos"
                     :rules="[rules.required, rules.counterApellidos]"
@@ -66,7 +66,6 @@
                 </v-flex>
                 <v-flex xs6>
                   <v-text-field 
-                    color="blue"
                     label="Nombre"
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
@@ -76,7 +75,6 @@
                 </v-flex>
                 <v-flex xs5>
                   <v-text-field 
-                    color="blue"
                     label="Dirección"
                     v-model="direccion"
                     :rules="[rules.required, rules.counterDirección]"
@@ -86,7 +84,6 @@
                 </v-flex>
                 <v-flex xs7>
                   <v-text-field 
-                    color="blue"
                     label="Email"
                     v-model="email"
                     :rules="[rules.required, rules.counterEmail, rules.emailRules]"
@@ -104,40 +101,36 @@
                 </v-flex>
                 <v-flex xs4>
                   <v-text-field 
-                    color="blue"
                     label="DNI"
                     v-model="n_documento"
                     :rules="[rules.required, rules.counterDni]"
                     counter="8"
-                    mask="########"
+                    v-mask="'########'"
                     v-if="tipo_documento === 'Dni'"
                     :disabled="disabled"
                   ></v-text-field>
                   <v-text-field 
-                    color="blue"
                     label="N° Extranjero"
                     v-model="n_documento"
                     :rules="[rules.required, rules.counterExtranjero]"
                     counter="11"
-                    mask="###########"
+                    v-mask="'###########'"
                     v-else
                     :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs4>
                   <v-text-field 
-                    color="blue"
                     label="Celular"
                     v-model="celular"
                     :rules="[rules.required, rules.counterCelular]"
                     counter="9"
-                    mask="#########"
+                    v-mask="'#########'"
                     :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs6>
                   <v-select 
-                    color="blue"
                     label="Puesto"
                     v-model="puesto"
                     :items="puestos"
@@ -147,7 +140,6 @@
                 </v-flex>
                 <v-flex xs6>
                   <v-select 
-                    color="blue"
                     label="Area"
                     v-model="area"
                     :items="areas"
@@ -157,7 +149,6 @@
                 </v-flex>
                 <v-flex xs4>
                   <v-select 
-                    color="blue"
                     label="Tipo de contrato"
                     v-model="tipo_contrato"
                     :items="tipo_contratos"
@@ -170,7 +161,6 @@
                     v-model="menuDate"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    lazy
                     transition="scale-transition"
                     offset-y
                     full-width
@@ -178,7 +168,6 @@
                   >
                   <template v-slot:activator="{ on }">
                     <v-text-field
-                      color="blue"
                       v-model="fechaRegistro"
                       label="Fecha de inicio"
                       prepend-inner-icon="event"
@@ -193,7 +182,6 @@
                 </v-flex>
                 <v-flex xs4>
                   <v-text-field 
-                    color="blue"
                     label="Sueldo"
                     v-model="sueldo"
                     :rules="[rules.required]"
@@ -211,9 +199,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarPersonal" :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPersonal" :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="registrarPersonal" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarPersonal" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -224,11 +212,11 @@
           <v-spacer></v-spacer>
           <h3 class="title-modal headline">Detalle del empleado</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeDetailModal">
+          <v-btn icon color="blue" @click="closeDetailModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="py-0">
+        <v-card-text class="pb-0">
           <v-container class="white" grid-list-md>
             <v-layout row wrap>
               <v-flex xs12>
@@ -307,7 +295,7 @@
                 <v-layout>
                   <v-flex xs5><strong>Fecha de inicio</strong></v-flex>
                   <v-flex xs7>
-                    <p>{{ fechaRegistroFormatDetail }}</p>
+                    <p>{{ fechaRegistroFormatDetail | reverseDate }}</p>
                   </v-flex>
                 </v-layout>
               </v-flex>
@@ -330,7 +318,6 @@
                       label="Search"
                       single-line
                       hide-details
-                      color="blue"
                     ></v-text-field>
                   </v-card-title>
                   <v-data-table
@@ -338,29 +325,16 @@
                     :items="historial"
                     :search="historialSearch"
                     :loading="historialLoading"
+                    loading-text="Loading..."
                   >
-                    <v-progress-linear v-slot:progress indeterminate></v-progress-linear>
-                    <template v-slot:items="props">
-                      <td class="text-xs-right">{{ props.item.tipo }}</td>
-                      <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
-                      <td class="text-xs-right">{{ props.item.monto }}</td>
-                      <td class="text-xs-right">{{ props.item.motivo }}</td>
-                    </template>
-                    <template v-slot:no-results>
-                      <v-alert :value="true" color="error" icon="warning">
-                        Your search for "{{ historialSearch }}" found no results.
-                      </v-alert>
-                    </template>
-                    <template v-slot:footer>
-                      <td :colspan="headers.length">
-                        <strong>Monto total a descontar {{ montoDescontar }}</strong>
-                      </td>
+                    <template v-slot:item.fecha_transaccion="{ item }">
+                        <span>{{ item.fecha_transaccion | reverseDate }}</span>
                     </template>
                   </v-data-table>
                 </v-card>
               </v-flex>
-              <v-flex xs12 class="text-xs-right pt-3">
-                <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
+              <v-flex xs12 class="text-right pt-3">
+                <v-btn color="blue darken-1" text @click="closeDetailModal">Cerrar</v-btn>
               </v-flex>
             </v-layout>
           </v-container>
@@ -382,20 +356,19 @@
         <v-card-text>¿Realmente deseas <strong>{{ activarText }}</strong> al personal?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-btn color="red darken-1" icon @click="activeDialog = false"><v-icon>close</v-icon></v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="activarPersonal(index)">Aceptar</v-btn>
+          <v-btn color="green darken-1" icon @click="activarPersonal(index)"><v-icon>done</v-icon></v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginate"
           @next="paginate"
@@ -412,14 +385,16 @@
 </template>
 
 <script>
-import axios from 'axios';
-import LoadingDialog from '../../components/loading/LoadingDialog';
-import LoadingFish from '../../components/loading/LoadingFish';
-import PersonalBox from '../../components/box/PersonalBox';
-import ErrorMessage from '../../components/messages/ErrorMessage';
-import AlertNotifications from '../../components/messages/AlertNotifications';
+import axios from 'axios'
+import { mask } from 'vue-the-mask'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import LoadingDialog from '../../components/loading/LoadingDialog'
+import LoadingFish from '../../components/loading/LoadingFish'
+import PersonalBox from '../../components/box/PersonalBox'
+import ErrorMessage from '../../components/messages/ErrorMessage'
+import AlertNotifications from '../../components/messages/AlertNotifications'
+
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -428,6 +403,9 @@ export default {
     PersonalBox,
     ErrorMessage,
     AlertNotifications
+  },
+  directives: {
+    mask,
   },
   data(){
     return {
@@ -510,10 +488,10 @@ export default {
       historialSearch: '',
       historialLoading: false,
       headers: [
-        { text: 'Tipo', align: 'center', sortable: false, value: '' },
+        { text: 'Tipo', align: 'center', sortable: false, value: 'tipo' },
         { text: 'Fecha', align: 'center', value: 'fecha_transaccion' },
-        { text: 'Monto', align: 'center', sortable: false, value: '' },
-        { text: 'Motivo', align: 'center', sortable: false, value: '' },
+        { text: 'Monto', align: 'center', sortable: false, value: 'monto' },
+        { text: 'Motivo', align: 'center', sortable: false, value: 'motivo' }
       ],
       historial: [],
       montoDescontar: 0
@@ -635,7 +613,7 @@ export default {
         this.areaDetail = this.personal[index].area_trabajo;
         this.tipo_contratoDetail = this.personal[index].tipo_contrato;
         this.fechaRegistroDetail = this.personal[index].fecha_registro;
-        this.fechaRegistroFormatDetail = this.personal[index].fecha_registro.split('-').reverse().join('-');
+        this.fechaRegistroFormatDetail = this.personal[index].fecha_registro;
         this.sueldoDetail = this.personal[index].sueldo;
         // 
         this.id = this.personal[index].id;
@@ -703,7 +681,6 @@ export default {
       this.id = this.personal[index].id;
       this.create = false;
       this.disabledDate = true;
-      this.$refs.form.resetValidation();
       this.createModalMutation(true);
     },
 
@@ -888,6 +865,11 @@ export default {
     },
     searchQuery(){
       this.searchPersonal(this.searchQuery);
+    }
+  },
+  filters: {
+    reverseDate(str) {
+      return str.split('-').reverse().join('-')
     }
   },
   async created(){

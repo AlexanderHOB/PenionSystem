@@ -2,10 +2,11 @@
   <div class="login">
     <v-container grid-list-xl>
       <div class="login-bg"></div>
-      <h1 class="login-title text-xs-center">Bienvenido</h1>
+      <h1 class="login-title text-center" v-show="isLoading">Loading...</h1>
+      <h1 class="login-title text-center" v-show="!isLoading">Bienvenido</h1>
       <v-layout row wrap>
-        <v-flex xs4 v-for="(item, i) in items" :key="item.id" @click="openModal(i)">
-          <div class="login-card">
+        <v-flex xs4 v-for="(item, i) in items" :key="item.id">
+          <div class="login-card" @click="openModal(i)">
             <img src="../assets/img/login/logeo-inicio.svg" alt="Logeo" class="login-card-img">
             <h2 class="login-card-title">{{ item.title }}</h2>
           </div>
@@ -18,18 +19,18 @@
       width="600"
     >
       <v-card class="modal">
-        <v-card-title class="pb-0">
+        <v-card-title>
           <v-spacer></v-spacer>
           <h3 class="modal-title">Login {{ modalTitle }}</h3>
           <v-spacer></v-spacer>
-          <v-btn icon class="blue--text" @click="modal = false">
+          <v-btn icon color="blue" @click="modal = false">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pb-4">
+        <v-card-text class="pb-5">
           <h4 class="usaurios-title">Usuarios Permitidos:</h4>
-          <ul class="usaurios text-xs-center">
-            <li v-for="(usuario, i) in usuarios" class="usaurios-item" :style="{'background-color':  usuario.color}" @click="openModalPassword(i)">{{ usuario.name }}</li>
+          <ul class="usaurios text-center">
+            <li v-for="(usuario, i) in usuarios" class="usaurios-item" :style="{'background-color':  usuario.color}" @click="openModalPassword(i)">{{ usuario.nombres }} {{ usuario.apellidos }}</li>
           </ul>
         </v-card-text>
       </v-card>
@@ -45,168 +46,219 @@
             <v-spacer></v-spacer>
           </v-card-title>
           <v-card-text class="pb-4">
-            <v-text-field
-              :append-icon="passwordShow ? 'visibility' : 'visibility_off'"
-              :type="passwordShow ? 'text' : 'password'"
-              name="password"
-              label="Ingese su contraseña"
-              hint="Al menos 8 caracteres"
-              class="input-group--focused"
-              @click:append="passwordShow = !passwordShow"
-            ></v-text-field>
+            <v-form
+              ref="form"
+              lazy-validation
+              v-model="valid"
+              @submit.prevent="login"
+              autocomplete="off"
+            >
+              <v-container grid-list-lg>
+                <v-layout>
+                  <v-flex>
+                    <v-text-field
+                      v-model="password"
+                      @input="clearError"
+                      :append-icon="passwordShow ? 'visibility' : 'visibility_off'"
+                      :type="passwordShow ? 'text' : 'password'"
+                      :rules="[rules.required, rules.counterPass, rules.minPass]"
+                      name="password"
+                      label="Ingese su contraseña"
+                      hint="Al menos 8 caracteres"
+                      class="input-group--focused"
+                      counter="20"
+                      @click:append="passwordShow = !passwordShow"
+                      :disabled="disabled"
+                      :error="error.state"
+                      :error-messages="error.message"
+                    ></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-form>
           </v-card-text>
           <v-card-actions class="pb-4">
             <v-spacer></v-spacer>
-            <v-btn flat color="green">Ingresar</v-btn>
-            <v-btn flat color="red" @click="modalPassword = false">Cancelar</v-btn>
+            <v-btn icon color="red" @click="modalPassword = false" :disabled="disabled"><v-icon>close</v-icon></v-btn>
+            <v-btn icon color="green" @click="login" :loading="loginLoad" :disabled="!valid"><v-icon>done</v-icon></v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </v-dialog>
 
-    <v-dialog
-      v-model="test"
-      width="500"
-      persistent
-    >
-      <v-card class="modal">
-        <v-card-title class="pb-0">
-          <v-spacer></v-spacer>
-          <h3 class="modal-password-title">{{ name }}</h3>
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-card-text class="pb-4">
-          <v-text-field
-            name="password"
-            v-model="user"
-            label="nick"
-          ></v-text-field>
-          <v-text-field
-          v-model="pass"
-            :append-icon="passwordShow ? 'visibility' : 'visibility_off'"
-            :type="passwordShow ? 'text' : 'password'"
-            name="password"
-            label="Ingese su contraseña"
-            hint="Al menos 8 caracteres"
-            @click:append="passwordShow = !passwordShow"
-          ></v-text-field>
-        </v-card-text>
-        <v-card-actions class="pb-4">
-          <v-spacer></v-spacer>
-          <v-btn flat color="red" @click="test = false">Cancelar</v-btn>
-          <v-btn flat color="green" @click="login">Ingresar</v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
-import axios from 'axios';
+import axios from 'axios'
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   data(){
     return {
-      items: [
-        {
-          title: 'Administrador',
-        usuarios: [
-          {name: 'Tenorio Camarena Felix Martin', color: '#FBB03B'}
-        ]
-        },
-        {
-          title: 'Mozo',
-          usuarios: [
-            {name: 'Tenorio Camarena Felix Martin', color: '#FBB03B'},
-            {name: 'Arteaga Saldaña Manuela', color: '#74CDD0'},
-            {name: 'Tuesta Rengifo Jennifer', color: '#558EF7'}
-        ]
-        },
-        {
-          title: 'Caja',
-          usuarios: [
-          {name: 'Tuesta Rengifo Jennifer', color: '#558EF7'}
-        ] 
-        },
-        {
-          title: 'Title',
-          usuarios: [
-          {name: 'Tuesta Rengifo Jennifer', color: '#558EF7'}
-        ] 
-        },
-        {
-          title: 'Title',
-          usuarios: [
-          {name: 'Arteaga Saldaña Manuela', color: '#74CDD0'},
-        ] 
-        },
-        {
-          title: 'Title',
-          usuarios: [
-          {name: 'Tuesta Rengifo Jennifer', color: '##558EF7'}
-        ] 
-        },
-      ],
+      items: [],
+      isLoading: true,
       modal: false,
       modalTitle: '',
       usuarios: [],
       name: '',
+      password: '',
+      index: 0,
       modalPassword: false,
       passwordShow: false,
-      test: true,
-      user: '',
-      pass: ''
+      disabled: false,
+      loginLoad: false,
+      error: {
+        state: false,
+        message: ''
+      },
+      // Datos para valdiar formulario
+      valid: true,
+      rules: {
+        required: value => !!value || 'Required.',
+        counterPass: value => value.length <= 20 || '20 carácteres como máximo',
+        minPass: value => value.length >= 8 || '8 Carácteres como mínimo',
+      },
     }
   },
   methods: {
+    // OBTENER USUARIOS
+    async getUsuarios(){
+      try {
+
+        if(this.allUsuariosState.length == 0){
+          await this.allUsuariosAction();
+        }
+        if(this.allUsuariosState.data){
+          let usuarios = this.allUsuariosState.data;
+          if(usuarios.length > 0){
+
+            usuarios = usuarios.filter(function(e){
+              return e.condicion
+            });
+
+            var roles = [];
+            
+            usuarios.forEach( (e, i) => {
+              roles[i] = e.rol;
+            });
+
+            // roles = roles.filter((e, i, arr) => {
+            //   return arr.indexOf(e) === i;
+            // });
+            roles = [... new Set(roles)];
+
+            roles.forEach(e => {
+              let user = usuarios.filter(element => {
+                return element.rol == e
+              });
+              this.items.push({
+                title: e,
+                usuarios: user
+              });
+            });
+
+          }
+        }else {
+          
+        }
+      } catch (error) {
+      }finally {
+        this.isLoading = false;
+      }
+    },
+
+    // Open Modal
     openModal(index){
       this.modalTitle = this.items[index].title;
       this.usuarios = this.items[index].usuarios;
       this.modal = true;
     },
+
+    // Open modal password
     openModalPassword(index){
-      this.name = this.usuarios[index].name;
+      this.name = `${this.usuarios[index].nombres} ${this.usuarios[index].apellidos}`;
+      this.index = index;
       this.modalPassword = true;
     },
-    async login(){
-      let response = await axios.post(this.url + 'auth/login',
-      {
-        email: this.user,
-        password: this.pass,
-        remember_me: false,
-      },
-      {
-        headers: {
-          Apikey: this.config.headers.Authorizations,
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-       }
-      }
-      );
-      console.log(response);
-      this.tokenMutation(response.data.access_token);
-      this.authMutation(response.data);
-      console.log(this.token);
-      console.log(this.auth.token_type + ' ' + this.auth.access_token);
-      let res = await axios.get(this.url + 'auth/user',
-      {
-        headers: {
-          Apikey: this.config.headers.Authorizations,
-          Authorization: this.auth.token_type + ' ' + this.auth.access_token,
-          'Content-Type': 'application/json',
-        }
-      });
 
-      console.log(res);
+    // Limpiar errores
+    clearError(){
+      if(this.error.state){
+        this.error.state = false;
+        this.error.message = '';
+      }
     },
-    ...mapMutations(['tokenMutation', 'authMutation'])
+
+    // Login
+    async login(){
+      try {
+        if(this.$refs.form.validate() && !this.error.state){
+
+          this.disabled = true;
+          this.loginLoad = true;
+          let usuario = this.usuarios[this.index];
+
+          let response = await axios.post(this.url + 'auth/login',
+            {
+              email: usuario.email,
+              password: this.password,
+              remember_me: false,
+            },
+            {
+              headers: {
+                Apikey: this.config.headers.Apikey,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            }
+          );
+
+          console.log(response);
+          this.tokenMutation(response.data.access_token);
+          this.authMutation(response.data);
+          console.log(this.token);
+          console.log(this.auth.token_type + ' ' + this.auth.access_token);
+          let res = await axios.get(this.url + 'auth/user',
+          {
+            headers: {
+              Apikey: this.config.headers.Authorizations,
+              Authorization: this.auth.token_type + ' ' + this.auth.access_token,
+              'Content-Type': 'application/json',
+            }
+          });
+
+          console.log(res);
+          this.modal = false;
+        }
+      } catch (error) {
+        this.error.state = true;
+        this.error.message = 'Password invalida';
+        console.log(error)
+      }finally {
+        this.disabled = false;
+        this.loginLoad = false;
+      }
+    },
+    ...mapMutations(['tokenMutation', 'authMutation']),
+    ...mapActions(['allUsuariosAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'token', 'auth'])
+    ...mapState(['url', 'config', 'token', 'auth', 'allUsuariosState'])
   },
+  watch: {
+    modalPassword(){
+      if(!this.modalPassword){
+        this.password = '';
+        this.$refs.form.resetValidation();
+      }
+      this.clearError();
+    }
+  },
+  created(){
+    this.getUsuarios();
+  }
 }
 </script>
 

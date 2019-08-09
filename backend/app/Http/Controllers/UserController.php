@@ -64,30 +64,29 @@ class UserController extends Controller
 
     public function update($id, Request $request)
     {
-        try{
-            DB::beginTransaction();
+        $request->validate([
+            'color'    => 'required|string|max:7'
+        ]);
+        $user = User::findOrFail($id);
+        $user->color = $request->color;
+        $user->rol_id = $request->rol_id;
 
-            $user = User::findOrFail($request->id);
-            $persona = Persona::findOrFail($user->id);
-            $persona->nombre    = $request->nombre;
-            $persona->dni       = $request->dni;
-            $persona->direccion = $request->direccion;
-            $persona->celular   = $request->celular;
-            $persona->email     = $request->email;
-            $persona->save();
+        $user->save();
 
+        return $user;
+    }
 
-            $user->email = $request->email;
-            $user->password = bcrypt( $request->password);
-            $user->condicion = '1';
-            $user->rol_id = $request->rol_id;
-            $user->color = $request->color;
-            $user->save();
+    public function updatePass($id, Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string'
+        ]);
+        $user = User::findOrFail($id);
+        $user->password = bcrypt($request->pasword);
 
-            DB::commit();
-        } catch (Exception $e){
-            DB::rollBack();
-        }
+        $user->save();
+
+        return $user;
     }
 
     public function desactivar($id)

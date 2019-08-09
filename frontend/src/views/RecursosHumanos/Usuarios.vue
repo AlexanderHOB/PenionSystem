@@ -8,20 +8,20 @@
       </v-flex>
 
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div>
             <v-btn class="blue" dark fab small @click="refreshUsuarios"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(usuario, i) of usuarios" :key="usuario.id" class="mb-4">
           <div class="usuarios-box">
-            <div class="usuarios-content text-xs-center">
+            <div class="usuarios-content text-center">
               <h2 class="usuarios-title">{{ usuario.rol }}:</h2>
               <p class="mb-0 usuarios-apellido">{{ usuario.apellidos }}</p>
               <p class="mb-0 usuarios-nombre">{{ usuario.nombres }}</p>
             </div>
-            <div class="usuarios-textBox text-xs-center">
+            <div class="usuarios-textBox text-center">
               <p class="mb-0 usuarios-text" v-show="usuario.condicion">Activo</p> 
               <p class="mb-0 usuarios-text" v-show="!usuario.condicion">Inactivo</p>
             </div>
@@ -40,25 +40,25 @@
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Datos del Usuario</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
-              <v-layout row wrap>
+            <v-container grid-list-lg>
+              <v-layout row wrap justify-center>
                 <v-flex xs12  v-show="create">
                   <v-autocomplete
                     v-model="personal"
                     :items="items"
                     :loading="isLoadingPersonal"
-                    color="blue"
                     hide-no-data
                     hide-selected
                     item-text="fullName"
@@ -116,23 +116,26 @@
                   <p>{{ area }}</p>
                 </v-flex>
                 <v-flex xs12>
-                  <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Usuario</h3>
-                  <h3 v-show="!create" class="headline title-modal text-xs-center">Editar Usuario</h3>
+                  <h3 v-show="create" class="headline title-modal text-center">Registrar Usuario</h3>
+                  <h3 v-show="!create" class="headline title-modal text-center">Editar Usuario</h3>
                 </v-flex>
-                <v-flex xs6>
-                  <v-select
-                    color="blue"
+                <v-flex xs8>
+                  <v-autocomplete
                     v-model="rol"
                     :rules="[rules.required]"
                     :items="allRols"
                     item-text="nombre"
                     item-value="id"
+                    hide-no-data
+                    hide-selected
                     label="Rol"
+                    :loading="isLoadingRols"
                     :disabled="disabled"
                     return-object
-                  ></v-select>
+                    @focus="getAllRols"
+                  ></v-autocomplete>
                 </v-flex>
-                <v-flex xs6>
+                <v-flex xs8 v-if="create">
                   <v-text-field
                     v-model="password"
                     :append-icon="showPass ? 'visibility' : 'visibility_off'"
@@ -145,13 +148,8 @@
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
-                  <v-layout wrap justify-space-around>
-                    <v-flex xs2 class="color-picker red" @click="color = '#F44336'"></v-flex>
-                    <v-flex xs2 class="color-picker blue" @click="color = '#2196F3'"></v-flex>
-                    <v-flex xs2 class="color-picker green" @click="color = '#4CAF50'"></v-flex>
-                    <v-flex xs2 class="color-picker orange" @click="color = '#FF9800'"></v-flex>
-                    <v-flex xs2 class="color-picker purple" @click="color = '#9C27B0'"></v-flex>
-                    <v-flex xs6 class="color-picker mt-4" :style="{'background-color': color}"></v-flex>
+                  <v-layout justify-center>
+                    <v-color-picker hide-inputs v-model="color"></v-color-picker>
                   </v-layout>
                 </v-flex>
                 <v-flex x12 class="d-none">
@@ -162,12 +160,59 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
+          <v-btn @click="changePassModal = true" dark color="blue" v-show="!create">Cambiar Password</v-btn>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarUsuario"  :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarUsuario"  :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="registrarUsuario"  :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarUsuario"  :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
+
+      <v-dialog
+        v-model="changePassModal"
+        max-width="350"
+      >
+        <v-card>
+          <v-card-title>
+            <v-spacer></v-spacer>
+            <h3 class="headline title-modal">Cambiar contraseña</h3>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text class="pb-0">
+            <v-form
+              ref="pass"
+              lazy-validation
+              v-model="valid"
+              @submit.prevent="changePass"
+              autocomplete="off"
+            >
+              <v-container grid-list-lg>
+                <v-layout row wrap justify-center>
+                  <v-flex xs12>
+                    <v-text-field
+                      v-model="password"
+                      :append-icon="showPass ? 'visibility' : 'visibility_off'"
+                      :rules="[rules.required, rules.counterPass, rules.minPass]"
+                      :type="showPass ? 'text' : 'password'"
+                      label="Password"
+                      counter="20"
+                      @click:append="showPass = !showPass"
+                      :disabled="disabled"
+                    ></v-text-field>
+                  </v-flex>
+                </v-layout>
+              </v-container>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" icon @click="changePassModal = false" :disabled="disabled"><v-icon>close</v-icon></v-btn>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" icon @click="changePass" :loading="isLoadBtn"><v-icon>done</v-icon></v-btn>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-dialog>
 
     <v-dialog v-model="usuarioDetail" max-width="600px">
@@ -176,12 +221,12 @@
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Detalles del Usuario</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeDetailModal">
+          <v-btn icon color="blue" @click="closeDetailModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text class="pt-0">
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs12 v-show="isLoadingPersonal" class="pa-0">
                   <v-progress-linear :indeterminate="true" height="2"></v-progress-linear>
@@ -234,7 +279,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="blue" flat @click="closeDetailModal">Cerrar</v-btn>
+            <v-btn color="blue" text @click="closeDetailModal">Cerrar</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -253,20 +298,19 @@
         <v-card-text>¿Realmente deseas <strong>{{ activarText }}</strong> al personal?</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-btn color="red darken-1" icon @click="activeDialog = false"><v-icon>close</v-icon></v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="activarUsuario(index)">Aceptar</v-btn>
+          <v-btn color="green darken-1" icon @click="activarUsuario(index)"><v-icon>done</v-icon></v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
     
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginate"
           @next="paginate"
@@ -283,14 +327,15 @@
 </template>
 
 <script>
-import axios from 'axios';
-import LoadingDialog from '../../components/loading/LoadingDialog';
-import LoadingFish from '../../components/loading/LoadingFish';
-import PersonalBox from '../../components/box/PersonalBox';
-import ErrorMessage from '../../components/messages/ErrorMessage';
-import AlertNotifications from '../../components/messages/AlertNotifications';
+import axios from 'axios'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import LoadingDialog from '../../components/loading/LoadingDialog'
+import LoadingFish from '../../components/loading/LoadingFish'
+import PersonalBox from '../../components/box/PersonalBox'
+import ErrorMessage from '../../components/messages/ErrorMessage'
+import AlertNotifications from '../../components/messages/AlertNotifications'
+
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -323,17 +368,15 @@ export default {
       },
       // Data para editar el usuario
       password: '',
-      color: '#000',
+      color: '#000000',
       rol: null,
-      allRols: [
-        {id: 4, nombre: 'Mozo'},
-        {id: 3, nombre: 'Cajero'},
-        {id: 1, nombre: 'Administrador'},
-      ],
+      allRols: [],
+      isLoadingRols: false,
       showPass: false,
       create: true,
       index: 0,
       id: 0,
+      changePassModal: false,
       disabled: true,
       isLoadBtn: false,
       //Datos para el personal
@@ -519,6 +562,35 @@ export default {
       this.disabled = false;
     },
 
+    // Obtener todos los roles
+    async getAllRols(){
+      try {
+
+        this.isLoadingRols = true;
+
+        if(this.allRolsState.length == 0){
+          await this.allRolsAction();
+        }
+        if(this.allRolsState.data){
+          let rols = this.allRolsState.data;
+          if(rols.length > 0){
+
+            this.allRols = rols;
+
+          }else {
+            this.allRols = [];
+          }
+        }else {
+          this.allRols = [];
+        }
+      } catch (error) {
+        this.allRols = [];
+        this.snackbarMutation({value: true, text: 'Error al obtener los roles', color: 'error'});
+      }finally {
+        this.isLoadingRols = false;
+      }
+    },
+
     // ABRIR USUARIO DETAIL MODAL
     async detailUsuariolModal(index){
       let usuario = this.usuarios[index];
@@ -557,13 +629,27 @@ export default {
       }, 100);
     },
 
-    // MODAL PARA EDITAR ADELANTO
+    // MODAL PARA EDITAR USUARIO
     async editUsuarioModal(index){
       this.create = false;
-      let usuario = this.usuarios[index];
       this.disabled = false;
 
+      let usuario = this.usuarios[index];
+      
+      this.color = usuario.color;
+      this.index = index;
+
       this.createModalMutation(true);
+
+      this.getAllRols();
+      
+      let rol = {
+        id: usuario.rol_id,
+        nombre: usuario.rol
+      }
+
+      this.rol = rol;
+      this.disabled = true;
 
       await this.getAllPersonal();
 
@@ -571,7 +657,7 @@ export default {
         return e.id ==  usuario.empleado_id;
       });
       this.personal = personal[0];
-
+      
       this.asignPersonal();
     },
 
@@ -584,7 +670,7 @@ export default {
     // LIMPIAR FORMUALRIO
     resetForm(){
       this.password = '',
-      this.color = '#000',
+      this.color = '#000000',
       this.rol = null,
       this.personal = {};
       this.apellidos = '';
@@ -606,6 +692,7 @@ export default {
         if (this.$refs.form.validate()) {
           this.isLoadBtn = true;
           this.disabled = true;
+
           let response = await axios.post(this.url + 'user/registrar', {
             email: this.email,
             color: this.color,
@@ -649,7 +736,57 @@ export default {
 
     // EDITAR USUARIO
     async editarUsuario(){
+      try {
+        if (this.$refs.form.validate()) {
 
+          let colorBup = this.color;
+          let rolNombreBup = this.rol.nombre;
+          let rolIdBup = this.rol.id;
+
+          this.closeModal();
+
+          this.usuarios[this.index].color = colorBup;
+          this.usuarios[this.index].rol = rolNombreBup;
+          this.usuarios[this.index].rol_id = rolIdBup;
+
+
+          let response = await axios.put(this.url + 'user/actualizar/' + this.usuarios[this.index].id, {
+            color: colorBup,
+            rol_id: rolIdBup
+          }, this.config);
+          this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'});
+        }
+      }catch (error) {
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'});
+      }
+    },
+
+    // Cambiar contraseña
+    async changePass() {
+      try {
+        if (this.$refs.pass.validate()) {
+          this.isLoadBtn = true;
+          this.disabled = true;
+
+          let response = await axios.put(this.url + 'user/updatePass/' + this.usuarios[this.index].id, {
+            password: this.password
+          }, this.config);
+
+          this.closeModal();
+
+          if(response.data){
+            this.snackbarMutation({value: true, text: 'Contraseña cambiada correctamente', color: 'success'});
+          }else{
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al cambiar la contraseña', color: 'error'});
+          }
+        }
+      } catch (error) {
+        this.closeModal();
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+      }finally {
+        this.isLoadBtn = false;
+        this.disabled = false;
+      }
     },
 
     // ACTIVAR MODAL / INACTIVE
@@ -708,6 +845,12 @@ export default {
     watch: {
     searchQuery(){
       this.searchUsuarios(this.searchQuery);
+    },
+    changePassModal() {
+      if(this.changePassModal == false){
+        this.$refs.pass.resetValidation();
+        this.valid = true;
+      }
     }
   },
   async created(){

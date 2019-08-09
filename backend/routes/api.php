@@ -26,7 +26,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');
     Route::put('/mesa/activar/{id}','MesaController@activar');
     Route::get('/mesa/selectMesa','MesaController@selectMesa');
-    //Routas Categorias 
+    //Routas Categorias
     Route::get('/categoria/platillo','CategoriaController@index');
     Route::get('/categoria/platillos','CategoriaController@getAllCategorias');  // aomine
     Route::post('/categoria/platillo/registrar','CategoriaController@store');
@@ -48,6 +48,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/users','UserController@getAllUsers'); // aomine
     Route::post('/user/registrar', 'UserController@store');
     Route::put('/user/actualizar/{id}', 'UserController@update');
+    Route::put('/user/updatePass/{id}', 'UserController@updatePass');  // aomine
     Route::put('/user/desactivar/{id}', 'UserController@desactivar');
     Route::put('/user/activar/{id}', 'UserController@activar');
      //Empleados
@@ -62,6 +63,8 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/stateSalary','TransaccionController@stateSalary');
     Route::post('/discount','TransaccionController@discount');
     Route::get('/historial/{tipo}','TransaccionController@getAdelantoDescuento');
+    // Roles
+    Route::get('/roles','RolController@index'); // aomine
 });
 
 Route::group(['prefix' => 'auth'], function () {

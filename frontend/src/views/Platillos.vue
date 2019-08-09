@@ -9,9 +9,9 @@
       </v-flex>
 
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div>
             <v-btn class="blue" dark fab small @click="refreshPlatillos"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
@@ -27,9 +27,9 @@
         C230.76,54.78,230.8,46.44,227.69,40.43z"/>
             </clipPath>
             </svg>
-            <h2 class="platillo-title text-xs-center">{{ platillo.nombre }}</h2>
+            <h2 class="platillo-title text-center">{{ platillo.nombre }}</h2>
             <PrimaryBox class="platillo-bg" :active="platillo.condicion" :activeInteraction="activarModal" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
-            <div class="platillo-textBox text-xs-center">
+            <div class="platillo-textBox text-center">
               <p class="mb-0 platillo-text" v-show="platillo.condicion">Activo</p> 
               <p class="mb-0 platillo-text" v-show="!platillo.condicion">Inactivo</p>           
             </div>
@@ -47,22 +47,22 @@
           <h3 v-show="create" class="headline title-modal">Crear Platillo</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Platillo</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-text-field 
-                    color="blue"
                     label="Nombre del platillo"
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
@@ -72,7 +72,6 @@
                 </v-flex>
                 <v-flex xs12 sm6>
                   <v-text-field 
-                    color="blue"
                     label="Codigo del platillo"
                     v-model="codigo"
                     :rules="[rules.required, rules.counterCodigo]"
@@ -82,7 +81,6 @@
                 </v-flex>
                 <v-flex xs12 sm6>
                   <v-select
-                    color="blue"
                     :rules="[rules.required]"
                     v-model="area"
                     :items="areas"
@@ -92,7 +90,6 @@
                 </v-flex>
                 <v-flex xs12 sm6>
                   <v-select
-                    color="blue"
                     v-model="categoria"
                     :rules="[rules.required]"
                     :items="categorias"
@@ -105,7 +102,6 @@
                 </v-flex>
                 <v-flex xs12 sm6>
                   <v-text-field
-                    color="blue"
                     label="Precio del platillo"
                     v-model="precio"
                     :rules="[rules.required, rules.positive]"
@@ -116,7 +112,6 @@
                 </v-flex>
                 <v-flex xs12>
                   <v-textarea
-                    color="blue"
                     label="Descripción"
                     auto-grow
                     @click:append="descripcion = ''"
@@ -137,9 +132,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearPlatillo" :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarPlatillo" :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="crearPlatillo" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarPlatillo" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -150,11 +145,11 @@
           <v-spacer></v-spacer>
           <h3 class="headline">{{ nombreDetail }}</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeDetailModal">
+          <v-btn icon color="blue" @click="closeDetailModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pb-0">
+        <v-card-text>
           <p> <strong>Codigo:</strong> {{ codigoDetail }}</p>
           <p> <strong>Área:</strong> {{ areaDetail }}</p>
           <p> <strong>Precio:</strong> $ {{ precioDetail }}</p>
@@ -163,7 +158,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDetailModal">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -181,20 +176,19 @@
         <v-card-text>Confirma que quieres <strong>{{ activarText }}</strong> el platillo</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-btn color="red darken-1" icon @click="activeDialog = false"><v-icon>close</v-icon></v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="activarPlatillo(index)">Aceptar</v-btn>
+          <v-btn color="green darken-1" icon @click="activarPlatillo(index)"><v-icon>done</v-icon></v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginate"
           @next="paginate"
@@ -404,7 +398,6 @@ export default {
           }
         } catch (error) {
           this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'});
-          console.log(error);
         }
       },
 
@@ -444,7 +437,6 @@ export default {
       this.index = index;
       this.id = this.platillos[index].id;
       this.create = false;
-      this.$refs.form.resetValidation();
       this.createModalMutation(true);
     },
 

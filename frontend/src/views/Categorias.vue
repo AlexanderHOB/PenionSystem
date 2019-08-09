@@ -9,17 +9,17 @@
       </v-flex>
       
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div>
             <v-btn class="blue" dark fab small @click="refreshCategorias"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(categoria, i) of categorias" :key="categoria.id" class="mb-4">
           <div class="categoria-box">
-            <h2 class="categoria-title text-xs-center">{{ categoria.nombre }}</h2>
+            <h2 class="categoria-title text-center">{{ categoria.nombre }}</h2>
             <PrimaryBox class="categoria-bg" :active="categoria.condicion" :activeInteraction="activarModal" :bgBox="bgBox" :bgBackBox="bgBackBox" :index="i" />
-            <div class="categoria-textBox text-xs-center">
+            <div class="categoria-textBox text-center">
               <p class="mb-0 categoria-text" v-show="categoria.condicion">Activo</p> 
               <p class="mb-0 categoria-text" v-show="!categoria.condicion">Inactivo</p> 
             </div>
@@ -37,22 +37,22 @@
           <h3 v-show="create" class="title-modal headline title-modal">Crear Categoria</h3>
           <h3 v-show="!create" class="title-modal headline title-modal">Editar Categoria</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs12>
                   <v-text-field 
-                    color="blue"
                     label="Nombre de la categoria"
                     v-model="nombre"
                     :rules="[rules.required, rules.counterNombre]"
@@ -62,7 +62,6 @@
                 </v-flex>
                 <v-flex xs12>
                   <v-textarea
-                    color="blue"
                     label="Descripción"
                     auto-grow
                     @click:append="descripcion = ''"
@@ -83,9 +82,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearCategoria" :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarCategoria" :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="crearCategoria" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarCategoria" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -96,16 +95,16 @@
           <v-spacer></v-spacer>
           <h3 class="title-modal headline">{{ nombreDetail }}</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeDetailModal">
+          <v-btn icon color="blue" @click="closeDetailModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pb-0">
+        <v-card-text>
           <p>{{ descripcionDetail }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" flat @click="closeDetailModal">Cerrar</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDetailModal">Cerrar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -123,20 +122,19 @@
         <v-card-text>Confirma que quieres <strong>{{ activarText }}</strong> la categoria</v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" flat @click="activeDialog = false">Cancelar</v-btn>
+          <v-btn color="red darken-1" icon class="" @click="activeDialog = false"><v-icon>close</v-icon></v-btn>
           <v-spacer></v-spacer>
-          <v-btn color="green darken-1" flat @click="activarCategoria(index)">Aceptar</v-btn>
+          <v-btn color="green darken-1" icon @click="activarCategoria(index)"><v-icon>done</v-icon></v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginate"
           @next="paginate"
@@ -339,7 +337,6 @@ export default {
       this.index = index;
       this.id = this.categorias[index].id;
       this.create = false;
-      this.$refs.form.resetValidation();
       this.createModalMutation(true);
     },
 
@@ -528,12 +525,12 @@ export default {
   &-detail {
     position: absolute;
     bottom: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
     width: 50px;
     transition: .5s;
     cursor: pointer;
     &:hover {
-      transform: translateY(20px) scale(1.1);
+      transform: translateY(15px) scale(1.1);
     }
   }
   &-edit {

@@ -8,20 +8,20 @@
       </v-flex>
 
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div>
             <v-btn class="blue" dark fab small @click="refreshPersonal"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
         <v-flex xs4 v-for="(empleado, i) of personal" :key="empleado.id" class="mb-4">
           <div class="personal-box">
-            <div class="personal-content text-xs-center">
+            <div class="personal-content text-center">
               <h2 class="personal-title">{{ empleado.puesto_trabajo }}:</h2>
               <p class="mb-0 personal-apellido">{{ empleado.apellidos }}</p>
               <p class="mb-0 personal-nombre">{{ empleado.nombres }}</p>
             </div>
-            <div class="personal-textBox text-xs-center">
+            <div class="personal-textBox text-center">
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
@@ -39,18 +39,19 @@
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Pago del personal</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs3>
                   <p><strong>Apellidos</strong></p>
@@ -102,19 +103,18 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarPago"  :loading="isLoadBtn">Crear</v-btn>
-            <!-- <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn> -->
+            <v-btn color="blue" text @click="closeModal">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="registrarPago"  :loading="isLoadBtn">Crear</v-btn>
+            <!-- <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn> -->
         </v-card-actions>
       </v-card>
     </v-dialog>
     
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginatePersonal"
           @next="paginatePersonal"

@@ -83,10 +83,6 @@ img {
 
 // SIDENAV
 .sidenav {
-  // Scroll
-  &::-webkit-scrollbar {
-    display: none;
-  }
   &-items-active {
     @extend %bg-primary;
     box-shadow: $primary-shadow;
@@ -98,26 +94,17 @@ img {
   }
 }
 
-// Sidenav Mini
-.v-navigation-drawer--mini-variant {
-  // Mover subitems en mini
-  .v-list__group__items--no-action .v-list__tile {
-      ::before {
-        transform: translateX(-60px);
-      }
-  }
-
-  // Ocultar flecha de los groups en mini
-  .v-list__group__header__append-icon {
-    display: none;
+// Ocultar scrollbar
+.v-navigation-drawer__content {
+  &::-webkit-scrollbar {
+    display: none !important;
   }
 }
 
 // Subitems de un group
-.v-list__group__items--no-action .v-list__tile {
-  // Desactivando overflow hidden
-  .v-list__tile__title {
-    overflow: initial;
+.v-list-group__items {
+  .sidenav-subitems-active {
+    color: rgba(0, 0, 0, .87) !important;
   }
   // Icons de los subitems de un group
   ::before {
@@ -131,24 +118,27 @@ img {
   }
 }
 
-// Hover para item activado
-.theme--light.v-list .sidenav-items-active:hover {
-  @extend %bg-primary;
-}
-
-// Ocultando dividers
-.v-list__group.v-list__group--active::before {
-  display: none;
-}
-
 // Group Active
-.theme--light.v-list .group-active .v-list__group__header {
+.theme--light.v-list .group-active .v-list-group__header {
   color: #fff;
   @extend %bg-primary;
   box-shadow: $primary-shadow;
   .v-icon.material-icons.theme--light {
     color: #fff;
   }
+}
+
+.v-application .v-list-group--active.primary--text {
+  color: rgba(0, 0, 0, .87) !important;
+}
+
+// Group Arrow 
+.sidenav-group .v-icon.material-icons {
+    margin-top: 4px;
+}
+
+.theme--light.v-application .sidenav .group-active .v-list-group__header {
+  color: #fff !important;
 }
 
 // HEADER
