@@ -84,7 +84,7 @@ import { mapState, mapMutations } from 'vuex';
 export default {
   methods: {
     search(){},
-    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation']),
+    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation'])
   },
   computed: {
     ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),

@@ -99,7 +99,7 @@ class UserController extends Controller
     }
 
     public function getAllUsers(){
-        $personas = User::join('personas','users.id','=','personas.id')
+        $personas = User::join('personas','users.empleado_id','=','personas.id')
         ->join('roles','users.rol_id','=','roles.id')
         ->select('personas.id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')  
         ->orderBy('personas.id', 'desc')->get();

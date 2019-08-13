@@ -16,7 +16,7 @@ class Empleado extends Model
     ];
 
     public function persona(){
-        return $this->belongsTo('App\Persona');
+        return $this->belongsTo('App\Persona', 'id');
     }
     public function transacciones(){
         return $this->hasMany('App\Transaccion','persona_id','id');
@@ -24,5 +24,5 @@ class Empleado extends Model
     public function user(){
         return $this->hasOne('App\User');
     }
-    
+
 }

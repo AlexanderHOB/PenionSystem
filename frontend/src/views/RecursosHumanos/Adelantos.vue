@@ -225,8 +225,6 @@ export default {
       id: 0,
       disabled: true,
       isLoadBtn: false,
-      // Datos para detalles del adelanto
-      adelantoDetail: false,
       //Datos para el personal
       personal: {},
       allPersonal: [],
@@ -318,6 +316,8 @@ export default {
         }
       } catch (error) {
         this.allPersonal = [];
+        this.snackbarMutation({value: true, text: 'Error al obtener el personal', color: 'error'});
+
       }finally {
         this.isLoadingPersonal = false;
       }

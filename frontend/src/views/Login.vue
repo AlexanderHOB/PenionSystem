@@ -34,9 +34,41 @@
         </v-card-text>
       </v-card>
 
-          <v-dialog
-      v-model="modalPassword"
+      <v-dialog
+        v-model="modalPassword"
+        width="500"
+      >
+        <v-card class="modal">
+          <v-card-title class="pb-0">
+            <v-spacer></v-spacer>
+            <h3 class="modal-password-title">{{ name }}</h3>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text class="pb-4">
+            <v-text-field
+              :append-icon="passwordShow ? 'visibility' : 'visibility_off'"
+              :type="passwordShow ? 'text' : 'password'"
+              name="password"
+              label="Ingese su contraseña"
+              hint="Al menos 8 caracteres"
+              class="input-group--focused"
+              @click:append="passwordShow = !passwordShow"
+            ></v-text-field>
+          </v-card-text>
+          <v-card-actions class="pb-4">
+            <v-spacer></v-spacer>
+            <v-btn flat color="green">Ingresar</v-btn>
+            <v-btn flat color="red" @click="modalPassword = false">Cancelar</v-btn>
+            <v-spacer></v-spacer>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-dialog>
+
+    <v-dialog
+      v-model="test"
       width="500"
+      persistent
     >
       <v-card class="modal">
         <v-card-title class="pb-0">
@@ -46,29 +78,34 @@
         </v-card-title>
         <v-card-text class="pb-4">
           <v-text-field
+            name="password"
+            v-model="user"
+            label="nick"
+          ></v-text-field>
+          <v-text-field
+          v-model="pass"
             :append-icon="passwordShow ? 'visibility' : 'visibility_off'"
             :type="passwordShow ? 'text' : 'password'"
             name="password"
             label="Ingese su contraseña"
             hint="Al menos 8 caracteres"
-            class="input-group--focused"
             @click:append="passwordShow = !passwordShow"
           ></v-text-field>
         </v-card-text>
         <v-card-actions class="pb-4">
           <v-spacer></v-spacer>
-          <v-btn flat color="green">Ingresar</v-btn>
-          <v-btn flat color="red" @click="modalPassword = false">Cancelar</v-btn>
+          <v-btn flat color="red" @click="test = false">Cancelar</v-btn>
+          <v-btn flat color="green" @click="login">Ingresar</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
-    </v-dialog>
     </v-dialog>
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
+import axios from 'axios';
 
 export default {
   data(){
@@ -118,7 +155,10 @@ export default {
       usuarios: [],
       name: '',
       modalPassword: false,
-      passwordShow: false
+      passwordShow: false,
+      test: true,
+      user: '',
+      pass: ''
     }
   },
   methods: {
@@ -130,10 +170,42 @@ export default {
     openModalPassword(index){
       this.name = this.usuarios[index].name;
       this.modalPassword = true;
-    }
+    },
+    async login(){
+      let response = await axios.post(this.url + 'auth/login',
+      {
+        email: this.user,
+        password: this.pass,
+        remember_me: false,
+      },
+      {
+        headers: {
+          Apikey: this.config.headers.Authorizations,
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+       }
+      }
+      );
+      console.log(response);
+      this.tokenMutation(response.data.access_token);
+      this.authMutation(response.data);
+      console.log(this.token);
+      console.log(this.auth.token_type + ' ' + this.auth.access_token);
+      let res = await axios.get(this.url + 'auth/user',
+      {
+        headers: {
+          Apikey: this.config.headers.Authorizations,
+          Authorization: this.auth.token_type + ' ' + this.auth.access_token,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log(res);
+    },
+    ...mapMutations(['tokenMutation', 'authMutation'])
   },
   computed: {
-    ...mapState(['token'])
+    ...mapState(['url', 'config', 'token', 'auth'])
   },
 }
 </script>

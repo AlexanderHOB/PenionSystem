@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <template v-if="token !== 'token'">
+    <template v-if="token !== 'token' || (token === 'token' && user.rol !== 'administrador')">
       <router-view />
     </template>
 
-    <template  v-else>
+    <template  v-if="token === 'token' && user.rol === 'administrador'">
       <Sidenav />
       <v-content>
         <Header />
@@ -34,7 +34,7 @@
       ...mapMutations(['drawerMutation', 'miniMutation'])
     },
     computed: {
-      ...mapState(['token', 'drawerState', 'miniState']),
+      ...mapState(['token', 'user', 'drawerState', 'miniState']),
 
     }
   }
@@ -152,7 +152,8 @@ img {
 }
 
 // HEADER
-.header-waves .v-image__image {
+.header-waves .v-image__image,
+.mozo-header-waves .v-image__image {
   background-repeat: repeat-x;
 }
 
@@ -184,6 +185,13 @@ img {
     border-radius: 50px;
     background-color: rgba(0, 0, 0, .25);
   }
+}
+
+// MOZO
+.mesas-link.router-link-exact-active.router-link-active {
+	color: #fff;
+  @extend %bg-primary;
+  box-shadow: $primary-shadow;
 }
 </style>
 

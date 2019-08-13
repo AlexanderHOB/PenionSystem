@@ -7,6 +7,11 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     token: 'token',
+    testApiKey: process.env.VUE_APP_APIKEY,
+    auth: {},
+    user: {
+      rol: 'mozo'
+    },
     // Sidenav
     drawerState: true,
     miniState: true,
@@ -15,7 +20,7 @@ export default new Vuex.Store({
     url: 'http://127.0.0.1:8000/api/',
     config: {
       headers: {
-        Authorizations: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
+        Apikey: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
         'Content-Type': 'application/json'
       }
     },
@@ -48,6 +53,7 @@ export default new Vuex.Store({
     allAdelantosState: [],
     allDescuentosState: [],
     allUsuariosState: [],
+    allRolsState: []
   },
   mutations: {
     drawerMutation(state, value){
@@ -89,6 +95,12 @@ export default new Vuex.Store({
     searchDisabledMutation(state, value){
       state.searchDisabled = value;
     },
+    tokenMutation(state, value){
+      state.token = value;
+    },
+    authMutation(state, value){
+      state.auth = value;
+    },
     allMesasMutation(state, action){
       state.allMesasState = action;
     },
@@ -109,6 +121,9 @@ export default new Vuex.Store({
     },
     allUsuariosMutation(state, action){
       state.allUsuariosState = action;
+    },
+    allRolsMutation(state, action){
+      state.allRolsState = action;
     }
   },
   actions: {
@@ -139,6 +154,10 @@ export default new Vuex.Store({
     allUsuariosAction: async function({ state, commit }){
       let response = await axios.get(state.url + 'users', state.config);
       commit('allUsuariosMutation', response)
+    },
+    allRolsAction: async function({ state, commit }){
+      let response = await axios.get(state.url + 'users', state.config);
+      commit('allRolsMutation', response)
     }
   },
   getters: {
