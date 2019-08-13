@@ -1,6 +1,6 @@
 <template>
     <v-container fluid grid-list-xl>
-      <v-layout row wrap class="text-xs-center py-3">
+      <v-layout row wrap class="text-center py-3">
         <v-flex xs1></v-flex>
         <v-flex xs2>
           <router-link class="mesas-link" :to="{name: 'mozo-mesas-libres'}">Mesas Libres</router-link>

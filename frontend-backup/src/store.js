@@ -10,7 +10,7 @@ export default new Vuex.Store({
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
-      rol: 'administrador'
+      rol: 'mozo'
     },
     // Sidenav
     drawerState: true,

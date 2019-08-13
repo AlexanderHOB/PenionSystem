@@ -6,11 +6,11 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: '',
+    token: 'token',
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
-      rol: 'administrador'
+      rol: 'mozo'
     },
     // Sidenav
     drawerState: true,
@@ -166,6 +166,9 @@ export default new Vuex.Store({
   getters: {
     getToken(state){
       return state.token;
+    },
+    getRol(state){
+      return state.user.rol;
     }
   }
 })

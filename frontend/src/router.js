@@ -9,13 +9,27 @@ function requireAuth (to, from, next) {
   if (store.getters.getToken !== 'token') {
     next({ name: 'login' })
   } else {
+    if(to.matched[0].name === 'mozo' && store.getters.getRol !== 'mozo'){
+      next({ name: 'home' })
+    }
+
+    if(store.getters.getRol === 'mozo' && to.matched[0].name !== 'mozo'){
+      next({ name: 'mozo' })
+    }
+
     next()
   }
 }
 
 function Auth (to, from, next) {
   if (store.getters.getToken === 'token') {
-    next({ name: 'home' })
+    if(store.getters.getRol === 'admin') {
+      next({ name: 'home' })
+    }
+
+    if(store.getters.getRol === 'mozo') {
+      next({ name: 'mozo' })
+    }
   } else {
     next()
   }
@@ -40,46 +54,55 @@ export default new Router({
     {
       path: '/mesas',
       name: 'mesas',
+      beforeEnter: requireAuth,
       component: () => import( './views/Mesas.vue')
     },
     {
       path: '/categorias',
       name: 'categorias',
+      beforeEnter: requireAuth,
       component: () => import('./views/Categorias.vue')
     },
     {
       path: '/platillos',
       name: 'platillos',
+      beforeEnter: requireAuth,
       component: () => import('./views/Platillos.vue')
     },
     {
       path: '/personal',
       name: 'personal',
+      beforeEnter: requireAuth,
       component: () => import('./views/RecursosHumanos/Personal.vue')
     },
     {
       path: '/usuarios',
       name: 'usuarios',
+      beforeEnter: requireAuth,
       component: () => import('./views/RecursosHumanos/Usuarios.vue')
     },
     {
       path: '/adelantos',
       name: 'adelantos',
+      beforeEnter: requireAuth,
       component: () => import('./views/RecursosHumanos/Adelantos.vue')
     },
     {
       path: '/descuentos',
       name: 'descuentos',
+      beforeEnter: requireAuth,
       component: () => import('./views/RecursosHumanos/Descuentos.vue')
     },
     {
       path: '/pagos',
       name: 'pagos',
+      beforeEnter: requireAuth,
       component: () => import('./views/RecursosHumanos/Pagos.vue')
     },
     {
       path: '/mozo',
       name: 'mozo',
+      beforeEnter: requireAuth,
       component: () => import('./views/Mozo/Mozo.vue'),
       redirect: { name: 'mozo-mesas' },
       children: [

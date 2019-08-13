@@ -31,19 +31,19 @@
         </v-flex>
         <v-flex class="platillo" xs4>
           <mozo-platillo-box class="platillo-bg" :addPlatillo="addPlatillo" :index="1" />
-          <p class="platillo-text text-xs-center">Porción de arroz blanco</p>
+          <p class="platillo-text text-center">Porción de arroz blanco</p>
           <span class="platillo-add">+</span>
         </v-flex>
       </v-layout>
     </v-flex>
     <v-flex xs4>
       <v-card>
-        <v-card-title>
+        <v-card-title class="pb-5">
           <v-spacer></v-spacer>
           <h2>PEDIDO</h2>
           <v-spacer></v-spacer>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="black--text">
           <v-layout row wrap>
             <v-flex xs4><strong>N° pedido</strong></v-flex>
             <v-flex xs8>12345</v-flex>
@@ -52,20 +52,32 @@
             <v-flex xs4><strong>Mesa</strong></v-flex>
             <v-flex xs8>1</v-flex>
             <v-flex xs12>
-              <v-data-table
+              <!-- <v-data-table
                 :headers="headers"
                 :items="ordenes"
                 class="elevation-1"
               >
                 <template v-slot:items="props">
                   <td class="text-xs-center px-0">
-                    <img src="../../assets/img/mozo/eliminar.svg" alt="aumentar" class="actions">
-                    <img src="../../assets/img/mozo/aumentar.svg" alt="aumentar" class="actions">
-                    <img src="../../assets/img/mozo/disminuir.svg" alt="aumentar" class="actions">
+                    
                   </td>
                   <td class="text-xs-left px-0">{{ props.item.platillo }}</td>
                   <td class="text-xs-center px-0">{{ props.item.cantidad }}</td>
                   <td class="text-xs-center px-0">{{ props.item.valor }}</td>
+                </template>
+              </v-data-table> -->
+
+              <v-data-table
+                :headers="headers"
+                :items="ordenes"
+                class="elevation-1"
+              >
+                <template v-slot:item.action="{ item }">
+                  <div class="text-center px-0">
+                    <img src="../../assets/img/mozo/eliminar.svg" alt="aumentar" class="actions">
+                    <img src="../../assets/img/mozo/aumentar.svg" alt="aumentar" class="actions">
+                    <img src="../../assets/img/mozo/disminuir.svg" alt="aumentar" class="actions">
+                  </div>
                 </template>
               </v-data-table>
             </v-flex>
@@ -73,7 +85,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="yellow" round>Comanda</v-btn>
+          <v-btn class="yellow" rounded>Comanda</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
       </v-card>
@@ -94,7 +106,7 @@ export default {
         'arroces'
       ],
       headers: [
-        { text: 'Actions', align: 'center', sortable: false, value: '' },
+        { text: 'Actions', align: 'center', sortable: false, value: 'action' },
         { text: 'Pedido', align: 'center', width: 120, sortable: false, value: 'platillo' },
         { text: 'Cant', align: 'center', class: 'px-0', value: 'cantidad' },
         { text: 'Valor', align: 'center', class: 'px-0', value: 'valor' },
