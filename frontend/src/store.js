@@ -6,18 +6,18 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: 'token',
+    token: '',
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     user: {
-      rol: 'mozo'
+      rol: ''
     },
     // Sidenav
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
     // url: 'http://192.168.1.2:8000/api/',
-    url: 'http://127.0.0.1:8000/api/',
+    url: process.env.VUE_APP_API_URL,
     config: {
       headers: {
         Apikey: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',

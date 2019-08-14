@@ -223,7 +223,7 @@ export default {
           let res = await axios.get(this.url + 'auth/user',
           {
             headers: {
-              Apikey: this.config.headers.Authorizations,
+              Apikey: this.config.headers.Apikey,
               Authorization: this.auth.token_type + ' ' + this.auth.access_token,
               'Content-Type': 'application/json',
             }
