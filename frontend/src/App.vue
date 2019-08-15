@@ -1,10 +1,10 @@
 <template>
   <v-app>
-    <template v-if="token !== 'token' || (token === 'token' && user.rol !== 'admin')">
+    <template v-if="!token || (token && auth.rol !== 'Administrador')">
       <router-view />
     </template>
 
-    <template  v-if="token === 'token' && user.rol === 'admin'">
+    <template  v-if="token && auth.rol === 'Administrador'">
       <Sidenav />
       <v-content>
         <Header />
@@ -34,7 +34,7 @@
       ...mapMutations(['drawerMutation', 'miniMutation'])
     },
     computed: {
-      ...mapState(['token', 'user', 'drawerState', 'miniState']),
+      ...mapState(['token', 'auth', 'drawerState', 'miniState']),
 
     }
   }

@@ -51,14 +51,17 @@
             ></v-text-field>
           </form>
         </v-flex>
-        <v-flex v-if="headerActionCreate" xs12 sm3 class="pt-5 mt-2 text-xs-center text-sm-right">
-          <v-btn class="ma-0 indigo  white--text" rounded @click="createModalMutation(true)">
+        <v-flex sm2 class="pt-5 mt-2 text-center text-sm-right">
+            <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
+        </v-flex>
+        <v-flex v-if="headerActionCreate" xs12 sm2 class="pt-5 mt-2 text-center text-sm-right">
+          <v-btn class="indigo white--text" rounded @click="createModalMutation(true)">
             <v-icon left>add_circle_outline</v-icon>
             Nuevo
           </v-btn>
         </v-flex>
-        <v-flex v-if="headerActionReport" xs12 sm3 class="pt-5 mt-2 text-xs-center text-sm-right">
-          <v-btn class="ma-0 deep-purple white--text" rounded>
+        <v-flex v-if="headerActionReport" xs12 sm2 class="pt-5 mt-2 text-center text-sm-right">
+          <v-btn class="deep-purple white--text" rounded>
             <v-icon left>insert_drive_file</v-icon>
             Reporte
           </v-btn>
@@ -85,7 +88,14 @@ import { mapState, mapMutations } from 'vuex';
 export default {
   methods: {
     search(){},
-    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation'])
+    logout() {
+      this.tokenMutation('');
+      localStorage.removeItem('token');
+      this.authMutation({});
+      localStorage.removeItem('auth');
+      this.$router.push({name: 'login'})
+    },
+    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'tokenMutation', 'authMutation'])
   },
   computed: {
     ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),

@@ -34,6 +34,9 @@
               <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
             </router-link>
           </v-flex>
+          <v-flex class="pt-5">
+            <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
+          </v-flex>
         </v-layout>
       </v-container>
       <div class="mozo-header-waves">
@@ -56,7 +59,14 @@ import { mapState, mapMutations } from 'vuex';
 export default {
   methods: {
     search(){},
-    ...mapMutations(['breadcrumbMutation'])
+    logout() {
+      this.tokenMutation('');
+      localStorage.removeItem('token');
+      this.authMutation({});
+      localStorage.removeItem('auth');
+      this.$router.push({name: 'login'})
+    },
+    ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation'])
   },
   computed: {
     ...mapState(['breadcrumb'])

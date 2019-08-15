@@ -8,7 +8,7 @@
         <v-flex xs4 v-for="(item, i) in items" :key="item.id">
           <div class="login-card" @click="openModal(i)">
             <img src="../assets/img/login/logeo-inicio.svg" alt="Logeo" class="login-card-img">
-            <h2 class="login-card-title">{{ item.title }}</h2>
+            <h2 class="login-card-title text-center">{{ item.title }}</h2>
           </div>
         </v-flex>
       </v-layout>
@@ -215,32 +215,40 @@ export default {
             }
           );
 
-          console.log(response);
-          this.tokenMutation(response.data.access_token);
-          this.authMutation(response.data);
-          console.log(this.token);
-          console.log(this.auth.token_type + ' ' + this.auth.access_token);
+          this.tokenMutation(response.data.token_type + ' ' + response.data.access_token);
+          localStorage.setItem('token', this.token);
+          
           let res = await axios.get(this.url + 'auth/user',
           {
             headers: {
               Apikey: this.config.headers.Apikey,
-              Authorization: this.auth.token_type + ' ' + this.auth.access_token,
+              Authorization: this.token,
               'Content-Type': 'application/json',
             }
           });
 
-          console.log(res);
+          this.authMutation(res.data);
+          localStorage.setItem('auth', JSON.stringify(this.auth));
           this.modal = false;
+          this.redirect()
         }
       } catch (error) {
         this.error.state = true;
         this.error.message = 'Password invalida';
-        console.log(error)
       }finally {
         this.disabled = false;
         this.loginLoad = false;
       }
     },
+
+    redirect() {
+      if(this.auth.rol === 'Administrador') {
+        this.$router.push({name: 'home'})
+      }else if(this.auth.rol === 'Mozo') {
+        this.$router.push({name: 'mozo'})
+      }else if(this.auth.rol === 'Caja') {}
+    },
+
     ...mapMutations(['tokenMutation', 'authMutation']),
     ...mapActions(['allUsuariosAction'])
   },
@@ -306,6 +314,7 @@ export default {
       font-size: 32px;
       letter-spacing: 2px;
       font-weight: 400;
+      line-height: 100%;
       transition: .3s;
     }
   }

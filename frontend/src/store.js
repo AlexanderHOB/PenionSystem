@@ -9,9 +9,6 @@ export default new Vuex.Store({
     token: '',
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
-    user: {
-      rol: ''
-    },
     // Sidenav
     drawerState: true,
     miniState: true,
@@ -99,7 +96,7 @@ export default new Vuex.Store({
       state.token = value;
     },
     authMutation(state, value){
-      state.auth = value;
+      state.auth = {...value};
     },
     allMesasMutation(state, action){
       state.allMesasState = action;
@@ -168,7 +165,7 @@ export default new Vuex.Store({
       return state.token;
     },
     getRol(state){
-      return state.user.rol;
+      return state.auth.rol;
     }
   }
 })
