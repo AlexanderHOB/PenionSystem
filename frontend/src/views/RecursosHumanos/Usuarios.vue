@@ -693,13 +693,22 @@ export default {
           this.isLoadBtn = true;
           this.disabled = true;
 
-          let response = await axios.post(this.url + 'user/registrar', {
-            email: this.email,
-            color: this.color,
-            empleado_id: this.id,
-            rol_id: this.rol.id,
-            password: this.password
-          }, this.config);
+          let response = await axios.post(this.url + 'auth/signup', 
+            {
+              email: this.email,
+              color: this.color,
+              empleado_id: this.id,
+              rol_id: this.rol.id,
+              password: this.password
+            },
+            {
+              headers: {
+                Apikey: this.config.headers.Apikey,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+              }
+            }
+          );
 
           this.closeModal();
 
@@ -711,7 +720,7 @@ export default {
             this.allUsuarios.reverse();
             this.allUsuarios.push(response.data);
             this.allUsuarios.reverse();
-            this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
+            this.snackbarMutation({value: true, text: 'Usuario creado correctamente', color: 'success'});
             this.paginate();
             this.page = 1;
             this.backup.usuarios = [];
@@ -722,7 +731,7 @@ export default {
               return e.id !== self.id
             });
           }else{
-            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al personal', color: 'error'});
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al usuario', color: 'error'});
           }
         }
       } catch (error) {
@@ -754,10 +763,10 @@ export default {
             color: colorBup,
             rol_id: rolIdBup
           }, this.config);
-          this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'});
+          this.snackbarMutation({value: true, text: 'Usuario editado correctamente', color: 'success'});
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el usuario', color: 'error'});
       }
     },
 

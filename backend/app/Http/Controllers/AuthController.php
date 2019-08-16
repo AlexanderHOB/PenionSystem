@@ -32,6 +32,7 @@ class AuthController extends Controller
             'documento' => $user->empleado->persona->documento,
             'email' => $user->empleado->persona->email,
             'id' => $user->id,
+            'color' => $user->color,
             'empleado_id' => $user->empleado_id,
             'nombres' => $user->empleado->persona->nombres,
             'rol' => $user->rol->nombre,
@@ -39,6 +40,7 @@ class AuthController extends Controller
         ];
         return $newuser;
     }
+
     public function login(Request $request)
     {
         $request->validate([
