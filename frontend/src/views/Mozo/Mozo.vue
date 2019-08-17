@@ -34,7 +34,7 @@
               <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
             </router-link>
           </v-flex>
-          <v-flex class="pt-5">
+          <v-flex class="pt-5 mt-5">
             <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
           </v-flex>
         </v-layout>

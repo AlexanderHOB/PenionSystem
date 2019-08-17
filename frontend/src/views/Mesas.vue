@@ -399,7 +399,7 @@ export default {
       }
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchPlaceholderMutation', 'searchQueryMutation', 'searchDisabledMutation', 'searchItemsMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchPlaceholderMutation', 'searchQueryMutation', 'searchDisabledMutation']),
     ...mapActions(['allMesasAction'])
   },
   computed: {
