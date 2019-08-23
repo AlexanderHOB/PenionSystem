@@ -154,6 +154,9 @@ export default {
     },
 
     refreshMesas(){
+      if(this.refreshUI) {
+        this.refreshUIMutation(false);
+      }
       this.refresh = true;
       this.getMesas();
     },
@@ -173,11 +176,18 @@ export default {
       this.mesaSelect = this.mesas[index]      
     },
 
-    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation', 'refreshUIMutation']),
     ...mapActions(['allMesasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'allMesasState'])
+    ...mapState(['url', 'config', 'loadingFish', 'allMesasState', 'refreshUI'])
+  },
+  watch: {
+    refreshUI() {
+      if(this.refreshUI) {
+        this.refreshMesas()
+      }
+    }
   },
   filters: {
     persona(capacidad){

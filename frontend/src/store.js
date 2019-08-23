@@ -50,7 +50,9 @@ export default new Vuex.Store({
     allAdelantosState: [],
     allDescuentosState: [],
     allUsuariosState: [],
-    allRolsState: []
+    allRolsState: [],
+    //
+    refreshUI: false
   },
   mutations: {
     drawerMutation(state, value){
@@ -124,6 +126,9 @@ export default new Vuex.Store({
     },
     allRolsMutation(state, action){
       state.allRolsState = action;
+    },
+    refreshUIMutation(state, value) {
+      state.refreshUI = value
     }
   },
   actions: {

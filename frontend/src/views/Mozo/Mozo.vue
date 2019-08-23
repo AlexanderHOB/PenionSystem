@@ -10,6 +10,9 @@
           </div>
           </v-flex>
           <v-flex xs12 sm3 class="mozo-header-user pt-3">
+            <div class="ml-5">
+              <v-btn class="blue ml-5" dark fab small @click="refreshUIMutation(true)"><v-icon>replay</v-icon></v-btn>
+            </div>
             <div class="mozo-header-userBox fill-height">
               <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
               <v-img
@@ -66,7 +69,7 @@ export default {
       localStorage.removeItem('auth');
       this.$router.push({name: 'login'})
     },
-    ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation'])
+    ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation', 'refreshUIMutation'])
   },
   computed: {
     ...mapState(['breadcrumb'])
@@ -76,7 +79,6 @@ export default {
   }
 }
 </script>
-
 
 <style lang="scss" scoped>
 .mozo {
@@ -107,7 +109,7 @@ export default {
     }
     &-user {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
     }
     &-userImg {
       height: 100%;
