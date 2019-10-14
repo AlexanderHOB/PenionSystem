@@ -122,6 +122,9 @@ export default new Vuex.Store({
     allUsuariosMutation(state, action){
       state.allUsuariosState = action;
     },
+    allUsuariosMutation(state, action){
+      state.allUsuariosState = action;
+    },
     allRolsMutation(state, action){
       state.allRolsState = action;
     }
@@ -156,13 +159,16 @@ export default new Vuex.Store({
       commit('allUsuariosMutation', response)
     },
     allRolsAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'users', state.config);
+      let response = await axios.get(state.url + 'roles', state.config);
       commit('allRolsMutation', response)
     }
   },
   getters: {
     getToken(state){
       return state.token;
+    },
+    getRol(state){
+      return state.user.rol;
     }
   }
 })

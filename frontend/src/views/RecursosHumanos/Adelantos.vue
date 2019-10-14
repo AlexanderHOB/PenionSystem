@@ -1,30 +1,27 @@
 <template>
   <v-container grid-list-xl>
     <v-layout row wrap>
-      <v-flex xs12 class="d-flex align-center">
+      <v-flex xs12 class="d-flex align-center justify-space-between">
         <h1 class="display-1">{{ title }}</h1>
-        <div class="text-xs-right">
+        <div>
           <v-btn class="blue" dark fab small @click="refreshAdelantos"><v-icon>replay</v-icon></v-btn>
         </div>
       </v-flex>
       <v-flex xs12>
-         <v-data-table
+        <v-data-table
           :headers="headers"
           :items="adelantos"
           :loading="isLoad"
+          loading-text="Loading..."
           class="elevation-1"
         >
-          <v-progress-linear v-slot:progress color="blue" indeterminate></v-progress-linear>
-          <template v-slot:items="props">
-            <td>{{ props.item.tipo }}</td>
-            <td class="text-xs-right">{{ props.item.fecha_transaccion.split('-').reverse().join('-') }}</td>
-            <td class="text-xs-right">{{ props.item.monto }}</td>
-            <td class="text-xs-right">{{ props.item.motivo }}</td>
-            <td class="text-xs-center">
-              <v-btn icon @click="editarAdelantoModal(props.item.id)">
-                <v-icon>create</v-icon>
-              </v-btn>
-            </td>
+          <template v-slot:item.fecha_transaccion="{ item }">
+              <span>{{ item.fecha_transaccion | reverseDate }}</span>
+          </template>
+          <template v-slot:item.action="{ item }">
+            <v-btn icon @click="editarAdelantoModal(item.id)">
+              <v-icon>create</v-icon>
+            </v-btn>
           </template>
         </v-data-table>
       </v-flex>
@@ -36,25 +33,25 @@
           <v-spacer></v-spacer>
           <h3 class="headline title-modal">Datos del personal</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs12  v-show="create">
                   <v-autocomplete
                     v-model="personal"
                     :items="items"
                     :loading="isLoadingPersonal"
-                    color="blue"
                     hide-no-data
                     hide-selected
                     item-text="fullName"
@@ -106,15 +103,14 @@
                   <p>{{ area }}</p>
                 </v-flex>
                 <v-flex xs12>
-                  <h3 v-show="create" class="headline title-modal text-xs-center">Registrar Adelanto</h3>
-                  <h3 v-show="!create" class="headline title-modal text-xs-center">Editar Adelanto</h3>
+                  <h3 v-show="create" class="headline title-modal text-center">Registrar Adelanto</h3>
+                  <h3 v-show="!create" class="headline title-modal text-center">Editar Adelanto</h3>
                 </v-flex>
                 <v-flex xs6>
                   <v-menu
                     v-model="menuDate"
                     :close-on-content-click="false"
                     :nudge-right="40"
-                    lazy
                     transition="scale-transition"
                     offset-y
                     full-width
@@ -122,7 +118,6 @@
                   >
                   <template v-slot:activator="{ on }">
                     <v-text-field
-                      color="blue"
                       v-model="fechaAdelanto"
                       label="Fecha de adelanto"
                       prepend-inner-icon="event"
@@ -137,7 +132,6 @@
                 </v-flex>
                 <v-flex xs6>
                   <v-text-field 
-                    color="blue"
                     label="Monto"
                     v-model="monto"
                     :rules="[rules.required]"
@@ -148,7 +142,6 @@
                 </v-flex>
                 <v-flex xs12>
                   <v-textarea
-                    color="blue"
                     label="Motivo"
                     auto-grow
                     @click:append="motivo = ''"
@@ -169,9 +162,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="registrarAdelanto"  :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="registrarAdelanto"  :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarAdelanto"  :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -197,11 +190,11 @@ export default {
       //Datos para los adelantos
       adelantos: [],
       headers: [
-        { text: 'Personal',align: 'left',  value: 'tipo' },
+        { text: 'Personal', align: 'left',  value: 'tipo' },
         { text: 'Fecha', align: 'center', width: 120, value: 'fecha_transaccion' },
-        { text: 'Monto',align: 'center', value: 'monto' },
-        { text: 'Motivo',align: 'center', value: 'motivo' },
-        { text: 'Acciones',align: 'center', sortable: false, value: '' }
+        { text: 'Monto', align: 'center', value: 'monto' },
+        { text: 'Motivo', align: 'center', value: 'motivo' },
+        { text: 'Acciones', align: 'center', sortable: false, value: 'action' }
       ],
       isLoad: true,
       refresh: false,
@@ -405,8 +398,9 @@ export default {
       this.celular = '';
       this.puesto = '';
       this.area = '';
+      this.disabledDate = false;
       this.date = new Date().toISOString().substr(0, 10);
-      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
+      this.fechaAdelanto = this.date.split('-').reverse().join('-');
       this.disabled = true;
       this.disabledDate = true;
       this.monto = '';
@@ -491,6 +485,11 @@ export default {
     },
     searchQuery(){
       this.searchAdelantos(this.searchQuery);
+    }
+  },
+  filters: {
+    reverseDate(str) {
+      return str.split('-').reverse().join('-')
     }
   },
   async created(){

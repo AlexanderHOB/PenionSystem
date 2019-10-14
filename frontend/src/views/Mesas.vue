@@ -8,9 +8,9 @@
         <ErrorMessage :errorMessage="messageMesas" :refresh="refreshMesas" />
       </v-flex>
       <template v-else>
-        <v-flex xs12 class="d-flex align-center">
+        <v-flex xs12 class="d-flex align-center justify-space-between">
           <h1 class="display-1">{{ title }}</h1>
-          <div class="text-xs-right">
+          <div>
             <v-btn class="blue" dark fab small @click="refreshMesas"><v-icon>replay</v-icon></v-btn>
           </div>
         </v-flex>
@@ -25,12 +25,12 @@
             <v-card-title class="pt-0">
                 <h2>{{ mesa.numero }}</h2>
             </v-card-title>
-            <v-card-text class="py-0">
-              <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad == 1 ? 'persona' : 'personas' }}</strong></p>
+            <v-card-text class="pb-0">
+              <p><strong class="black--text">Capacidad: {{ mesa.capacidad | persona }}</strong></p>
               <p>{{ mesa.descripcion }}</p>
             </v-card-text>
             <v-card-actions>
-              <v-btn color="green" flat @click="editarMesaModal(i)">Editar Mesa</v-btn>
+              <v-btn color="green" text @click="editarMesaModal(i)">Editar Mesa</v-btn>
             </v-card-actions>
           </v-card>
         </v-flex>
@@ -44,44 +44,42 @@
           <h3 v-show="create" class="headline title-modal">Crear Mesa</h3>
           <h3 v-show="!create" class="headline title-modal">Editar Mesa</h3>
           <v-spacer></v-spacer>
-          <v-btn icon color="blue--text" @click="closeModal">
+          <v-btn icon color="blue" @click="closeModal">
             <v-icon>close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-0">
+        <v-card-text>
           <v-form
             ref="form"
             lazy-validation
             v-model="valid"
             @submit.prevent="formAction"
+            autocomplete="off"
           >
-            <v-container>
+            <v-container grid-list-lg>
               <v-layout row wrap>
                 <v-flex xs12 sm6>
                   <v-text-field
-                    color="blue"
                     label="Número de mesa"
                     v-model="numero"
                     :rules="[rules.required, rules.zero, unique]"
                     counter="2"
-                    mask="##"
+                    v-mask="'##'"
                     :disabled="disabled"
                   ></v-text-field>
                 </v-flex> 
                 <v-flex xs12 sm6>
                   <v-text-field
-                    color="blue"
                     label="Capacidad"
                     v-model="capacidad"
-                    :rules="[rules.required, rules.maxValue, rules.zero]"
+                    :rules="[rules.required, rules.maxValue]"
                     counter="2"
-                    mask="##"
+                    v-mask="'##'"
                     :disabled="disabled"
                   ></v-text-field>
                 </v-flex>
                 <v-flex xs12>
                   <v-textarea
-                    color="blue"
                     label="Descripción"
                     auto-grow
                     @click:append="descripcion = ''"
@@ -102,19 +100,18 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-            <v-btn color="red darken-1" flat @click="closeModal" :disabled="disabled">Cerrar</v-btn>
-            <v-btn :disabled="!valid" v-show="create" color="green darken-1" flat @click="crearMesa" :loading="isLoadBtn">Crear</v-btn>
-            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" flat @click="editarMesa" :loading="isLoadBtn">Editar</v-btn>
+            <v-btn color="red darken-1" text @click="closeModal" :disabled="disabled">Cerrar</v-btn>
+            <v-btn :disabled="!valid" v-show="create" color="green darken-1" text @click="crearMesa" :loading="isLoadBtn">Crear</v-btn>
+            <v-btn :disabled="!valid" v-show="!create" color="green darken-1" text @click="editarMesa" :loading="isLoadBtn">Editar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <template v-if="pageTotal">
-      <div class="text-xs-center mt-4">
+      <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
-          color="blue"
           circle
           @input="paginate"
           @next="paginate"
@@ -132,12 +129,14 @@
 
 <script>
 import axios from 'axios';
-import LoadingDialog from '../components/loading/LoadingDialog';
-import LoadingFish from '../components/loading/LoadingFish';
-import ErrorMessage from '../components/messages/ErrorMessage';
-import AlertNotifications from '../components/messages/AlertNotifications';
+import { mask } from 'vue-the-mask'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import LoadingDialog from '../components/loading/LoadingDialog'
+import LoadingFish from '../components/loading/LoadingFish'
+import ErrorMessage from '../components/messages/ErrorMessage'
+import AlertNotifications from '../components/messages/AlertNotifications'
+
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -145,6 +144,9 @@ export default {
     LoadingFish,
     ErrorMessage,
     AlertNotifications
+  },
+  directives: {
+    mask,
   },
   data:() => ({
     title: 'Mesas',
@@ -170,7 +172,7 @@ export default {
     rules: {
       required: value => !!value || 'Required.',
       counter: value => value.length <= 50 || '50 caracteres como maximo',
-      zero: value => value.charAt(0) != 0 || 'el primer digito no puede ser 0',
+      zero: value => value.charAt(0) != 0 || 'El primer digito no puede ser 0',
       maxValue: value => value <= 30 || 'la capacidad no puede ser más de 30'
     },
     // Data para editar Mesa
@@ -221,7 +223,7 @@ export default {
       } catch (error) {
         this.headerActionsMutation({create: false, report: false});
         this.pageTotal = 0;
-        this.messageMesas = 'Error al conctar con el servidor';
+        this.messageMesas = 'Error al conectar con el servidor';
         this.searchDisabledMutation(true);
       }finally {
         this.loadingDialogMutation(false);
@@ -286,18 +288,18 @@ export default {
 
     // MODAL PARA EDITAR MESA
     editarMesaModal(index){
-      this.numero = this.mesas[index].numero;
+      this.createModalMutation(true);
+      this.numero = this.mesas[index].numero.toString();
       this.capacidad = this.mesas[index].capacidad;
       this.descripcion = this.mesas[index].descripcion;
       this.index = index;
       this.id = this.mesas[index].id;
       this.create = false;
-      this.$refs.form.resetValidation();
-      this.createModalMutation(true);
     },
 
     // CERRAR MODAL
     closeModal(){
+      this.$refs.form.resetValidation();
       this.createModalMutation(false);
       setTimeout(this.resetForm, 100);
     },
@@ -308,7 +310,6 @@ export default {
       this.capacidad = '';
       this.descripcion = '';
       this.create = true;
-      this.$refs.form.resetValidation();
     },
 
     // CREAR MESAS
@@ -415,11 +416,28 @@ export default {
           }
         }
         return !counter || 'Este número ya esta en uso'
+      },
+      zero() {
+        // var zero = false;
+        // if(this.numero.charAt(0) == 0){
+        // if(this.numero.substr(0, 1) == 0){
+          // zero = true;
+        // }
+        // return !zero || 'El primer digito no puede ser 0'
       }
   },
   watch: {
     searchQuery(){
         this.searchMesas(this.searchQuery);
+    }
+  },
+  filters: {
+    persona(capacidad){
+      if(capacidad == 1){
+        return capacidad + ' persona'
+      }else {
+        return capacidad + ' personas'
+      }
     }
   },
   async created() {

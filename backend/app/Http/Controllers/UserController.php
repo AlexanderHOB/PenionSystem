@@ -31,57 +31,62 @@ class UserController extends Controller
     }
     public function store(Request $request)
     {
-        try{
-            DB::beginTransaction();
+        $request->validate([
+            'email'    => 'required|string|email',
+            'password' => 'required|string',
+            'color'    => 'required|string|max:7'
+        ]);
+        $user = new User([
+            'email'         => $request->email,
+            'color'         => $request->color,
+            'empleado_id'   => $request->empleado_id,
+            'rol_id'        => $request->rol_id,
+            'password' => bcrypt($request->password),
+        ]);
+        $user->save();
 
-            $persona            = new Persona();
-            $persona->nombre    = $request->nombre;
-            $persona->dni       = $request->dni;
-            $persona->direccion = $request->direccion;
-            $persona->celular   = $request->celular;
-            $persona->email     = $request->email;
-            $persona->save();
-
-            $user = new User();
-            $user->id           = $persona->id;
-            $user->rol_id       = $request->rol_id;
-            $user->email        = $request->email;
-            $user->password     = bcrypt( $request->password);
-            $user->color        =$request->color;
-            $user->condicion    = '1';
-            $user->save();
-
-            DB::commit();
-        } catch (Exception $e){
-            DB::rollBack();
-        }
+        $newuser = [
+            'apellidos' => $user->empleado->persona->apellidos,
+            'celular' => $user->empleado->persona->celular,
+            'condicion' => 1,
+            'direccion' => $user->empleado->persona->direccion,
+            'documento' => $user->empleado->persona->documento,
+            'email' => $user->empleado->persona->email,
+            'id' => $user->id,
+            'color' => $user->color,
+            'empleado_id' => $user->empleado_id,
+            'nombres' => $user->empleado->persona->nombres,
+            'rol' => $user->rol->nombre,
+            'rol_id' => $user->rol_id
+        ];
+        return $newuser;
     }
 
     public function update($id, Request $request)
     {
-        try{
-            DB::beginTransaction();
+        $request->validate([
+            'color'    => 'required|string|max:7'
+        ]);
+        $user = User::findOrFail($id);
+        $user->color = $request->color;
+        $user->rol_id = $request->rol_id;
 
-            $user = User::findOrFail($request->id);
-            $persona = Persona::findOrFail($user->id);
-            $persona->nombre    = $request->nombre;
-            $persona->dni       = $request->dni;
-            $persona->direccion = $request->direccion;
-            $persona->celular   = $request->celular;
-            $persona->email     = $request->email;
-            $persona->save();
-            
-            $user->email    = $request->email;
-            $user->password = bcrypt( $request->password);
-            $user->condicion = '1';
-            $user->rol_id   = $request->rol_id;
-            $user->color    = $request->color;
-            $user->save();
+        $user->save();
 
-            DB::commit();
-        } catch (Exception $e){
-            DB::rollBack();
-        }
+        return $user;
+    }
+
+    public function updatePass($id, Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string'
+        ]);
+        $user = User::findOrFail($id);
+        $user->password = bcrypt($request->pasword);
+
+        $user->save();
+
+        return $user;
     }
 
     public function desactivar($id)
@@ -101,7 +106,7 @@ class UserController extends Controller
     public function getAllUsers(){
         $personas = User::join('personas','users.empleado_id','=','personas.id')
         ->join('roles','users.rol_id','=','roles.id')
-        ->select('personas.id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol')  
+        ->select('users.id', 'personas.id as empleado_id', 'personas.apellidos','personas.nombres','personas.documento','personas.direccion','personas.celular','personas.email','users.email','users.password','users.condicion','users.rol_id','roles.nombre as rol','users.color')
         ->orderBy('personas.id', 'desc')->get();
 
         return $personas;

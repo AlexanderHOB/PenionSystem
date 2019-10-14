@@ -4,12 +4,12 @@
       <v-container class="mozo-header pb-2">
         <v-layout row wrap class="mozo-header-layout">
           <v-flex xs4></v-flex>
-          <v-flex xs4 class="pt-1">
+          <v-flex xs4 class="pt-3">
             <div class="mozo-header-breadcrumbBox d-flex align-center fill-height">
               <p class="mozo-header-breadcrumb mb-0"><span class="yellow--text">El Peñon \</span> {{ breadcrumb }}</p>
           </div>
           </v-flex>
-          <v-flex xs12 sm3 class="mozo-header-user pt-1">
+          <v-flex xs12 sm3 class="mozo-header-user pt-3">
             <div class="mozo-header-userBox fill-height">
               <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
               <v-img
@@ -18,16 +18,17 @@
                 class="mozo-header-userImg"
                 contain
                 height="40"
+                width="40"
               ></v-img>
             </div>
           </v-flex>
-          <v-flex xs4 class="pt-4">
+          <v-flex xs4 class="pt-5">
             <router-link class="mozo-buttonBox" :to="{name: 'mozo-mesas'}">
               <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
               <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/mesas.svg" alt="mesas" class="mozo-buttonIcon"><span>Mesas</span></p>
             </router-link>
           </v-flex>
-          <v-flex xs4 class="pt-4">
+          <v-flex xs4 class="pt-5">
             <router-link class="mozo-buttonBox" :to="{name: 'mozo-menu'}">
               <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
               <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>

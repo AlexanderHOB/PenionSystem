@@ -10,7 +10,6 @@
     {{ snackbarState.text }}
     <v-btn
       icon
-      flat
       @click="snackbarState.state = false"
     >
       <v-icon>close</v-icon>

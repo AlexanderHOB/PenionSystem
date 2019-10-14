@@ -15,9 +15,9 @@
                 <h2>1</h2>
                 <div class="mesa-color"  :style="{'background-color':  '#2151aa'}"></div>
             </v-card-title>
-            <v-card-text class="py-0">
+            <v-card-text class="pb-0">
               <!-- <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad == 1 ? 'persona' : 'personas' }}</strong></p> -->
-              <p><strong>Capacidad: 1 persona</strong></p>
+              <p class="black--text"><strong>Capacidad: 1 persona</strong></p>
               <p>descripción</p>
             </v-card-text>
           </v-card>
@@ -27,18 +27,18 @@
     <v-flex xs4>
       <v-card>
         <v-container>
-          <v-card-title>
+          <v-card-title class="pb-5">
           <v-spacer></v-spacer>
           <h2>Mesa Número 1</h2>
           <v-spacer></v-spacer>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="pb-0">
           <p>Capacidad: 25 personas</p>
           <p>Descripción: Mesa con reserva</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn flat color="green">Ver pedidos</v-btn>
+          <v-btn text color="green">Ver pedidos</v-btn>
           <v-spacer></v-spacer>
         </v-card-actions>
         </v-container>

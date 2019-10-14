@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div class="text-xs-center pt-5 mt-5">
+    <div class="text-center pt-5 mt-5">
       <h1 class="blue--text notFound-title">404 Error</h1>
       <p class="notFound-text">No se pudo encontrar la pagina que buscas</p>
       <v-btn round large class="blue white--text" :to="{name: 'home'}">Volver</v-btn>
