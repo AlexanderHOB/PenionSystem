@@ -6,18 +6,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: 'token',
+    token: '',
     testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
-    user: {
-      rol: 'mozo'
-    },
     // Sidenav
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
     // url: 'http://192.168.1.2:8000/api/',
-    url: 'http://127.0.0.1:8000/api/',
+    url: process.env.VUE_APP_API_URL,
     config: {
       headers: {
         Apikey: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
@@ -53,7 +50,9 @@ export default new Vuex.Store({
     allAdelantosState: [],
     allDescuentosState: [],
     allUsuariosState: [],
-    allRolsState: []
+    allRolsState: [],
+    //
+    refreshUI: false
   },
   mutations: {
     drawerMutation(state, value){
@@ -99,7 +98,7 @@ export default new Vuex.Store({
       state.token = value;
     },
     authMutation(state, value){
-      state.auth = value;
+      state.auth = {...value};
     },
     allMesasMutation(state, action){
       state.allMesasState = action;
@@ -127,6 +126,9 @@ export default new Vuex.Store({
     },
     allRolsMutation(state, action){
       state.allRolsState = action;
+    },
+    refreshUIMutation(state, value) {
+      state.refreshUI = value
     }
   },
   actions: {
@@ -168,7 +170,7 @@ export default new Vuex.Store({
       return state.token;
     },
     getRol(state){
-      return state.user.rol;
+      return state.auth.rol;
     }
   }
 })

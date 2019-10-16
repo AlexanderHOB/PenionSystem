@@ -33,6 +33,7 @@ class AuthController extends Controller
             'documento' => $user->empleado->persona->documento,
             'email' => $user->empleado->persona->email,
             'id' => $user->id,
+            'color' => $user->color,
             'empleado_id' => $user->empleado_id,
             'nombres' => $user->empleado->persona->nombres,
             'rol' => $user->rol->nombre,
@@ -40,6 +41,7 @@ class AuthController extends Controller
         ];
         return $newuser;
     }
+
     public function login(Request $request)
     {
         $request->validate([
@@ -77,14 +79,19 @@ class AuthController extends Controller
 
     public function user(Request $request)
     {
-        $user= $request->user();    
-        $empleado=Persona::join('empleados','personas.id','=','empleados.id')
-        ->join('users','users.empleado_id','=','personas.id')
-        ->join('roles','users.rol_id','=','roles.id')
-        ->select(DB::raw("CONCAT(personas.nombres,roles.nombre) AS fullname"))
-        ->where('personas.id','=',$user->empleado_id)
-        ->get();
-        
-        return response()->json($empleado);
+        $user = $request->user();
+        $userMOD = [
+            'color' => $user->color,
+            'apellidos' => $user->empleado->persona->apellidos,
+            'condicion' => 1,
+            'email' => $user->empleado->persona->email,
+            'id' => $user->id,
+            'empleado_id' => $user->empleado_id,
+            'nombres' => $user->empleado->persona->nombres,
+            'rol' => $user->rol->nombre,
+            'rol_id' => $user->rol_id
+        ];
+
+        return $userMOD;
     }
 }

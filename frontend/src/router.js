@@ -6,14 +6,17 @@ import store from './store'
 Vue.use(Router)
 
 function requireAuth (to, from, next) {
-  if (store.getters.getToken !== 'token') {
+
+  checkLocal();
+
+  if (!store.getters.getToken) {
     next({ name: 'login' })
   } else {
-    if(to.matched[0].name === 'mozo' && store.getters.getRol !== 'mozo'){
+    if(to.matched[0].name === 'mozo' && store.getters.getRol !== 'Mozo'){
       next({ name: 'home' })
     }
 
-    if(store.getters.getRol === 'mozo' && to.matched[0].name !== 'mozo'){
+    if(store.getters.getRol === 'Mozo' && to.matched[0].name !== 'mozo'){
       next({ name: 'mozo' })
     }
 
@@ -22,16 +25,33 @@ function requireAuth (to, from, next) {
 }
 
 function Auth (to, from, next) {
-  if (store.getters.getToken === 'token') {
-    if(store.getters.getRol === 'admin') {
+
+  checkLocal();
+
+  if (store.getters.getToken) {
+    if(store.getters.getRol === 'Administrador') {
       next({ name: 'home' })
     }
 
-    if(store.getters.getRol === 'mozo') {
+    if(store.getters.getRol === 'Mozo') {
       next({ name: 'mozo' })
     }
   } else {
     next()
+  }
+}
+
+function checkLocal() {
+  const user = typeof localStorage.getItem('auth') === 'string' ?
+  JSON.parse(localStorage.getItem('auth')) :
+  ''
+  const token = typeof localStorage.getItem('token') === 'string' ?
+  localStorage.getItem('token') :
+  ''
+
+  if(user && token){
+     store.commit('tokenMutation', token)
+     store.commit('authMutation', user)
   }
 }
 
@@ -40,13 +60,13 @@ export default new Router({
   base: process.env.BASE_URL,
   routes: [
     {
-      path: '/login',
+      path: '/',
       name: 'login',
       beforeEnter: Auth,
       component: () => import( './views/Login.vue')
     },
     {
-      path: '/',
+      path: '/dashboard',
       name: 'home',
       beforeEnter: requireAuth,
       component: Home

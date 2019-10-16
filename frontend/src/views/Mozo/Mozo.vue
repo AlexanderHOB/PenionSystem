@@ -10,6 +10,9 @@
           </div>
           </v-flex>
           <v-flex xs12 sm3 class="mozo-header-user pt-3">
+            <div class="ml-5">
+              <v-btn class="blue ml-5" dark fab small @click="refreshUIMutation(true)"><v-icon>replay</v-icon></v-btn>
+            </div>
             <div class="mozo-header-userBox fill-height">
               <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
               <v-img
@@ -34,6 +37,9 @@
               <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
             </router-link>
           </v-flex>
+          <v-flex class="pt-5 mt-5">
+            <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
+          </v-flex>
         </v-layout>
       </v-container>
       <div class="mozo-header-waves">
@@ -56,7 +62,14 @@ import { mapState, mapMutations } from 'vuex';
 export default {
   methods: {
     search(){},
-    ...mapMutations(['breadcrumbMutation'])
+    logout() {
+      this.tokenMutation('');
+      localStorage.removeItem('token');
+      this.authMutation({});
+      localStorage.removeItem('auth');
+      this.$router.push({name: 'login'})
+    },
+    ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation', 'refreshUIMutation'])
   },
   computed: {
     ...mapState(['breadcrumb'])
@@ -66,7 +79,6 @@ export default {
   }
 }
 </script>
-
 
 <style lang="scss" scoped>
 .mozo {
@@ -97,7 +109,7 @@ export default {
     }
     &-user {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
     }
     &-userImg {
       height: 100%;
