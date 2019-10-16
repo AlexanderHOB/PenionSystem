@@ -18,8 +18,8 @@ class CreateMesasTable extends Migration
             $table->integer('numero')->unique();
             $table->integer('capacidad');
             $table->string('descripcion',50)->nullable()->default('Sin Descripción');
-            $table->string('estado',30)->nullable();
-            $table->boolean('condicion')->default(1);
+            $table->string('estado',30)->nullable(); //Estado (ocupado - Disponible )
+            $table->boolean('condicion')->default(1); //Habilitado o Desabilitado
             $table->timestamps();
         });
     }

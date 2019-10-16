@@ -17,11 +17,12 @@ class CreatePlatillosTable extends Migration
             $table->increments('id');
             $table->integer('categoria_id')->unsigned();
             $table->string('nombre',60)->unique();
-            $table->string('codigo',5);
-            $table->string('area',40);
+            $table->string('codigo',5)->unique();
+            $table->string('unidad_de_medida',80);
+            $table->string('area',40); //(FRÍA - CALIENTE - MIXTA)
             $table->decimal('precio',11,2);
             $table->string('descripcion',200)->nullable()->default('Sin Descripción');
-            $table->boolean('condicion')->default(1);
+            $table->boolean('condicion')->default(1); //ACTIVO O DESACTIVADO
 
             //Relacion Categoria-Platillos
             $table->foreign('categoria_id')->references('id')->on('categorias');

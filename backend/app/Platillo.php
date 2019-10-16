@@ -10,12 +10,13 @@ class Platillo extends Model
         'categoria_id',
         'nombre',
         'codigo',
+        'unidad_de_medida',
         'area',
         'precio',
         'descripcion',
         'condicion'
     ];
-
+   
     //Relacion con la tabla categorias 
     public function categoria(){
         return $this->belongsTo('App\Categoria','categoria_id');

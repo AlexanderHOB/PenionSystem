@@ -21,6 +21,9 @@ class Empleado extends Model
     public function transacciones(){
         return $this->hasMany('App\Transaccion','persona_id','id');
     }
+    public function Pedidos(){
+        return $this->hasMany('App\Pedido');
+    }
     public function user(){
         return $this->hasOne('App\User');
     }

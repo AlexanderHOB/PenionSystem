@@ -11,6 +11,10 @@ class Mesa extends Model
         'numero',
         'capacidad',
         'descripcion',
-        'condicion'
+        'condicion',
+        'estado'
         ];
+        public function DetallesPedido(){
+            return $this->hasMany('App\DetallePedido');
+        }
 }
