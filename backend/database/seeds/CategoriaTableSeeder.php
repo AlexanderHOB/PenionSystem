@@ -11,11 +11,12 @@ class CategoriaTableSeeder extends Seeder
      */
     public function run()
     {
-        for($i=1;$i<=10;$i++){
+        $cat = ['Entradas','Ceviches','Chupes','Combos Marinos','Jaleas','Chicharrones','Arroces','Planchas Y Milanesas','Fin De Semana','Platos Familiares','Cervezas','Gaseosas','Agua','Refrescos','Postres'];
+        for($i=0;$i<=14;$i++){
 
             DB::table('categorias')->insert([
-                'nombre'=>'Categoria Nº ' . $i,
-                'descripcion' => 'Categoria -> '.Str::random(10),
+                'nombre'=> $cat[$i],
+                'descripcion' => 'Categoria -> '.$cat[$i],
                 'condicion' => 1,           
             ]);
         }
