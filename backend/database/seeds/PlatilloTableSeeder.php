@@ -19,7 +19,7 @@ class PlatilloTableSeeder extends Seeder
         for($i=1;$i<=143;$i++){
 
             DB::table('platillos')->insert([
-                'categoria_id'   => rand(1,10),
+                'categoria_id'   => rand(1,15),
                 'nombre'        => $platillos[$i],
                 'codigo'        => $codigo_pla[$i],
                 'unidad_de_medida' => $uMedida[rand(0,3)],
