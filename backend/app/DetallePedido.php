@@ -25,7 +25,7 @@ class DetallePedido extends Model
     protected function Pedido(){
         return $this->belongsTo('App\Pedido');
     }
-    protected function Mesa(){
+    protected function mesa(){
         return $this->belongsTo('App\Mesa');
     }
     protected function modificaciones(){

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Mesa;
+use App\{Mesa, Pedido,Platillo,Categoria,DetallePedido};
 use App\Http\Requests\MesaStoreRequest;
 class MesaController extends Controller
 {
@@ -60,7 +60,20 @@ class MesaController extends Controller
         $mesa->save();
     }
     public function getAllMesas(){
-        $mesas = Mesa::orderBy('numero')->get();
-        return $mesas;
+        $mesas = Mesa::where('estado','=','Disponible')->get();
+        $pedidos=Pedido::join('detalles_pedido','pedidos.id','=','detalles_pedido.pedido_id')
+        ->join('mesas','detalles_pedido.mesa_id','=','mesas.id')
+        ->select('pedidos.id','pedidos.estado','pedidos.tipo_pedido','pedidos.numero_orden','pedidos.fecha_registro','pedidos.total','pedidos.descuento','pedidos.especial','pedidos.mozo_id')
+        ->groupBy('pedidos.id','pedidos.estado')
+        ->where('mesas.estado','=','Ocupado')
+        ->where('pedidos.estado','=','Pendiente')->get();
+        foreach($pedidos as $pedido){
+            $pedido->DetallesPedidos;
+            $pedido->user;
+            $pedido['mesa']=$pedido->detallesPedidos[0]->mesa;
+          
+        }
+        
+        return ['libres'=>$mesas,'pedidos'=>$pedidos];
     }
 }

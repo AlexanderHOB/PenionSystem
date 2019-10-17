@@ -45,4 +45,7 @@ class User extends Authenticatable
     public function empleado(){
         return $this->belongsTo('App\Empleado','empleado_id');
     }
+    public function pedidos(){
+        return $this->hasMany('App\Pedido');
+    }
 }

@@ -21,6 +21,7 @@ class CreatePedidosTable extends Migration
             $table->decimal('total',10,2);
             $table->decimal('descuento',10,2);
             $table->boolean('especial')->default(0); //no comprobante
+            $table->string('estado',50)->default('Iniciado');
             $table->integer('mozo_id')->unsigned();
             $table->foreign('mozo_id')->references('id')->on('users');
 

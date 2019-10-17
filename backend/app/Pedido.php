@@ -17,8 +17,8 @@ class Pedido extends Model
         'mozo_id'
         ];
         
-    protected function mozo(){
-        return $this->belongsTo('App\Empleado','mozo_id');
+    protected function user(){
+        return $this->belongsTo('App\User','mozo_id');
     }
     protected function DetallesPedidos(){
         return $this->hasMany('App\DetallePedido');
