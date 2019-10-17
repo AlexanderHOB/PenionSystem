@@ -19,7 +19,7 @@ class CreateReservasTable extends Migration
             $table->date('fecha_evento');
             $table->decimal('adelanto');
             $table->integer('cliente_id');
-            $table->foreing('cliente_id')->references('id')->on('personas');
+            $table->foreign('cliente_id')->references('id')->on('personas');
             $table->timestamps();
         });
     }
