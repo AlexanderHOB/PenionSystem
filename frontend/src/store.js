@@ -52,7 +52,10 @@ export default new Vuex.Store({
     allUsuariosState: [],
     allRolsState: [],
     //
-    refreshUI: false
+    refreshUI: false,
+    // Caja
+    asideTitle: '',
+    cajaBreadcrumb: ''
   },
   mutations: {
     drawerMutation(state, value){
@@ -129,6 +132,12 @@ export default new Vuex.Store({
     },
     refreshUIMutation(state, value) {
       state.refreshUI = value
+    },
+    asideTitleMutation (state, value) {
+      state.asideTitle = value
+    },
+    cajaBreadcrumbMutation (state, value) {
+      state.cajaBreadcrumb = value
     }
   },
   actions: {
