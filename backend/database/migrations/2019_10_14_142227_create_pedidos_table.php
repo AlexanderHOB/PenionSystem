@@ -23,6 +23,8 @@ class CreatePedidosTable extends Migration
             $table->boolean('especial')->default(0); //no comprobante
             $table->integer('mozo_id')->unsigned();
             $table->foreign('mozo_id')->references('id')->on('users');
+
+            $table->timestamps();
         
         });
     }
