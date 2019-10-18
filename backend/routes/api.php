@@ -65,6 +65,12 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/historial/{tipo}','TransaccionController@getAdelantoDescuento');
     // Roles
     Route::get('/roles','RolController@index'); // aomine
+    //Pedido
+    Route::get('/pedidos','PedidoController@index'); // obetener todos los pedidos ordenado por fecha des
+    Route::post('/pedido/registrar','PedidoController@store'); // crear un nuevo pedido con todos sus items
+    Route::put('/pedido/anular/{id}','PedidoController@anular');// anular un pedido
+    Route::put('/pedido/actualizar','PedidoController@update'); // actualizar algun pedido en caja
+
 });
 
 Route::group(['prefix' => 'auth'], function () {

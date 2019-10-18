@@ -20,13 +20,17 @@ class DetallePedido extends Model
         'subtotal',
         'total',
         'pedido_id',
-        'mesa_id'
+        'mesa_id',
+        'platillo_id'
         ];
     protected function Pedido(){
         return $this->belongsTo('App\Pedido');
     }
     protected function mesa(){
         return $this->belongsTo('App\Mesa');
+    }
+    protected function platillo(){
+        return $this->belongsTo('App\Platillo');
     }
     protected function modificaciones(){
         return $this->hasMany('App\Modificacion');
