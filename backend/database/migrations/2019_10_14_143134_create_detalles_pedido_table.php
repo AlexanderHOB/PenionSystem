@@ -16,7 +16,7 @@ class CreateDetallesPedidoTable extends Migration
         Schema::create('detalles_pedido', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->smallInteger('cantidad');
-            $table->decimal('descuentos',10,2);
+            $table->decimal('descuentos',10,2)->default(0,00);
             $table->decimal('valor_unitario',10,2);
             $table->decimal('precio_unitario',10,2);
             $table->string('comentario',100);
@@ -27,6 +27,8 @@ class CreateDetallesPedidoTable extends Migration
             $table->decimal('total',10,2);
             $table->integer('pedido_id')->unsigned();
             $table->foreign('pedido_id')->references('id')->on('pedidos');
+            $table->integer('platillo_id')->unsigned();
+            $table->foreign('platillo_id')->references('id')->on('platillos');
             $table->integer('mesa_id')->unsigned();
             $table->foreign('mesa_id')->references('id')->on('mesas');
             $table->timestamps();

@@ -20,7 +20,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'cors'], function(){
     //Routas Mesas
     Route::get('/mesa','MesaController@index');
-    Route::get('/mesas','MesaController@getAllMesas'); // aomine
+    Route::get('/mesas','MesaController@getAllMesas'); // obtener todas las mesas
     Route::post('/mesa/registrar','MesaController@store');
     Route::post('/mesa/actualizar/{id}','MesaController@update');
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');
@@ -65,6 +65,12 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/historial/{tipo}','TransaccionController@getAdelantoDescuento');
     // Roles
     Route::get('/roles','RolController@index'); // aomine
+    //Pedido
+    Route::get('/pedidos','PedidoController@index'); // obetener todos los pedidos ordenado por fecha des
+    Route::post('/pedido/registrar','PedidoController@store'); // crear un nuevo pedido con todos sus items
+    Route::put('/pedido/anular/{id}','PedidoController@anular');// anular un pedido
+    Route::put('/pedido/actualizar','PedidoController@update'); // actualizar algun pedido en caja
+
 });
 
 Route::group(['prefix' => 'auth'], function () {
