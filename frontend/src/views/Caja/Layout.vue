@@ -51,9 +51,6 @@
             <v-list-item :to="{name: 'cajeroMesasOcupadas'}">
               <v-list-item-title>Mesas Ocupadas</v-list-item-title>
             </v-list-item>
-            <v-list-item>
-              <v-list-item-title>Mesas Globales</v-list-item-title>
-            </v-list-item>
           </v-list>
         </v-menu>
       </v-toolbar-items>
