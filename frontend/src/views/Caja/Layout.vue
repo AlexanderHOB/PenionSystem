@@ -23,50 +23,42 @@
       </v-container>   
     </header>
 
-    <v-row class="Navbar">
-      <v-col cols="5" class="Navbar-aside d-flex justify-center align-center">
-        <h2 class="title font-weight-regular text-uppercase">{{ asideTitle }}</h2>
-      </v-col>
-      <v-col cols="7" class="pa-0">
-        <v-toolbar
-          class="elevation-0"
-          dark
-          color="cyan darken-2"
-        >
-          <v-spacer></v-spacer>
-          <v-toolbar-items>
-            <v-btn text>Orden</v-btn>
-            <v-btn text>Menú</v-btn>
-            <v-btn text>Reservaciones</v-btn>
-            <v-btn text>Eventos</v-btn>
-            <v-menu offset-y>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  text
-                  v-on="on"
-                  ref="cajero"
-                  class="Navbar-link-cajero"
-                >
-                  Caja
-                </v-btn>
-              </template>
-              <v-list nav>
-                <v-list-item :to="{name: 'cajeroMesasLibres'}">
-                  <v-list-item-title>Mesas Libres</v-list-item-title>
-                </v-list-item>
-                <v-list-item :to="{name: 'cajeroMesasOcupadas'}">
-                  <v-list-item-title>Mesas Ocupadas</v-list-item-title>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-title>Mesas Globales</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </v-toolbar-items>
-          <v-spacer></v-spacer>
-        </v-toolbar>
-      </v-col>
-    </v-row>
+    <v-toolbar
+      class="elevation-0"
+      dark
+      color="cyan darken-2"
+    >
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn text>Orden</v-btn>
+        <v-btn text>Menú</v-btn>
+        <v-btn text>Reservaciones</v-btn>
+        <v-btn text>Eventos</v-btn>
+        <v-menu offset-y>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              text
+              v-on="on"
+              class="Navbar-link-cajero"
+            >
+              Caja
+            </v-btn>
+          </template>
+          <v-list nav>
+            <v-list-item :to="{name: 'cajeroMesasLibres'}">
+              <v-list-item-title>Mesas Libres</v-list-item-title>
+            </v-list-item>
+            <v-list-item :to="{name: 'cajeroMesasOcupadas'}">
+              <v-list-item-title>Mesas Ocupadas</v-list-item-title>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-title>Mesas Globales</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-toolbar-items>
+      <v-spacer></v-spacer>
+    </v-toolbar>
 
     <main>
       <router-view />
@@ -86,16 +78,14 @@ export default {
       if (verifyCajero !== -1) {
         const cajero = document.querySelector('.Navbar-link-cajero')
         cajero.classList.add('Navbar-link-active')
-        console.log(this.$refs.cajero)
       }
     },
-    ...mapMutations(['asideTitleMutation', 'cajaBreadcrumbMutation'])
+    ...mapMutations(['cajaBreadcrumbMutation'])
   },
   computed: {
-    ...mapState(['asideTitle', 'cajaBreadcrumb'])
+    ...mapState(['cajaBreadcrumb'])
   },
   created () {
-    this.asideTitleMutation('Orden')
     this.cajaBreadcrumbMutation('Cajero')
   },
   mounted () {

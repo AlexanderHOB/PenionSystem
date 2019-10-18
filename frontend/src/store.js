@@ -2,6 +2,9 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 
+import cajaService from '@/services/caja'
+
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -13,7 +16,7 @@ export default new Vuex.Store({
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
-    // url: 'http://192.168.1.2:8000/api/',
+    // url: 'http://192.168.1.63:8000/api/',
     url: process.env.VUE_APP_API_URL,
     config: {
       headers: {
@@ -54,7 +57,6 @@ export default new Vuex.Store({
     //
     refreshUI: false,
     // Caja
-    asideTitle: '',
     cajaBreadcrumb: ''
   },
   mutations: {
@@ -103,8 +105,8 @@ export default new Vuex.Store({
     authMutation(state, value){
       state.auth = {...value};
     },
-    allMesasMutation(state, action){
-      state.allMesasState = action;
+    allMesasMutation(state, object){
+      state.allMesasState = object;
     },
     allCategoriasMutation(state, action){
       state.allCategoriasState = action;
@@ -132,9 +134,6 @@ export default new Vuex.Store({
     },
     refreshUIMutation(state, value) {
       state.refreshUI = value
-    },
-    asideTitleMutation (state, value) {
-      state.asideTitle = value
     },
     cajaBreadcrumbMutation (state, value) {
       state.cajaBreadcrumb = value
@@ -172,9 +171,16 @@ export default new Vuex.Store({
     allRolsAction: async function({ state, commit }){
       let response = await axios.get(state.url + 'roles', state.config);
       commit('allRolsMutation', response)
+    },
+    async getMesasAction ({ commit }) {
+      const { data } = await cajaService.getMesas()
+      commit('allMesasMutation', data)
     }
   },
   getters: {
+    getBaseUrl (state) {
+      return state.url
+    },
     getToken(state){
       return state.token;
     },
