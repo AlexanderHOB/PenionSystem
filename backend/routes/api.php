@@ -70,6 +70,14 @@ Route::group(['middleware' => 'cors'], function(){
     Route::post('/pedido/registrar','PedidoController@store'); // crear un nuevo pedido con todos sus items
     Route::put('/pedido/anular/{id}','PedidoController@anular');// anular un pedido
     Route::put('/pedido/actualizar','PedidoController@update'); // actualizar algun pedido en caja
+    //Comensales
+    Route::get('/comensales','ComensalController@index'); // obetener todos los comensales
+    Route::post('/comensal/registrar','ComensalController@store'); // Crear nuevo comensal
+    Route::put('/comensal/actualizar','ComensalController@update'); // Crear nuevo comensal
+    Route::put('/comensal/desactivar/{id}', 'ComensalController@desactivar');
+    Route::put('/comensal/activar/{id}', 'ComensalController@activar');
+    //Crear historial de pedidos
+    Route::post('/estadoDeCuenta/registrar','EstadoDeCuentaComensalController@store'); //registrar un nuevo estado de cuenta
 
 });
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\{Mesa, Pedido,Platillo,Categoria,DetallePedido};
+use App\{Mesa, Pedido,Platillo,DetallePedido};
 use App\Http\Requests\MesaStoreRequest;
 class MesaController extends Controller
 {
@@ -67,13 +67,30 @@ class MesaController extends Controller
         ->groupBy('pedidos.id','pedidos.estado')
         ->where('mesas.estado','=','Ocupado')
         ->where('pedidos.estado','=','Pendiente')->get();
-        foreach($pedidos as $pedido){
-            $pedido->DetallesPedidos;
-            $pedido->user;
-            $pedido['mesa']=$pedido->detallesPedidos[0]->mesa;
-          
-        }
+        $pedidosFiltrados=[];
         
-        return ['libres'=>$mesas,'pedidos'=>$pedidos];
+        foreach($pedidos as $pedido){
+        
+            
+            $dp=$pedido->DetallesPedidos;
+            foreach ($dp as $p){
+                $p->platillo;
+            }
+            $response=[
+                'id'                => $pedido->id,
+                'tipo_pedido'       => $pedido->tipo_pedido,
+                "estado"            => $pedido->estado,
+                "numero_orden"      => $pedido->numero_orden,
+                "total"             => $pedido->total,
+                "descuento"         => $pedido->descuento,
+                "especial"          => $pedido->especial,
+                "nombre_mozo"       => $pedido->user->empleado->persona['nombres'],
+                "rol_mozo"          => $pedido->user->rol['nombre'],
+                "detalles_pedidos"  =>$dp,
+            ];
+            array_push( $pedidosFiltrados,$response);
+        }
+                 
+        return ['libres'=>$mesas,'pedidos'=>$pedidosFiltrados];
     }
 }
