@@ -18,6 +18,7 @@
   import Sidenav from './components/Sidenav';
   import Header from './components/Header';
   import { mapState, mapMutations } from 'vuex';
+  import { service } from '@/services/service'
 
   export default {
     name: 'App',

@@ -200,7 +200,7 @@ export default {
           this.loginLoad = true;
           let usuario = this.usuarios[this.index];
 
-          let response = await axios.post(this.url + 'auth/login',
+          const response = await axios.post(this.url + 'auth/login',
             {
               email: usuario.email,
               password: this.password,
@@ -208,26 +208,19 @@ export default {
             },
             {
               headers: {
-                Apikey: this.config.headers.Apikey,
+                // Apikey: this.config.headers.Apikey,
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
               }
             }
           );
 
+          console.log(response.data)
+
           this.tokenMutation(response.data.token_type + ' ' + response.data.access_token);
           localStorage.setItem('token', this.token);
           
-          let res = await axios.get(this.url + 'auth/user',
-          {
-            headers: {
-              Apikey: this.config.headers.Apikey,
-              Authorization: this.token,
-              'Content-Type': 'application/json',
-            }
-          });
-
-          this.authMutation(res.data);
+          this.authMutation(response.data.user);
           localStorage.setItem('auth', JSON.stringify(this.auth));
           this.modal = false;
           this.redirect()

@@ -157,6 +157,32 @@ export default new Router({
       ]
     },
     {
+      path: '/caja',
+      name: 'caja',
+      redirect: { name: 'cajero' },
+      component: () => import('./views/Caja/Layout.vue'),
+      children: [
+        {
+          path: 'cajero',
+          name: 'cajero',
+          redirect: { name: 'cajeroMesasLibres' },
+          component: () => import('./views/Caja/Cajero.vue'),
+          children: [
+            {
+              path: 'mesas-libres',
+              name: 'cajeroMesasLibres',
+              component: () => import('./views/Caja/MesasLibres.vue')
+            },
+            {
+              path: 'mesas-ocupadas',
+              name: 'cajeroMesasOcupadas',
+              component: () => import('./views/Caja/MesasOcupadas.vue')
+            },
+          ]
+        }
+      ]
+    },
+    {
       path: '*',
       component: () => import('./views/NotFound.vue')
     }
