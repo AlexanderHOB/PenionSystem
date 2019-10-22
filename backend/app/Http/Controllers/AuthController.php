@@ -18,7 +18,7 @@ class AuthController extends Controller
         $user = new User([
             'email'         => $request->email,
             'color'         => $request->color,
-            'empleado_id'   => $request->empleado_id,
+            'empleado_id'            => $request->empleado_id,
             'rol_id'        => $request->rol_id,
             'password' => bcrypt($request->password),
         ]);
@@ -26,18 +26,17 @@ class AuthController extends Controller
         // return response()->json([
         //     'message' => 'Successfully created user!'], 201);
         $newuser = [
-            'apellidos' => $user->empleado->persona->apellidos,
-            'celular' => $user->empleado->persona->celular,
-            'condicion' => 1,
-            'direccion' => $user->empleado->persona->direccion,
-            'documento' => $user->empleado->persona->documento,
-            'email' => $user->empleado->persona->email,
-            'id' => $user->id,
-            'color' => $user->color,
-            'empleado_id' => $user->empleado_id,
-            'nombres' => $user->empleado->persona->nombres,
-            'rol' => $user->rol->nombre,
-            'rol_id' => $user->rol_id
+            'apellidos'     => $user->empleado->persona->apellidos,
+            'celular'       => $user->empleado->persona->celular,
+            'condicion'     => 1,
+            'direccion'     => $user->empleado->persona->direccion,
+            'documento'     => $user->empleado->persona->documento,
+            'email'         => $user->empleado->persona->email,
+            'id'            => $user->empleado_id,
+            'color'         => $user->color,
+            // 'nombres'       => $user->empleado->persona->nombres,
+            'rol'           => $user->rol->nombre,
+            'rol_id'        => $user->rol_id
         ];
         return $newuser;
     }
@@ -47,7 +46,6 @@ class AuthController extends Controller
         $request->validate([
             'email'       => 'required|string|email',
             'password'    => 'required|string',
-            'remember_me' => 'boolean',
         ]);
         $credentials = request(['email', 'password']);
         if (!Auth::attempt($credentials)) {
@@ -70,7 +68,6 @@ class AuthController extends Controller
                 'condicion'     => 1,
                 'email'         => $user->empleado->persona->email,
                 'id'            => $user->id,
-                'empleado_id'   => $user->empleado_id,
                 'nombres'       => $user->empleado->persona->nombres,
                 'rol'           => $user->rol->nombre,
                 'rol_id'        => $user->rol_id
@@ -95,9 +92,8 @@ class AuthController extends Controller
             'color'         => $user->color,
             'apellidos'     => $user->empleado->persona->apellidos,
             'condicion'     => 1,
-            'email'         => $user->empleado->persona->email,
-            'id'            => $user->id,
-            'empleado_id'   => $user->empleado_id,
+            // 'email'         => $user->empleado->persona->email,
+            'id'            => $user->empleado_id,
             'nombres'       => $user->empleado->persona->nombres,
             'rol'           => $user->rol->nombre,
             'rol_id'        => $user->rol_id

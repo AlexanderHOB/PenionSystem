@@ -19,7 +19,7 @@ class Comensal extends Model
        
 
     public function persona(){
-        return $this->belongsTo('App\Persona', 'id');
+        return $this->belongsTo('App\Persona');
     }
     public function estadoCuentaComensal(){
         return $this->hasMany('App\EstadoDeCuentaComensal');

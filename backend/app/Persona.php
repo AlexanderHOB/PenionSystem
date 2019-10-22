@@ -16,14 +16,14 @@ class Persona extends Model
         'celular',
         'email'
         ];
-    public function user()
-    {
-        return $this->hasOne('App\User');
-    }
+    // public function user()
+    // {
+    //     return $this->hasOne('App\User');
+    // }
 
     public function empleado()
     {
-        return $this->hasOne('App\Empleado');
+        return $this->hasOne('App\Empleado','id');
     }
     public function comensal()
     {
