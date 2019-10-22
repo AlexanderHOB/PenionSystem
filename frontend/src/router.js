@@ -22,7 +22,7 @@ function requireAdminRol (to, from, next) {
   }
 
   if (store.getters.getRol !== 'Administrador') {
-    redirect()
+    redirect(next)
   }
 
   next()
@@ -37,7 +37,7 @@ function requireMozoRol (to, from, next) {
   }
 
   if (store.getters.getRol !== 'Mozo') {
-    redirect()
+    redirect(next)
   }
 
   next()
@@ -50,9 +50,9 @@ function requireCajeroRol (to, from, next) {
     next({ name: 'login' })
     return
   }
-
+  console.log(store.getters.getRol)
   if (store.getters.getRol !== 'Cajero') {
-    redirect()
+    redirect(next)
   }
 
   next()
@@ -62,7 +62,7 @@ function Auth (to, from, next) {
 
   const verify = checkLocal()
   if (verify) {
-    redirect()
+    redirect(next)
   }
   next()
 }
@@ -80,7 +80,7 @@ function checkLocal () {
   return false
 }
 
-function redirect () {
+function redirect (next) {
   
     if (store.getters.getRol === 'Administrador') {
       next({ name: 'admin' })
@@ -200,7 +200,7 @@ export default new Router({
     {
       path: '/caja',
       name: 'caja',
-      // beforeEnter: requireCajeroRol,
+      beforeEnter: requireCajeroRol,
       redirect: { name: 'cajero' },
       component: () => import('./views/Caja/Layout.vue'),
       children: [

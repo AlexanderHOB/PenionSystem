@@ -15,8 +15,8 @@ export default new Vuex.Store({
     drawerState: true,
     miniState: true,
     // Data para la conexión a la API
-    url: 'http://192.168.88.150:8000/api/',
-    // url: process.env.VUE_APP_API_URL,
+    // url: 'http://192.168.88.150:8000/api/',
+    url: process.env.VUE_APP_API_URL,
     // Data del Loading
     loadingDialog: {
       state: false,
@@ -131,9 +131,8 @@ export default new Vuex.Store({
   },
   actions: {
     async login ({ commit }, credentials) {
-    console.log(credentials)
       const { data } = await authService.login(credentials)
-      localStorage.setItem('auth', JSON.stringify(this.auth))
+      localStorage.setItem('auth', JSON.stringify(data))
       commit('authMutation', data)
     },
     allMesasAction: async function ({ commit }) {
@@ -184,8 +183,7 @@ export default new Vuex.Store({
       return state.auth.access_token
     },
     getRol (state) {
-      // return state.auth.user.rol
-      return 'Admin'
+      return state.auth.user.rol
     }
   }
 })

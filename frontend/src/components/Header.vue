@@ -89,13 +89,12 @@ export default {
   methods: {
     search(){},
     logout() {
-      this.tokenMutation('');
       localStorage.removeItem('token');
       this.authMutation({});
       localStorage.removeItem('auth');
       this.$router.push({name: 'login'})
     },
-    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'tokenMutation', 'authMutation'])
+    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'authMutation'])
   },
   computed: {
     ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),

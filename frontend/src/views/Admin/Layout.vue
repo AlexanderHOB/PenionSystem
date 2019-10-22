@@ -1,8 +1,8 @@
 <template>
   <div>
     <sidenav />
-    <header-admin />
     <v-content>
+      <header-admin />
        <router-view />
     </v-content>
   </div>

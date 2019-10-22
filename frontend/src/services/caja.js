@@ -2,7 +2,7 @@ import { service } from './service'
 
 const cajaService = {
   getMesas: () => {
-    return service.get(`/mesas`)
+    return service.get(`/caja/mesas`)
   },
 }
 

@@ -10,7 +10,8 @@ class MesaController extends Controller
     public function index(Request $request)
     {
        //listar mesas
-        $mesas=Mesa::orderBy('id', 'asc')->paginate(10);
+        // $mesas=Mesa::orderBy('id', 'asc')->paginate(10);
+        $mesas = Mesa::orderBy('id')->get(); // aomine
         return  $mesas;
     }
 
@@ -68,10 +69,10 @@ class MesaController extends Controller
         ->where('mesas.estado','=','Ocupado')
         ->where('pedidos.estado','=','Pendiente')->get();
         $pedidosFiltrados=[];
-        
+
         foreach($pedidos as $pedido){
-        
-            
+
+
             $dp=$pedido->DetallesPedidos;
             foreach ($dp as $p){
                 $p->platillo;
@@ -90,7 +91,7 @@ class MesaController extends Controller
             ];
             array_push( $pedidosFiltrados,$response);
         }
-                 
+
         return ['libres'=>$mesas,'pedidos'=>$pedidosFiltrados];
     }
 }

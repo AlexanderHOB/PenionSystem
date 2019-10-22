@@ -19,8 +19,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::group(['middleware' => 'cors'], function(){
     //Routas Mesas
-    Route::get('/mesa','MesaController@index');
-    Route::get('/mesas','MesaController@getAllMesas'); // obtener todas las mesas
+    Route::get('/mesas','MesaController@index');
+    Route::get('/caja/mesas','MesaController@getAllMesas'); // obtener todas las mesas
     Route::post('/mesa/registrar','MesaController@store');
     Route::post('/mesa/actualizar/{id}','MesaController@update');
     Route::put('/mesa/desactivar/{id}','MesaController@desactivar');

@@ -187,9 +187,7 @@ export default {
     // Login
     async loginUI () {
       try {
-        console.log('alv !!!')
         if(this.$refs.form.validate() && !this.error.state){
-          console.log('kheee')
           this.disabled = true
           this.loginLoad = true
           const usuario = this.usuarios[this.index]
@@ -199,8 +197,6 @@ export default {
             password: this.password,
             remember_me: false
           }
-          console.log(credentials)
-          console.log('...')
           await this.login(credentials)
 
           this.modal = false
