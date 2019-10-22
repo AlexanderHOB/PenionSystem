@@ -52,7 +52,10 @@
         ></v-img>
       </div>
     </header>
-    <router-view />
+
+    <v-content>
+      <router-view />
+    </v-content>
   </div>
 </template>
 

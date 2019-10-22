@@ -1,16 +1,15 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from 'axios'
 
+import authService from '@/services/auth'
 import cajaService from '@/services/caja'
+import adminService from '@/services/admin'
 
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    token: '',
-    testApiKey: process.env.VUE_APP_APIKEY,
     auth: {},
     // Sidenav
     drawerState: true,
@@ -18,12 +17,6 @@ export default new Vuex.Store({
     // Data para la conexión a la API
     // url: 'http://192.168.1.63:8000/api/',
     url: process.env.VUE_APP_API_URL,
-    config: {
-      headers: {
-        Apikey: '$2y$10$atNNB9MLMCVmT1O9nG4PkugiTsDwtPoFe2uLwC0Lsrf.q0GUFCXgK',
-        'Content-Type': 'application/json'
-      }
-    },
     // Data del Loading
     loadingDialog: {
       state: false,
@@ -45,7 +38,7 @@ export default new Vuex.Store({
     searchPlaceholder: 'Texto a buscar...',
     searchQuery: '',
     searchDisabled: true,
-    // Data Layout
+    // Data Admin
     allMesasState: [],
     allCategoriasState: [],
     allPlatillosState: [],
@@ -99,9 +92,6 @@ export default new Vuex.Store({
     searchDisabledMutation(state, value){
       state.searchDisabled = value;
     },
-    tokenMutation(state, value){
-      state.token = value;
-    },
     authMutation(state, value){
       state.auth = {...value};
     },
@@ -140,36 +130,41 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    allMesasAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'mesas', state.config);
+    async login (credentials) {
+      const { data } = await authService.login(credentials)
+      localStorage.setItem('auth', JSON.stringify(this.auth))
+      commit('authMutation', data)
+    },
+    allMesasAction: async function ({ commit }) {
+      const response = await adminService.getMesas()
       commit('allMesasMutation', response)
     },
-    allCategoriasAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'categoria/platillos', state.config);
+    allCategoriasAction: async function ({ commit }) {
+      const response = await adminService.getCategorias()
       commit('allCategoriasMutation', response)
     },
-    allPlatillosAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'platillos', state.config);
+    allPlatillosAction: async function ({ commit }) {
+      const response = await adminService.getPlatillos()
       commit('allPlatillosMutation', response)
     },
-    allPersonalAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'empleados', state.config);
+    allPersonalAction: async function ({ commit }) {
+      const response = await adminService.getPersonal()
       commit('allPersonalMutation', response)
     },
-    allAdelantosAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'historial/adelanto', state.config);
+    allAdelantosAction: async function ({ commit }) {
+      const response = await adminService.getAdelantos()
       commit('allAdelantosMutation', response)
     },
-    allDescuentosAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'historial/descuento', state.config);
+    allDescuentosAction: async function ({ commit }) {
+      const response = await adminService.getDescuentos()
       commit('allDescuentosMutation', response)
     },
-    allUsuariosAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'users', state.config);
+    allUsuariosAction: async function ({ commit }) {
+      const response = await adminService.getUsuarios()
       commit('allUsuariosMutation', response)
     },
-    allRolsAction: async function({ state, commit }){
-      let response = await axios.get(state.url + 'roles', state.config);
+    allRolsAction: async function ({ commit }) {
+      const response = await adminService.getRoles()
       commit('allRolsMutation', response)
     },
     async getMesasAction ({ commit }) {
@@ -181,11 +176,14 @@ export default new Vuex.Store({
     getBaseUrl (state) {
       return state.url
     },
-    getToken(state){
-      return state.token;
+    getAuth (state) {
+      return state.auth.user
     },
-    getRol(state){
-      return state.auth.rol;
+    getToken (state) {
+      return state.auth.access_token
+    },
+    getRol (state) {
+      return state.auth.user.rol
     }
   }
 })

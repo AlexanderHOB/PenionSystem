@@ -17,7 +17,7 @@
         <v-flex v-for="(mesa, i) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
           <v-card>
             <v-img
-            :src="require('../assets/img/mesas/mesaOcupada.svg')"
+            :src="require('@/assets/img/mesas/mesaOcupada.svg')"
             contain
             height="100"
             class="mesa"
@@ -128,13 +128,13 @@
 </template>
 
 <script>
-import axios from 'axios';
+import adminService from '@/services/admin'
 import { mask } from 'vue-the-mask'
 
-import LoadingDialog from '../components/loading/LoadingDialog'
-import LoadingFish from '../components/loading/LoadingFish'
-import ErrorMessage from '../components/messages/ErrorMessage'
-import AlertNotifications from '../components/messages/AlertNotifications'
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 import { mapState, mapMutations, mapActions } from 'vuex'
 
@@ -146,7 +146,7 @@ export default {
     AlertNotifications
   },
   directives: {
-    mask,
+    mask
   },
   data:() => ({
     title: 'Mesas',
@@ -194,7 +194,6 @@ export default {
         this.loadingTitleMutation('Actualizando información');
         this.loadingDialogMutation(true);
 
-        // let response = await axios.get(this.url + 'mesas', this.config);
         if(this.allMesasState.length == 0 || this.refresh){
           await this.allMesasAction();
           this.refresh = false;
@@ -323,11 +322,13 @@ export default {
             this.descripcion = 'Mesa sin descripción';
           }
 
-          let response = await axios.post(this.url + 'mesa/registrar', {
+          const data = {
             numero: parseInt(this.numero),
             capacidad: parseInt(this.capacidad),
             descripcion: this.descripcion
-          }, this.config);
+          }
+
+          const response = await adminService.createMesa(data)
 
           this.closeModal();
 
@@ -378,11 +379,14 @@ export default {
           this.mesas[this.index].capacidad = capacidadBup;
           this.mesas[this.index].descripcion = descripcionBup;
 
-          let response = await axios.post(this.url + 'mesa/actualizar/' + this.id, {
+          const data = {
             numero: numeroBup,
             capacidad: capacidadBup,
             descripcion: descripcionBup
-          }, this.config);
+          }
+
+          const response = await adminService.updateMesa(this.id, data)
+
           this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'});
         }
       } catch (error) {
@@ -460,7 +464,7 @@ export default {
 }
 .title-modal {
   background-image: $primary-gradient;
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 </style>

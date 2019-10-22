@@ -25,8 +25,8 @@
               <p class="mb-0 usuarios-text" v-show="usuario.condicion">Activo</p> 
               <p class="mb-0 usuarios-text" v-show="!usuario.condicion">Inactivo</p>
             </div>
-            <img src="../../assets/iconos/edit.svg" alt="edit" class="usuarios-edit" @click="editUsuarioModal(i)">
-            <img src="../../assets/iconos/detail.svg" alt="detail" class="usuarios-detail" @click="detailUsuariolModal(i)">
+            <img src="@/assets/iconos/edit.svg" alt="edit" class="usuarios-edit" @click="editUsuarioModal(i)">
+            <img src="@/assets/iconos/detail.svg" alt="detail" class="usuarios-detail" @click="detailUsuariolModal(i)">
             <PersonalBox class="usuarios-bg" :active="usuario.condicion" :activeInteraction="activarModal" :index="i" />
             <div class="usuarios-color" :style="{'background-color': usuario.color}"></div>
           </div>
@@ -329,11 +329,11 @@
 <script>
 import axios from 'axios'
 
-import LoadingDialog from '../../components/loading/LoadingDialog'
-import LoadingFish from '../../components/loading/LoadingFish'
-import PersonalBox from '../../components/box/PersonalBox'
-import ErrorMessage from '../../components/messages/ErrorMessage'
-import AlertNotifications from '../../components/messages/AlertNotifications'
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import PersonalBox from '@/components/box/PersonalBox'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 import { mapState, mapMutations, mapActions } from 'vuex'
 
@@ -945,7 +945,7 @@ export default {
 }
 .title-modal {
   background-image: $primary-gradient;
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 // Borrar

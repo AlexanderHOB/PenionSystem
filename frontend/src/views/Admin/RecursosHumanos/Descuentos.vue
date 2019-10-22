@@ -176,7 +176,7 @@
 
 <script>
 import axios from 'axios';
-import AlertNotifications from '../../components/messages/AlertNotifications';
+import AlertNotifications from '@/components/messages/AlertNotifications';
 
 import { mapState, mapMutations, mapActions } from 'vuex';
 
@@ -503,7 +503,7 @@ export default {
 <style lang="scss" scoped>
 .title-modal {
   background-image: $primary-gradient;
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 </style>
