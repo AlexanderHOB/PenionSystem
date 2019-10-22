@@ -3,7 +3,8 @@ import { auth } from './service'
 const authService = {
   // Login
   login: credentials => {
-    return service.post('/login', credentials)
+    console.log(credentials)
+    return auth.post('/login', credentials)
   }
 }
 

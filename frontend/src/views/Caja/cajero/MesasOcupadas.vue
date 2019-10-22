@@ -147,7 +147,7 @@
             </v-col>
           </v-row>
         </v-col>
-        <v-col class="Details-card red lighten-1" cols="7">
+        <v-col class="Details-card red lighten-1 pt-5 pr-5" cols="7">
           <img src="@/assets/img/carta/aros.svg" alt="aros" class="Details-card-aros">
           <v-row class="mx-0 Details-content white pa-2">
             <v-col cols="12" class="pa-0">
@@ -455,8 +455,6 @@ export default {
           id: e.id
         })
       })
-
-      console.log(this.checkboxs)
 
       this.toggleDetails()
     },

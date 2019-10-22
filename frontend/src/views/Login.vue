@@ -49,7 +49,7 @@
               ref="form"
               lazy-validation
               v-model="valid"
-              @submit.prevent="login"
+              @submit.prevent="loginUI"
               autocomplete="off"
             >
               <v-container grid-list-lg>
@@ -79,7 +79,7 @@
           <v-card-actions class="pb-4">
             <v-spacer></v-spacer>
             <v-btn icon color="red" @click="modalPassword = false" :disabled="disabled"><v-icon>close</v-icon></v-btn>
-            <v-btn icon color="green" @click="login" :loading="loginLoad" :disabled="!valid"><v-icon>done</v-icon></v-btn>
+            <v-btn icon color="green" @click="loginUI" :loading="loginLoad" :disabled="!valid"><v-icon>done</v-icon></v-btn>
             <v-spacer></v-spacer>
           </v-card-actions>
         </v-card>
@@ -185,19 +185,22 @@ export default {
     },
 
     // Login
-    async login () {
+    async loginUI () {
       try {
+        console.log('alv !!!')
         if(this.$refs.form.validate() && !this.error.state){
+          console.log('kheee')
           this.disabled = true
           this.loginLoad = true
-          let usuario = this.usuarios[this.index]
+          const usuario = this.usuarios[this.index]
 
-          const credentials =  {
+          const credentials = {
             email: usuario.email,
             password: this.password,
-            remember_me: false,
+            remember_me: false
           }
-
+          console.log(credentials)
+          console.log('...')
           await this.login(credentials)
 
           this.modal = false

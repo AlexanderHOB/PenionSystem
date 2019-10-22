@@ -17,7 +17,7 @@ export const service = axios.create({
 // )
 
 export const auth = axios.create({
-  baseURL: `${store.getters.getBaseUrl}/auth`,
+  baseURL: `${store.getters.getBaseUrl}auth`,
   headers: {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
@@ -25,7 +25,7 @@ export const auth = axios.create({
 })
 
 export const authWithToken = axios.create({
-  baseURL: `${store.getters.getBaseUrl}/auth`,
+  baseURL: `${store.getters.getBaseUrl}auth`,
   headers: {
     'Content-Type': 'application/json'
   }
