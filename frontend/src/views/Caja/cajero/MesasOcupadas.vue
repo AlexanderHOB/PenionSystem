@@ -488,7 +488,7 @@ export default {
     },
     toggleAllSelect (value) {
       this.selected = []
-      if (value) {
+      if (value) { 
         this.checkboxs.forEach((e, i, arr) => {
         this.selected.push(e)
           arr[i].value = 1
