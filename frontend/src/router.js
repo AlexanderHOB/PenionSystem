@@ -1,58 +1,99 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import Home from './views/Admin/Home.vue'
 import store from './store'
 
 Vue.use(Router)
 
-function requireAuth (to, from, next) {
-
-  checkLocal();
-
-  if (!store.getters.getToken) {
-    next({ name: 'login' })
-  } else {
-    if(to.matched[0].name === 'mozo' && store.getters.getRol !== 'Mozo'){
-      next({ name: 'home' })
-    }
-
-    if(store.getters.getRol === 'Mozo' && to.matched[0].name !== 'mozo'){
-      next({ name: 'mozo' })
-    }
-
-    next()
+function requireAuth () {
+  const verify = checkLocal()
+  if (!verify) {
+    return false
   }
+  return true
+}
+
+function requireAdminRol (to, from, next) {
+  const verify = requireAuth()
+
+  if (!verify) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (store.getters.getRol !== 'Administrador') {
+    redirect()
+  }
+
+  next()
+}
+
+function requireMozoRol (to, from, next) {
+  const verify = requireAuth()
+
+  if (!verify) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (store.getters.getRol !== 'Mozo') {
+    redirect()
+  }
+
+  next()
+}
+
+function requireCajeroRol (to, from, next) {
+  const verify = requireAuth()
+
+  if (!verify) {
+    next({ name: 'login' })
+    return
+  }
+
+  if (store.getters.getRol !== 'Cajero') {
+    redirect()
+  }
+
+  next()
 }
 
 function Auth (to, from, next) {
 
-  checkLocal();
-
-  if (store.getters.getToken) {
-    if(store.getters.getRol === 'Administrador') {
-      next({ name: 'home' })
-    }
-
-    if(store.getters.getRol === 'Mozo') {
-      next({ name: 'mozo' })
-    }
-  } else {
-    next()
+  const verify = checkLocal()
+  if (verify) {
+    redirect()
   }
+  next()
 }
 
-function checkLocal() {
-  const user = typeof localStorage.getItem('auth') === 'string' ?
-  JSON.parse(localStorage.getItem('auth')) :
-  ''
-  const token = typeof localStorage.getItem('token') === 'string' ?
-  localStorage.getItem('token') :
-  ''
-
-  if(user && token){
-     store.commit('tokenMutation', token)
-     store.commit('authMutation', user)
+function checkLocal () {
+  if (store.getters.getToken) {
+    return true
   }
+
+  if (localStorage.getItem('auth')) {
+    const user = JSON.parse(localStorage.getItem('auth'))
+    store.commit('authMutation', user)
+    return true
+  }
+  return false
+}
+
+function redirect () {
+  
+    if (store.getters.getRol === 'Administrador') {
+      next({ name: 'admin' })
+    }
+  
+    if (store.getters.getRol === 'Mozo') {
+      next({ name: 'mozo' })
+    }
+
+    if (store.getters.getRol === 'Cajero') {
+      next({ name: 'caja' })
+    }
+
 }
 
 export default new Router({
@@ -66,63 +107,63 @@ export default new Router({
       component: () => import( './views/Login.vue')
     },
     {
-      path: '/dashboard',
-      name: 'home',
-      beforeEnter: requireAuth,
-      component: Home
-    },
-    {
-      path: '/mesas',
-      name: 'mesas',
-      beforeEnter: requireAuth,
-      component: () => import( './views/Mesas.vue')
-    },
-    {
-      path: '/categorias',
-      name: 'categorias',
-      beforeEnter: requireAuth,
-      component: () => import('./views/Categorias.vue')
-    },
-    {
-      path: '/platillos',
-      name: 'platillos',
-      beforeEnter: requireAuth,
-      component: () => import('./views/Platillos.vue')
-    },
-    {
-      path: '/personal',
-      name: 'personal',
-      beforeEnter: requireAuth,
-      component: () => import('./views/RecursosHumanos/Personal.vue')
-    },
-    {
-      path: '/usuarios',
-      name: 'usuarios',
-      beforeEnter: requireAuth,
-      component: () => import('./views/RecursosHumanos/Usuarios.vue')
-    },
-    {
-      path: '/adelantos',
-      name: 'adelantos',
-      beforeEnter: requireAuth,
-      component: () => import('./views/RecursosHumanos/Adelantos.vue')
-    },
-    {
-      path: '/descuentos',
-      name: 'descuentos',
-      beforeEnter: requireAuth,
-      component: () => import('./views/RecursosHumanos/Descuentos.vue')
-    },
-    {
-      path: '/pagos',
-      name: 'pagos',
-      beforeEnter: requireAuth,
-      component: () => import('./views/RecursosHumanos/Pagos.vue')
+      path: '/admin',
+      name: 'admin',
+      beforeEnter: requireAdminRol,
+      component: () => import('./views/Admin/Layout.vue'),
+      redirect: { name: 'home' },
+      children: [
+        {
+          path: 'dashboard',
+          name: 'home',
+          component: Home
+        },
+        {
+          path: 'mesas',
+          name: 'mesas',
+          component: () => import( './views/Admin/Mesas.vue')
+        },
+        {
+          path: 'categorias',
+          name: 'categorias',
+          component: () => import('./views/Admin/Categorias.vue')
+        },
+        {
+          path: 'platillos',
+          name: 'platillos',
+          component: () => import('./views/Admin/Platillos.vue')
+        },
+        {
+          path: 'personal',
+          name: 'personal',
+          component: () => import('./views/Admin/RecursosHumanos/Personal.vue')
+        },
+        {
+          path: 'usuarios',
+          name: 'usuarios',
+          component: () => import('./views/Admin/RecursosHumanos/Usuarios.vue')
+        },
+        {
+          path: 'adelantos',
+          name: 'adelantos',
+          component: () => import('./views/Admin/RecursosHumanos/Adelantos.vue')
+        },
+        {
+          path: 'descuentos',
+          name: 'descuentos',
+          component: () => import('./views/Admin/RecursosHumanos/Descuentos.vue')
+        },
+        {
+          path: 'pagos',
+          name: 'pagos',
+          component: () => import('./views/Admin/RecursosHumanos/Pagos.vue')
+        }
+      ]
     },
     {
       path: '/mozo',
       name: 'mozo',
-      beforeEnter: requireAuth,
+      beforeEnter: requireMozoRol,
       component: () => import('./views/Mozo/Mozo.vue'),
       redirect: { name: 'mozo-mesas' },
       children: [
@@ -159,6 +200,7 @@ export default new Router({
     {
       path: '/caja',
       name: 'caja',
+      // beforeEnter: requireCajeroRol,
       redirect: { name: 'cajero' },
       component: () => import('./views/Caja/Layout.vue'),
       children: [
@@ -166,24 +208,84 @@ export default new Router({
           path: 'cajero',
           name: 'cajero',
           redirect: { name: 'cajeroMesasLibres' },
-          component: () => import('./views/Caja/Cajero.vue'),
+          component: () => import('./views/Caja/cajero/Cajero.vue'),
           children: [
             {
               path: 'mesas-libres',
               name: 'cajeroMesasLibres',
-              component: () => import('./views/Caja/MesasLibres.vue')
+              component: () => import('./views/Caja/cajero/MesasLibres.vue')
             },
             {
               path: 'mesas-ocupadas',
               name: 'cajeroMesasOcupadas',
-              component: () => import('./views/Caja/MesasOcupadas.vue')
+              component: () => import('./views/Caja/cajero/MesasOcupadas.vue')
             },
           ]
+        },
+        {
+          path: 'eventos',
+          name: 'eventos',
+          redirect: { name: 'listaEventos' },
+          component: () => import('./views/Caja/eventos/Eventos.vue'),
+          children: [
+            {
+              path: 'lista-eventos',
+              name: 'listaEventos',
+              component: () => import('./views/Caja/eventos/ListaEventos.vue')
+            },
+            {
+              path: 'evento',
+              name: 'evento',
+              component: () => import('./views/Caja/eventos/CrearEvento.vue')
+            },
+          ]
+        },
+        {
+          path: 'reservaciones',
+          name: 'reservaciones',
+          redirect: { name: 'listaReservaciones' },
+          component: () => import('./views/Caja/reservaciones/Reservaciones.vue'),
+          children: [
+            {
+              path: 'lista-reservaciones',
+              name: 'listaReservaciones',
+              component: () => import('./views/Caja/reservaciones/ListaReservaciones.vue')
+            },
+            {
+              path: 'reservacion',
+              name: 'reservacion',
+              component: () => import('./views/Caja/reservaciones/CrearReservacion.vue')
+            },
+          ]
+        },
+        {
+          path: 'orden',
+          name: 'orden',
+          redirect: { name: 'buscarOrden' },
+          component: () => import('./views/Caja/orden/Orden.vue'),
+          children: [
+            {
+              path: 'buscar-orden',
+              name: 'buscarOrden',
+              component: () => import('./views/Caja/orden/BuscarOrden.vue')
+            },
+            {
+              path: 'nueva-orden',
+              name: 'nuevaOrden',
+              component: () => import('./views/Caja/orden/NuevaOrden.vue')
+            },
+          ]
+        },
+        {
+          path: 'menu',
+          name: 'caja-menu',
+          component: () => import('./views/Caja/menu/Menu.vue')
         }
       ]
     },
     {
       path: '*',
+      name: 'notFound',
       component: () => import('./views/NotFound.vue')
     }
   ]

@@ -2,12 +2,11 @@
   <div class="login">
     <v-container grid-list-xl>
       <div class="login-bg"></div>
-      <h1 class="login-title text-center" v-show="isLoading">Loading...</h1>
-      <h1 class="login-title text-center" v-show="!isLoading">Bienvenido</h1>
+      <h1 class="login-title text-center">{{ title }}</h1>
       <v-layout row wrap>
         <v-flex xs4 v-for="(item, i) in items" :key="item.id">
           <div class="login-card" @click="openModal(i)">
-            <img src="../assets/img/login/logeo-inicio.svg" alt="Logeo" class="login-card-img">
+            <img src="@/assets/img/login/logeo-inicio.svg" alt="Logeo" class="login-card-img">
             <h2 class="login-card-title text-center">{{ item.title }}</h2>
           </div>
         </v-flex>
@@ -91,14 +90,13 @@
 </template>
 
 <script>
-import axios from 'axios'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   data(){
     return {
+      title: 'Loading...',
       items: [],
-      isLoading: true,
       modal: false,
       modalTitle: '',
       usuarios: [],
@@ -118,147 +116,118 @@ export default {
       rules: {
         required: value => !!value || 'Required.',
         counterPass: value => value.length <= 20 || '20 carácteres como máximo',
-        minPass: value => value.length >= 8 || '8 Carácteres como mínimo',
-      },
+        minPass: value => value.length >= 8 || '8 Carácteres como mínimo'
+      }
     }
   },
   methods: {
     // OBTENER USUARIOS
-    async getUsuarios(){
+    async getUsuarios () {
       try {
-
-        if(this.allUsuariosState.length == 0){
-          await this.allUsuariosAction();
+        if (this.allUsuariosState.length === 0) {
+          await this.allUsuariosAction()
         }
-        if(this.allUsuariosState.data){
-          let usuarios = this.allUsuariosState.data;
-          if(usuarios.length > 0){
 
-            usuarios = usuarios.filter(function(e){
-              return e.condicion
-            });
+        if (this.allUsuariosState.data) {
+          let usuarios = this.allUsuariosState.data
+          if (usuarios.length > 0) {
 
-            var roles = [];
+            usuarios = usuarios.filter(e => e.condicion)
+
+            let roles = []
             
-            usuarios.forEach( (e, i) => {
-              roles[i] = e.rol;
+            usuarios.forEach((e, i) => {
+              roles[i] = e.rol
             });
 
             // roles = roles.filter((e, i, arr) => {
-            //   return arr.indexOf(e) === i;
-            // });
-            roles = [... new Set(roles)];
+            //   return arr.indexOf(e) === i
+            // })
+            roles = [... new Set(roles)]
 
             roles.forEach(e => {
-              let user = usuarios.filter(element => {
+              const user = usuarios.filter(element => {
                 return element.rol == e
-              });
+              })
               this.items.push({
                 title: e,
                 usuarios: user
-              });
-            });
-
+              })
+            })
           }
-        }else {
-          
         }
+        this.title = 'Bienvenido'
       } catch (error) {
-      }finally {
-        this.isLoading = false;
+        this.title = 'Error'
       }
     },
 
     // Open Modal
-    openModal(index){
-      this.modalTitle = this.items[index].title;
-      this.usuarios = this.items[index].usuarios;
-      this.modal = true;
+    openModal (index) {
+      this.modalTitle = this.items[index].title
+      this.usuarios = this.items[index].usuarios
+      this.modal = true
     },
 
     // Open modal password
-    openModalPassword(index){
-      this.name = `${this.usuarios[index].nombres} ${this.usuarios[index].apellidos}`;
-      this.index = index;
-      this.modalPassword = true;
+    openModalPassword (index) {
+      this.name = `${this.usuarios[index].nombres} ${this.usuarios[index].apellidos}`
+      this.index = index
+      this.modalPassword = true
     },
 
     // Limpiar errores
-    clearError(){
-      if(this.error.state){
-        this.error.state = false;
-        this.error.message = '';
+    clearError () {
+      if (this.error.state) {
+        this.error.state = false
+        this.error.message = ''
       }
     },
 
     // Login
-    async login(){
+    async login () {
       try {
         if(this.$refs.form.validate() && !this.error.state){
+          this.disabled = true
+          this.loginLoad = true
+          let usuario = this.usuarios[this.index]
 
-          this.disabled = true;
-          this.loginLoad = true;
-          let usuario = this.usuarios[this.index];
+          const credentials =  {
+            email: usuario.email,
+            password: this.password,
+            remember_me: false,
+          }
 
-          const response = await axios.post(this.url + 'auth/login',
-            {
-              email: usuario.email,
-              password: this.password,
-              remember_me: false,
-            },
-            {
-              headers: {
-                // Apikey: this.config.headers.Apikey,
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-              }
-            }
-          );
+          await this.login(credentials)
 
-          console.log(response.data)
-
-          this.tokenMutation(response.data.token_type + ' ' + response.data.access_token);
-          localStorage.setItem('token', this.token);
-          
-          this.authMutation(response.data.user);
-          localStorage.setItem('auth', JSON.stringify(this.auth));
-          this.modal = false;
-          this.redirect()
+          this.modal = false
+          this.$router.push({ name: 'admin' })
         }
       } catch (error) {
-        this.error.state = true;
-        this.error.message = 'Password invalida';
-      }finally {
-        this.disabled = false;
-        this.loginLoad = false;
+        this.error.state = true
+        this.error.message = 'Password invalida'
+      } finally {
+        this.disabled = false
+        this.loginLoad = false
       }
     },
 
-    redirect() {
-      if(this.auth.rol === 'Administrador') {
-        this.$router.push({name: 'home'})
-      }else if(this.auth.rol === 'Mozo') {
-        this.$router.push({name: 'mozo'})
-      }else if(this.auth.rol === 'Caja') {}
-    },
-
-    ...mapMutations(['tokenMutation', 'authMutation']),
-    ...mapActions(['allUsuariosAction'])
+    ...mapActions(['allUsuariosAction', 'login'])
   },
   computed: {
-    ...mapState(['url', 'config', 'token', 'auth', 'allUsuariosState'])
+    ...mapState(['allUsuariosState'])
   },
   watch: {
-    modalPassword(){
-      if(!this.modalPassword){
-        this.password = '';
-        this.$refs.form.resetValidation();
+    modalPassword () {
+      if (!this.modalPassword) {
+        this.password = ''
+        this.$refs.form.resetValidation()
       }
-      this.clearError();
+      this.clearError()
     }
   },
-  created(){
-    this.getUsuarios();
+  created () {
+    this.getUsuarios()
   }
 }
 </script>
@@ -317,7 +286,7 @@ export default {
   font-weight: 400;
   &-title {
     background-image: linear-gradient(#0286CF 0% ,#26C4D8 100%);
-    -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 36px;
     transform: translateX(36px);

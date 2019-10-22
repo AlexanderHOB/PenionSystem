@@ -25,8 +25,8 @@
               <p class="mb-0 personal-text" v-show="empleado.condicion">Activo</p> 
               <p class="mb-0 personal-text" v-show="!empleado.condicion">Inactivo</p>
             </div>
-            <img src="../../assets/iconos/icono_pagar.svg" alt="detail" class="personal-pagar" @click="pagoModal(i)">
-            <img src="../../assets/iconos/icono_imprimir.svg" alt="detail" class="personal-imprimir" @click="pagoModal(i)">
+            <img src="@/assets/iconos/icono_pagar.svg" alt="detail" class="personal-pagar" @click="pagoModal(i)">
+            <img src="@/assets/iconos/icono_imprimir.svg" alt="detail" class="personal-imprimir" @click="pagoModal(i)">
             <PersonalBox class="personal-bg" :active="empleado.condicion" :activeInteraction="activarModal" :index="i" />
           </div>
         </v-flex>
@@ -132,11 +132,11 @@
 
 <script>
 import axios from 'axios';
-import LoadingDialog from '../../components/loading/LoadingDialog';
-import LoadingFish from '../../components/loading/LoadingFish';
-import PersonalBox from '../../components/box/PersonalBox';
-import ErrorMessage from '../../components/messages/ErrorMessage';
-import AlertNotifications from '../../components/messages/AlertNotifications';
+import LoadingDialog from '@/components/loading/LoadingDialog';
+import LoadingFish from '@/components/loading/LoadingFish';
+import PersonalBox from '@/components/box/PersonalBox';
+import ErrorMessage from '@/components/messages/ErrorMessage';
+import AlertNotifications from '@/components/messages/AlertNotifications';
 
 import { mapState, mapMutations, mapActions } from 'vuex';
 
@@ -385,7 +385,7 @@ export default {
 }
 .title-modal {
   background-image: $primary-gradient;
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 </style>

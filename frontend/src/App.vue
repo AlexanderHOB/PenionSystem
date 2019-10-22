@@ -1,43 +1,14 @@
 <template>
   <v-app>
-    <template v-if="!token || (token && auth.rol !== 'Administrador')">
-      <router-view />
-    </template>
-
-    <template  v-if="token && auth.rol === 'Administrador'">
-      <Sidenav />
-      <v-content>
-        <Header />
-        <router-view />
-      </v-content>
-    </template>
+    <router-view />
   </v-app>
 </template>
 
 <script>
-  import Sidenav from './components/Sidenav';
-  import Header from './components/Header';
-  import { mapState, mapMutations } from 'vuex';
   import { service } from '@/services/service'
 
   export default {
-    name: 'App',
-    components: {
-      Sidenav,
-      Header
-    },
-    data () {
-      return {
-        
-      }
-    },
-    methods: {
-      ...mapMutations(['drawerMutation', 'miniMutation'])
-    },
-    computed: {
-      ...mapState(['token', 'auth', 'drawerState', 'miniState']),
-
-    }
+    name: 'App'
   }
 </script>
 
@@ -49,10 +20,10 @@
   box-sizing: border-box;
   scroll-behavior: smooth;
 }
-::selection {
+// ::selection {
   // background-color: transparent;
   // text-shadow: 0 0 2px #068FD2;
-}
+// }
 body {	
   // Scroll
   &::-webkit-scrollbar {

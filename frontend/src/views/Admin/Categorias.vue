@@ -23,8 +23,8 @@
               <p class="mb-0 categoria-text" v-show="categoria.condicion">Activo</p> 
               <p class="mb-0 categoria-text" v-show="!categoria.condicion">Inactivo</p> 
             </div>
-            <img src="../assets/iconos/edit.svg" alt="edit" class="categoria-edit" @click="editarCategoriaModal(i)">
-            <img src="../assets/iconos/detail.svg" alt="detail" class="categoria-detail" @click="detailCategoriaModal(i)">
+            <img src="@/assets/iconos/edit.svg" alt="edit" class="categoria-edit" @click="editarCategoriaModal(i)">
+            <img src="@/assets/iconos/detail.svg" alt="detail" class="categoria-detail" @click="detailCategoriaModal(i)">
           </div>
         </v-flex>
       </template>
@@ -152,11 +152,11 @@
 
 <script>
 import axios from 'axios';
-import LoadingDialog from '../components/loading/LoadingDialog';
-import LoadingFish from '../components/loading/LoadingFish';
-import PrimaryBox from '../components/box/PrimaryBox';
-import ErrorMessage from '../components/messages/ErrorMessage';
-import AlertNotifications from '../components/messages/AlertNotifications';
+import LoadingDialog from '@/components/loading/LoadingDialog';
+import LoadingFish from '@/components/loading/LoadingFish';
+import PrimaryBox from '@/components/box/PrimaryBox';
+import ErrorMessage from '@/components/messages/ErrorMessage';
+import AlertNotifications from '@/components/messages/AlertNotifications';
 
 import { mapState, mapMutations, mapActions } from 'vuex';
 
@@ -542,7 +542,7 @@ export default {
 }
 .title-modal {
   background-image: $primary-gradient;
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 </style>
