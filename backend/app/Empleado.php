@@ -20,7 +20,7 @@ class Empleado extends Model
         return $this->belongsTo('App\Persona', 'id');
     }
     public function transacciones(){
-        return $this->hasMany('App\Transaccion','persona_id','id');
+        return $this->hasMany('App\Transaccion','persona_id');
     }
     
     public function user(){

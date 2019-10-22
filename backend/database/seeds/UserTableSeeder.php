@@ -14,9 +14,9 @@ class UserTableSeeder extends Seeder
         for($i=1;$i<=10;$i++){
 
             DB::table('users')->insert([
-                'id'               =>$i,
+                'empleado_id'               =>$i,
                 'email'            => 'usuario-'.$i.'@gmail.com',
-                'password'         => bcrypt('admin'),
+                'password'         => bcrypt('admin1234'),
                 'color'            => '#'.rand(111111,999999), 
                 'condicion'        => 1,
                 'rol_id'            =>rand(1,6),

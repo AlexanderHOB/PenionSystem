@@ -30,7 +30,7 @@ class DetallePedido extends Model
         return $this->belongsTo('App\Mesa');
     }
     protected function platillo(){
-        return $this->belongsTo('App\Platillo');
+        return $this->belongsTo('App\Platillo','platillo_id');
     }
     protected function modificaciones(){
         return $this->hasMany('App\Modificacion');

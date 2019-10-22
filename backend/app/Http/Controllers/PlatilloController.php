@@ -58,12 +58,12 @@ class PlatilloController extends Controller
     public function store(PlatilloStoreRequest $request)
     {
         $platillo = new Platillo();
-        $platillo->categoria_id =$request->categoria_id;
-        $platillo->codigo       =$request->codigo;
-        $platillo->nombre       =$request->nombre;
-        $platillo->area         =$request->area;
-        $platillo->precio       =$request->precio;
-
+        $platillo->categoria_id     =$request->categoria_id;
+        $platillo->codigo           =$request->codigo;
+        $platillo->nombre           =$request->nombre;
+        $platillo->area             =$request->area;
+        $platillo->precio           =$request->precio;
+        $platillo->unidad_de_medida =$request->unidad_de_medida;
         if($request->descripcion!=''||$request->descripcion!=null){
             $platillo->descripcion=$request->descripcion;
         }
