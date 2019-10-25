@@ -16,9 +16,20 @@
           <v-avatar class="mx-2" color="blue lighten-1">
             <v-icon dark>person</v-icon>
           </v-avatar>
-          <v-btn icon small>
-            <v-icon>keyboard_arrow_down</v-icon>
-          </v-btn>
+          <v-menu offset-y>
+            <template v-slot:activator="{ on }">
+              <v-btn icon small v-on="on">
+                <v-icon>keyboard_arrow_down</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                @click="logoutUI"
+              >
+                <v-list-item-title>Logout</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
         </div>   
       </v-container>   
     </header>
@@ -125,9 +136,16 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 
 export default {
+  methods: {
+    async logoutUI () {
+      this.logout()
+      this.$router.push({name: 'login'})
+    },
+    ...mapActions(['logout'])
+  },
   computed: {
     ...mapState(['cajaBreadcrumb'])
   }

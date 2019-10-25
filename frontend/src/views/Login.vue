@@ -93,7 +93,7 @@
 import { mapState, mapActions } from 'vuex'
 
 export default {
-  data(){
+  data () {
     return {
       title: 'Loading...',
       items: [],
@@ -197,6 +197,7 @@ export default {
             password: this.password,
             remember_me: false
           }
+
           await this.login(credentials)
 
           this.modal = false

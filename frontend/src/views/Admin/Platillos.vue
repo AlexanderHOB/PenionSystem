@@ -205,14 +205,15 @@
 </template>
 
 <script>
-import axios from 'axios';
-import LoadingDialog from '@/components/loading/LoadingDialog';
-import LoadingFish from '@/components/loading/LoadingFish';
-import PrimaryBox from '@/components/box/PrimaryBox';
-import ErrorMessage from '@/components/messages/ErrorMessage';
-import AlertNotifications from '@/components/messages/AlertNotifications';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import adminService from '@/services/admin'
+
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import PrimaryBox from '@/components/box/PrimaryBox'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 export default {
   components: {
@@ -222,7 +223,7 @@ export default {
     ErrorMessage,
     AlertNotifications
   },
-  data(){
+  data () {
     return {
       title: 'Platillos',
       bgBox: '#ebe03b',
@@ -284,64 +285,64 @@ export default {
   },
   methods: {
     // OBTENER PLATILLOS
-    async getPlatillos(){
+    async getPlatillos () {
       try {
-        if(this.backup.platillos.length != 0){
-          this.searchQueryMutation('');
-          return;
+        if (this.backup.platillos.length != 0) {
+          this.searchQueryMutation('')
+          return
         }
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
 
-        // let response = await axios.get(this.url + 'platillos', this.config);
-        if(this.allPlatillosState.length == 0 || this.refresh){
-          await this.allPlatillosAction();
-          this.refresh = false;
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
+
+        if (this.allPlatillosState.length == 0 || this.refresh) {
+          await this.allPlatillosAction()
+          this.refresh = false
         }
-        if(this.allPlatillosState.data){
-          let platillos = this.allPlatillosState.data;
-          if(platillos.length > 0){
-            this.allPlatillos = platillos;
-            this.page = 1;
-            this.paginate();
-            this.messagePlatillos = '';
-          }else {
-            this.messagePlatillos= 'No se encontraron platillos';
-            this.pageTotal = 0;
+        if (this.allPlatillosState.data) {
+          let platillos = this.allPlatillosState.data
+          if (platillos.length > 0) {
+            this.allPlatillos = platillos
+            this.page = 1
+            this.paginate()
+            this.messagePlatillos = ''
+          } else {
+            this.messagePlatillos= 'No se encontraron platillos'
+            this.pageTotal = 0
           }
-          this.searchDisabledMutation(false);
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messagePlatillos = response.data.message;
-          this.platillos = [];
-          this.pageTotal = 0;
-          this.searchDisabledMutation(true);
+          this.searchDisabledMutation(false)
+          this.headerActionsMutation({create: true, report: false})
+        } else {
+          this.headerActionsMutation({create: false, report: false})
+          this.messagePlatillos = response.data.message
+          this.platillos = []
+          this.pageTotal = 0
+          this.searchDisabledMutation(true)
         }
         
-      }catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
-        this.pageTotal = 0;
-        this.messagePlatillos = 'Error al conctar con el servidor';
-      }finally {
-        this.loadingDialogMutation(false);
+      } catch (error) {
+        this.headerActionsMutation({create: false, report: false})
+        this.searchDisabledMutation(true)
+        this.pageTotal = 0
+        this.messagePlatillos = 'Error al conctar con el servidor'
+      } finally {
+        this.loadingDialogMutation(false)
       }
     },
 
-    refreshPlatillos(){
-      this.refresh = true;
-      this.getPlatillos();
+    refreshPlatillos () {
+      this.refresh = true
+      this.getPlatillos()
     },
 
     // PAGINAR PLATILLOS
-    paginate(){
+    paginate () {
       if(this.allPlatillos.length > this.pagination){
-        this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination);
+        this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination)
       }else {
-         this.platillos = this.allPlatillos;
-          this.pageTotal = 0;
+         this.platillos = this.allPlatillos
+          this.pageTotal = 0
       }
     },
 
@@ -349,268 +350,274 @@ export default {
     searchPlatillos(query){
       if(query != '' && query != null){
         if(this.platillos.length != 0 && this.backup.platillosIndex){
-          this.backup.platillos = this.platillos;
+          this.backup.platillos = this.platillos
           if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
+            this.backup.pageTotal = this.pageTotal
           }
-          this.backup.platillosIndex = false;
+          this.backup.platillosIndex = false
         }
 
         if(this.messagePlatillos.length != 0){
-          this.messagePlatillos = '';
+          this.messagePlatillos = ''
         }
 
         this.platillos = this.allPlatillos.filter(function(e){
-          return  e.nombre.toLowerCase().search(query.toLowerCase()) != -1;
-        });
+          return  e.nombre.toLowerCase().search(query.toLowerCase()) != -1
+        })
         if(this.platillos.length == 0){
-          this.messagePlatillos = 'No se encontraron platillos con el nombre ' + query;
+          this.messagePlatillos = 'No se encontraron platillos con el nombre ' + query
         }
-        this.pageTotal = 0;
+        this.pageTotal = 0
       }else {
         if(this.backup.platillos.length != 0){
-          this.platillos =this.backup.platillos;
-          this.backup.platillos = [];
-          this.messagePlatillos = '';
+          this.platillos =this.backup.platillos
+          this.backup.platillos = []
+          this.messagePlatillos = ''
           if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
+            this.pageTotal = this.backup.pageTotal
+            this.backup.pageTotal = 0
           }
-          this.backup.platillosIndex = true;
+          this.backup.platillosIndex = true
         }
       }
     },
 
     // OBTENER CATEGORIAS
-    async getCategorias(){
+    async getCategorias () {
         try {
-          // let response = await axios.get(this.url + 'categoria/platillo/selectCategoria', this.config);
           if(this.allCategoriasState.length == 0){
-            await this.allCategoriasAction();
+            await this.allCategoriasAction()
           }
           if(this.allCategoriasState.data){
-            let categorias = this.allCategoriasState.data;
+            let categorias = this.allCategoriasState.data
             if(categorias.length > 0){
-                this.categorias = categorias.filter(function(e){
+                this.categorias = categorias.filter(e => {
                 return e.condicion
-              });
+              })
             }
           }
         } catch (error) {
-          this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'});
+          this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'})
         }
       },
 
     // MODAL DE DETALLE
-    detailPlatilloModal(index){
-      this.codigoDetail = this.platillos[index].codigo;
-      this.nombreDetail = this.platillos[index].nombre;
-      this.areaDetail = this.platillos[index].area;
-      this.precioDetail = this.platillos[index].precio;
-      this.nombreCategoriaDetail = this.platillos[index].categoria.nombre;
-      this.descripcionDetail = this.platillos[index].descripcion;
-      this.platillosDetail = true;
+    detailPlatilloModal (index) {
+      this.codigoDetail = this.platillos[index].codigo
+      this.nombreDetail = this.platillos[index].nombre
+      this.areaDetail = this.platillos[index].area
+      this.precioDetail = this.platillos[index].precio
+      this.nombreCategoriaDetail = this.platillos[index].categoria.nombre
+      this.descripcionDetail = this.platillos[index].descripcion
+      this.platillosDetail = true
     },
 
     // CERRAR MODAL DE DETALLE
-    closeDetailModal(){
-      this.platillosDetail = false;
-      let self = this;
-      setTimeout(function(){
-        self.codigoDetail = '';
-        self.nombreDetail = '';
-        self.areaDetail = '';
-        self.precioDetail = '';
-        self.nombreCategoriaDetail = '';
-        self.descripcionDetail = '';
-      }, 100);
+    closeDetailModal () {
+      this.platillosDetail = false
+      let self = this
+      setTimeout(function () {
+        self.codigoDetail = ''
+        self.nombreDetail = ''
+        self.areaDetail = ''
+        self.precioDetail = ''
+        self.nombreCategoriaDetail = ''
+        self.descripcionDetail = ''
+      }, 100)
     },
 
     // MODAL PARA EDITAR PLATILLO
-    editarPlatilloModal(index){
-      this.codigo = this.platillos[index].codigo;
-      this.nombre = this.platillos[index].nombre;
-      this.area = this.platillos[index].area;
-      this.precio = this.platillos[index].precio;
-      this.categoria = this.platillos[index].categoria;
-      this.descripcion = this.platillos[index].descripcion;
-      this.index = index;
-      this.id = this.platillos[index].id;
-      this.create = false;
-      this.createModalMutation(true);
+    editarPlatilloModal (index) {
+      this.codigo = this.platillos[index].codigo
+      this.nombre = this.platillos[index].nombre
+      this.area = this.platillos[index].area
+      this.precio = this.platillos[index].precio
+      this.categoria = this.platillos[index].categoria
+      this.descripcion = this.platillos[index].descripcion
+      this.index = index
+      this.id = this.platillos[index].id
+      this.create = false
+      this.createModalMutation(true)
     },
 
     // CERRAR MODAL
-    closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+    closeModal () {
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMUALRIO
-    resetForm(){
-      this.codigo = '';
-      this.nombre = '';
-      this.area = '';
-      this.precio = null;
-      this.categoria = null;
-      this.descripcion = '';
-      this.create = true;
-      this.$refs.form.resetValidation();
+    resetForm () {
+      this.codigo = ''
+      this.nombre = ''
+      this.area = ''
+      this.precio = null
+      this.categoria = null
+      this.descripcion = ''
+      this.create = true
+      this.$refs.form.resetValidation()
     },
 
     // CREAR PLATILLO
-    async crearPlatillo(){
+    async crearPlatillo () {
       try {
         if (this.$refs.form.validate()) {
-          this.isLoadBtn = true;
-          this.disabled = true;
+          this.isLoadBtn = true
+          this.disabled = true
           if(this.descripcion == '' || this.descripcion == null){
-            this.descripcion = 'Platillo sin descripción';
+            this.descripcion = 'Platillo sin descripción'
           }
-          this.precio = parseFloat(parseFloat(this.precio).toFixed(2));
-          console.log(this.categoria);
-          let response = await axios.post(this.url + 'platillo/registrar', {
+          this.precio = parseFloat(parseFloat(this.precio).toFixed(2))
+
+          const data = {
             categoria_id: this.categoria.id,
             codigo: this.codigo,
             nombre: this.nombre,
             area: this.area,
             precio: this.precio,
             descripcion: this.descripcion
-          }, this.config);
+          }
 
-          this.closeModal();
+          const response = await adminService.createPlatillo(data)
+
+          this.closeModal()
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
+              this.pageTotal = this.backup.pageTotal
           }
 
           if(this.allPlatillos.length % 10 === 0){
-            this.pageTotal++;
+            this.pageTotal++
           }
 
           if(response.data){
-            this.allPlatillos.push(response.data);
-            this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'});
-            this.page = this.pageTotal;
-            this.paginate();
-            this.backup.platillos = [];
-            this.messagePlatillos = '';
-            this.backup.platillosIndex = true;
+            this.allPlatillos.push(response.data)
+            this.snackbarMutation({value: true, text: 'Platillo creado correctamente', color: 'success'})
+            this.page = this.pageTotal
+            this.paginate()
+            this.backup.platillos = []
+            this.messagePlatillos = ''
+            this.backup.platillosIndex = true
           }else{
-            this.snackbarMutation({value: true, text: 'Ocurrio un error al crear el paltillo', color: 'error'});
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al crear el paltillo', color: 'error'})
           }
         }
       } catch (error) {
-        this.closeModal();
-        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+        this.closeModal()
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'})
       }finally {
-        this.isLoadBtn = false;
-        this.disabled = false;
+        this.isLoadBtn = false
+        this.disabled = false
       }
     },
 
-    async editarPlatillo(){
+    async editarPlatillo () {
       try {
         if (this.$refs.form.validate()) {
           if(this.descripcion == '' || this.descripcion == null){
-            this.descripcion = 'Platillo sin descripción';
+            this.descripcion = 'Platillo sin descripción'
           }
 
-          var categoriaBup = this.categoria.id;
-          let codigoBup = this.codigo;
-          let nombreBup = this.nombre;
-          let areaBup = this.area;
-          let precioBup = parseFloat(parseFloat(this.precio).toFixed(2));
-          let descripcionBup = this.descripcion;
+          var categoriaBup = this.categoria.id
+          let codigoBup = this.codigo
+          let nombreBup = this.nombre
+          let areaBup = this.area
+          let precioBup = parseFloat(parseFloat(this.precio).toFixed(2))
+          let descripcionBup = this.descripcion
 
-          this.closeModal();
+          this.closeModal()
 
-          var categoriaJsonBup = this.categorias.filter(e => e.id == categoriaBup);
+          var categoriaJsonBup = this.categorias.filter(e => e.id == categoriaBup)
 
-          this.platillos[this.index].categoria = categoriaJsonBup[0];
-          this.platillos[this.index].codigo = codigoBup;
-          this.platillos[this.index].nombre = nombreBup;
-          this.platillos[this.index].area = areaBup;
-          this.platillos[this.index].precio = precioBup;
-          this.platillos[this.index].descripcion = descripcionBup;
+          this.platillos[this.index].categoria = categoriaJsonBup[0]
+          this.platillos[this.index].codigo = codigoBup
+          this.platillos[this.index].nombre = nombreBup
+          this.platillos[this.index].area = areaBup
+          this.platillos[this.index].precio = precioBup
+          this.platillos[this.index].descripcion = descripcionBup
 
-          let response = await axios.put(this.url + 'platillo/actualizar/' + this.id, {
+          const data = {
             categoria_id: categoriaBup,
             codigo: codigoBup,
             nombre: nombreBup,
             area: areaBup,
             precio: precioBup,
             descripcion: descripcionBup
-          }, this.config);
-          this.snackbarMutation({value: true, text: 'Platillo editado correctamente', color: 'success'});
+          }
+
+          await adminService.updatePlatillo(this.id, data)
+
+          this.snackbarMutation({value: true, text: 'Platillo editado correctamente', color: 'success'})
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un erro al editar la platillo', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un erro al editar la platillo', color: 'error'})
       }
     },
 
     // MODAL PARA ACTIVAR
     activarModal(index){
-        this.index = index;
+        this.index = index
         if(this.platillos[index].condicion){
-          this.activarText = 'desactivar';
+          this.activarText = 'desactivar'
         }else{
-          this.activarText = 'activar';
+          this.activarText = 'activar'
         }
-        this.activeDialog = true;
+        this.activeDialog = true
     },
 
     //  ACTIVAR 
-    async activarPlatillo(index){
+    async activarPlatillo (index) {
       try {
-        this.id = this.platillos[index].id;
-        this.activeDialog = false;
-        if(this.platillos[index].condicion){
-          this.platillos[index].condicion = 0;
+        this.id = this.platillos[index].id
+        this.activeDialog = false
+        if( this.platillos[index].condicion ){
+          this.platillos[index].condicion = 0
 
-          let response = await axios.put(this.url + 'platillo/desactivar/' + this.id, {},this.config);
-          this.snackbarMutation({value: true, text: 'Platillo desactivada correctamente', color: 'success'});
-        }else {
-          this.platillos[index].condicion = 1;
+          await adminService.disabledPlatillo(this.id)
 
-          let response = await axios.put(this.url + 'platillo/activar/' + this.id, {}, this.config);
-          this.snackbarMutation({value: true, text: 'Platillo activada correctamente', color: 'success'});
+          this.snackbarMutation({value: true, text: 'Platillo desactivada correctamente', color: 'success'})
+        } else {
+          this.platillos[index].condicion = 1
+
+         await adminService.enabledPlatillo(this.id)
+
+          this.snackbarMutation({value: true, text: 'Platillo activada correctamente', color: 'success'})
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
-    async formAction(){
-      if(this.create){
-        await this.crearPlatillo();
+    async formAction () {
+      if (this.create) {
+        await this.crearPlatillo()
       }else {
-        await this.editarPlatillo();
+        await this.editarPlatillo()
       }
     },
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
     ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allPlatillosState', 'allCategoriasState'])
+    ...mapState(['loadingFish', 'createModalState', 'searchQuery', 'allPlatillosState', 'allCategoriasState'])
   },
   watch: {
-    searchQuery(){
-      this.searchPlatillos(this.searchQuery);
+    searchQuery () {
+      this.searchPlatillos(this.searchQuery)
     }
   },
-  async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    this.loadingFishMutation(true);
-    this.getCategorias();
-    await this.getPlatillos();
-    this.loadingFishMutation(false);
+  async created () {
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    this.loadingFishMutation(true)
+    this.getCategorias()
+    await this.getPlatillos()
+    this.loadingFishMutation(false)
   },
-  beforeMount(){
-    this.breadcrumbMutation('Platillos');
-    this.searchPlaceholderMutation('Nombre del platillo...');
+  beforeMount () {
+    this.breadcrumbMutation('Platillos')
+    this.searchPlaceholderMutation('Nombre del platillo...')
   }
 }
 </script>

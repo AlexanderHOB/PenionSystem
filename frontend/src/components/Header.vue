@@ -52,7 +52,7 @@
           </form>
         </v-flex>
         <v-flex sm2 class="pt-5 mt-2 text-center text-sm-right">
-            <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
+            <v-btn dark color="red" rounded @click="logoutUI">Logout</v-btn>
         </v-flex>
         <v-flex v-if="headerActionCreate" xs12 sm2 class="pt-5 mt-2 text-center text-sm-right">
           <v-btn class="indigo white--text" rounded @click="createModalMutation(true)">
@@ -83,18 +83,17 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   methods: {
     search(){},
-    logout() {
-      localStorage.removeItem('token');
-      this.authMutation({});
-      localStorage.removeItem('auth');
+    async logoutUI () {
+      this.logout()
       this.$router.push({name: 'login'})
     },
-    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'authMutation'])
+    ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'authMutation']),
+    ...mapActions(['logout'])
   },
   computed: {
     ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),

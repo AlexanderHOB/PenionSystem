@@ -16,7 +16,7 @@
             <div class="mozo-header-userBox fill-height">
               <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
               <v-img
-                :src="require('../../assets/iconos/administrador.svg')"
+                :src="require('@/assets/iconos/administrador.svg')"
                 alt="user"
                 class="mozo-header-userImg"
                 contain
@@ -27,24 +27,24 @@
           </v-flex>
           <v-flex xs4 class="pt-5">
             <router-link class="mozo-buttonBox" :to="{name: 'mozo-mesas'}">
-              <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/mesas.svg" alt="mesas" class="mozo-buttonIcon"><span>Mesas</span></p>
+              <img src="@/assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
+              <p class="pb-0 mozo-buttonText"><img src="@/assets/img/mozo/mesas.svg" alt="mesas" class="mozo-buttonIcon"><span>Mesas</span></p>
             </router-link>
           </v-flex>
           <v-flex xs4 class="pt-5">
             <router-link class="mozo-buttonBox" :to="{name: 'mozo-menu'}">
-              <img src="../../assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText"><img src="../../assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
+              <img src="@/assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
+              <p class="pb-0 mozo-buttonText"><img src="@/assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
             </router-link>
           </v-flex>
           <v-flex class="pt-5 mt-5">
-            <v-btn dark color="red" rounded @click="logout">Logout</v-btn>
+            <v-btn dark color="red" rounded @click="logoutUI">Logout</v-btn>
           </v-flex>
         </v-layout>
       </v-container>
       <div class="mozo-header-waves">
         <v-img
-          :src="require('../../assets/img/header/wave.png')"
+          :src="require('@/assets/img/header/wave.png')"
           contain
           height="80"
           class="mozo-header-waves-img"
@@ -60,25 +60,23 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   methods: {
-    search(){},
-    logout() {
-      this.tokenMutation('');
-      localStorage.removeItem('token');
-      this.authMutation({});
-      localStorage.removeItem('auth');
+    search () {},
+    async logoutUI () {
+      this.logout()
       this.$router.push({name: 'login'})
     },
+    ...mapActions(['logout']),
     ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation', 'refreshUIMutation'])
   },
   computed: {
     ...mapState(['breadcrumb'])
   },
   mounted(){
-    this.breadcrumbMutation('Mozo');
+    this.breadcrumbMutation('Mozo')
   }
 }
 </script>

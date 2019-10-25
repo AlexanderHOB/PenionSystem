@@ -18,8 +18,8 @@
 
     <v-row>
       <v-col
-        v-for="({ mesa, user }, i) in pedidos"
-        :key="mesa.id"
+        v-for="(pedido, i) in pedidos"
+        :key="pedido.mesa_id"
         cols="2"
       >
         <v-card @click="selectDetail(i)">
@@ -28,16 +28,16 @@
               <v-card-title
                 class="title pr-0 pl-1"
               >
-                Mesa {{ mesa.numero }}
+                Mesa {{ pedido.mesa_numero }}
               </v-card-title>
 
               <v-card-text class="pl-1">
                 <p class="Mesa-capacidad mb-1">Capacidad</p>
-                {{ mesa.capacidad }}
+                {{ pedido.mesa_capacidad }}
               </v-card-text>
             </div>
 
-            <div class="Mesa-img-box pa-2 pt-4" :style="{'background-color':  user.color}">
+            <div class="Mesa-img-box pa-2 pt-4" :style="{'background-color':  pedido.color_mozo}">
               <img src="@/assets/img/mesas/mesaOcupada.svg" alt="mesa" class="Mesa-img">
             </div>
           </div>
@@ -168,7 +168,7 @@
                     class="mt-0 pt-0"
                   ></v-checkbox>
                 </v-col>
-                <v-col class="pa-0 text-center" cols="6">
+                <v-col class="pa-0" cols="6">
                   <div class="subtitle-2">Ronda Marina (C/S, A/M Causa Lec/S) Doncella</div>
                   <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
                 </v-col>
@@ -189,8 +189,8 @@
               Seleccionar Todo
             </v-col>
             <v-col class="pa-0 my-2 text-center" cols="4">
-              <v-btn text color="blue" small>
-                Reducir (2)
+              <v-btn text color="blue" small @click="openReducir">
+                Reducir ({{ numberOfSelecteds }})
               </v-btn>
             </v-col>
             <v-col class="fill-height"></v-col>
@@ -287,6 +287,63 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+      v-model="reducir"
+      width="500"
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-3"
+          primary-title
+        >
+          Reducir
+        </v-card-title>
+
+        <v-card-text>
+          <h4 class="title mt-3">Lista de pedidos</h4>
+          <!-- <v-row class="mx-0 my-3" v-for="(pedido, i) in details.pedidos" :key="pedido.id"> -->
+          <div class="my-3">
+            <v-row class="mx-0 mb-2">
+              <v-col class="pa-0" cols="8">
+                <div class="subtitle-2">Ronda Marina (C/S, A/M Causa Lec/S) Doncella</div>
+                <!-- <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small> -->
+                <small class="Details-pedidos-desc caption">Auth</small>
+              </v-col>
+              <!-- <v-col class="pa-0 d-flex align-center justify-center" cols="2">{{ pedido.cantidad }}</v-col> --> <v-col class="pa-0 d-flex align-center justify-center" cols="2">1</v-col>
+              <!-- <v-col class="pa-0 d-flex align-center justify-center" cols="2"> {{ pedido.total }}</v-col> --> <v-col class="pa-0 d-flex align-center justify-center" cols="2"> 2</v-col>
+            </v-row>
+            <v-divider></v-divider>
+          </div>
+          
+          <v-form
+            ref="formReducir"
+            lazy-validation
+            v-model="validReducir"
+            @submit.prevent="handleReducir"
+          >
+            <v-textarea
+              v-model="justificacion"
+              counter
+              label="Justificación"
+            ></v-textarea>
+          </v-form>
+        </v-card-text>
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="handleReducir"
+            :disabled="!validReducir" 
+          >
+            Confirmar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     
     <v-btn
           v-show="overlay"
@@ -363,7 +420,7 @@ export default {
       // Pedidos
       checkboxs: [],
       selected:[],
-      // Descuentoss
+      // Descuentos
       descuentos: {
         show: false,
         radioGroup: 1,
@@ -374,7 +431,11 @@ export default {
       },
       descuentosInput: true,
       porcentaje: 0,
-      valor: 0
+      valor: 0,
+      // Reducir
+      reducir: false,
+      validReducir: true,
+      justificacion: ''
     }
   },
   methods: {
@@ -437,11 +498,12 @@ export default {
     },
     selectDetail (i) {
       const pedido = this.pedidos[i]
+      let nombre = pedido.nombre_mozo.split(' ')
       const config = {
         nOrden: pedido.numero_orden,
-        mesa: pedido.mesa.numero,
-        mozo: 'luismozo',
-        pax: pedido.mesa.capacidad,
+        mesa: pedido.mesa_numero,
+        mozo: nombre[0]+pedido.rol_mozo,
+        pax: pedido.mesa_capacidad,
         pedidos: pedido.detalles_pedidos,
         descuento: 0
       }
@@ -497,6 +559,13 @@ export default {
         })
       }
     },
+    // Reducir
+    openReducir () {
+      this.reducir = true
+    },
+    handleReducir () {
+      
+    },
     // ASSIGN
     // assign details
     assignDetaials (config) {
@@ -530,6 +599,9 @@ export default {
     ...mapMutations(['snackbarMutation', 'loadingTitleMutation', 'loadingDialogMutation'])
   },
   computed: {
+    numberOfSelecteds () {
+      return this.selected.length
+    },
     ...mapState(['allMesasState'])
   },
   created () {

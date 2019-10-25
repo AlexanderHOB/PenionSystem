@@ -327,7 +327,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { mapState, mapMutations, mapActions } from 'vuex'
+
+import adminService from '@/services/admin'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
@@ -335,7 +337,6 @@ import PersonalBox from '@/components/box/PersonalBox'
 import ErrorMessage from '@/components/messages/ErrorMessage'
 import AlertNotifications from '@/components/messages/AlertNotifications'
 
-import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -414,60 +415,60 @@ export default {
     async getUsuarios(){
       try {
         if(this.backup.usuarios.length != 0){
-          this.searchQueryMutation('');
-          return;
+          this.searchQueryMutation('')
+          return
         }
 
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
-        // let response = await axios.get(this.url + 'users', this.config);
+        // let response = await axios.get(this.url + 'users', this.config)
         if(this.allUsuariosState.length == 0 || this.refresh){
-          await this.allUsuariosAction();
-          this.refresh = false;
+          await this.allUsuariosAction()
+          this.refresh = false
         }
         if(this.allUsuariosState.data){
-          let usuarios = this.allUsuariosState.data;
+          let usuarios = this.allUsuariosState.data
           if(usuarios.length > 0){
-            this.allUsuarios = usuarios;
-            this.paginate();
-            this.messageUsuarios = '';
-            this.searchDisabledMutation(false);
+            this.allUsuarios = usuarios
+            this.paginate()
+            this.messageUsuarios = ''
+            this.searchDisabledMutation(false)
           }else {
-            this.messageUsuarios = 'No se encontro ningún usuario';
-            this.pageTotal = 0;
+            this.messageUsuarios = 'No se encontro ningún usuario'
+            this.pageTotal = 0
           }
-          this.headerActionsMutation({create: true, report: false});
+          this.headerActionsMutation({create: true, report: false})
         }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messageUsuarios = response.data.message;
-          this.usuarios = [];
-          this.pageTotal = 0;
-          this.searchDisabledMutation(true);
+          this.headerActionsMutation({create: false, report: false})
+          this.messageUsuarios = response.data.message
+          this.usuarios = []
+          this.pageTotal = 0
+          this.searchDisabledMutation(true)
         }
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.pageTotal = 0;
-        this.messageUsuarios = 'Error al conctar con el servidor';
-        this.searchDisabledMutation(true);
+        this.headerActionsMutation({create: false, report: false})
+        this.pageTotal = 0
+        this.messageUsuarios = 'Error al conctar con el servidor'
+        this.searchDisabledMutation(true)
       }finally {
-        this.loadingDialogMutation(false);
+        this.loadingDialogMutation(false)
       }
     },
 
     refreshUsuarios(){
-      this.refresh = true;
-      this.getUsuarios();
+      this.refresh = true
+      this.getUsuarios()
     },
 
     // PAGINAR USUARIOS
     paginate(){
       if(this.allUsuarios.length > this.pagination){
-        this.usuarios = this.allUsuarios.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allUsuarios.length / this.pagination);
+        this.usuarios = this.allUsuarios.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allUsuarios.length / this.pagination)
       }else {
-         this.usuarios = this.allUsuarios;
-          this.pageTotal = 0;
+         this.usuarios = this.allUsuarios
+          this.pageTotal = 0
       }
     },
 
@@ -475,36 +476,36 @@ export default {
     searchUsuarios(query){
       if(query != '' && query != null){
         if(this.usuarios.length != 0 && this.backup.usuariosIndex){
-          this.backup.usuarios = this.usuarios;
+          this.backup.usuarios = this.usuarios
           if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
+            this.backup.pageTotal = this.pageTotal
           }
-          this.backup.usuariosIndex = false;
+          this.backup.usuariosIndex = false
         }
 
         if(this.messageUsuarios.length != 0){
-          this.messageUsuarios = '';
+          this.messageUsuarios = ''
         }
 
         this.usuarios = this.allUsuarios.filter(function(e){
-          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 ;
-        });
+          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 
+        })
 
         if(this.usuarios.length == 0){
-          this.messageUsuarios = 'No se encontro usuario con el nombre ' + query;
+          this.messageUsuarios = 'No se encontro usuario con el nombre ' + query
         }
         
-        this.pageTotal = 0;
+        this.pageTotal = 0
       }else {
         if(this.backup.usuarios.length != 0){
-          this.usuarios = this.backup.usuarios;
-          this.backup.usuarios = [];
-          this.messageUsuarios = '';
+          this.usuarios = this.backup.usuarios
+          this.backup.usuarios = []
+          this.messageUsuarios = ''
           if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
+            this.pageTotal = this.backup.pageTotal
+            this.backup.pageTotal = 0
           }
-          this.backup.usuariosIndex = true;
+          this.backup.usuariosIndex = true
         }
       }
     },
@@ -513,158 +514,158 @@ export default {
     async getAllPersonal(){
       try {
 
-        this.isLoadingPersonal = true;
+        this.isLoadingPersonal = true
 
-        // let response = await axios.get(this.url + 'empleados', this.config);
+        // let response = await axios.get(this.url + 'empleados', this.config)
         if(this.allPersonalState.length == 0){
-          await this.allPersonalAction();
+          await this.allPersonalAction()
         }
         if(this.allPersonalState.data){
-          let personal = this.allPersonalState.data;
+          let personal = this.allPersonalState.data
           if(personal.length > 0){
 
-            this.allPersonal = personal;
+            this.allPersonal = personal
 
             this.allValidPersonal = personal.filter(function(e){
               return e.condicion && (e.puesto_trabajo === 'Mozo' ||  e.puesto_trabajo === 'Caja')
-            });
+            })
 
             for(let usuario of this.allUsuarios){
               this.allValidPersonal = this.allValidPersonal.filter(function(e){
                 return e.id !== usuario.empleado_id
-              });
+              })
             }
           }else {
-            this.allPersonal = [];
+            this.allPersonal = []
           }
         }else {
-          this.allPersonal = [];
+          this.allPersonal = []
         }
       } catch (error) {
-        this.allPersonal = [];
-        this.snackbarMutation({value: true, text: 'Error al obtener el personal', color: 'error'});
+        this.allPersonal = []
+        this.snackbarMutation({value: true, text: 'Error al obtener el personal', color: 'error'})
 
       }finally {
-        this.isLoadingPersonal = false;
+        this.isLoadingPersonal = false
       }
     },
 
     // ASIGNAR PERSONAL
     asignPersonal(){
-      this.apellidos = this.personal.apellidos;
-      this.nombres = this.personal.nombres;
-      this.email = this.personal.email;
-      this.n_documento = this.personal.documento;
-      this.celular = this.personal.celular;
-      this.puesto = this.personal.puesto_trabajo;
-      this.area = this.personal.area_trabajo;
-      this.id = this.personal.id;
-      this.disabled = false;
+      this.apellidos = this.personal.apellidos
+      this.nombres = this.personal.nombres
+      this.email = this.personal.email
+      this.n_documento = this.personal.documento
+      this.celular = this.personal.celular
+      this.puesto = this.personal.puesto_trabajo
+      this.area = this.personal.area_trabajo
+      this.id = this.personal.id
+      this.disabled = false
     },
 
     // Obtener todos los roles
     async getAllRols(){
       try {
 
-        this.isLoadingRols = true;
+        this.isLoadingRols = true
 
         if(this.allRolsState.length == 0){
-          await this.allRolsAction();
+          await this.allRolsAction()
         }
         if(this.allRolsState.data){
-          let rols = this.allRolsState.data;
+          let rols = this.allRolsState.data
           if(rols.length > 0){
 
-            this.allRols = rols;
+            this.allRols = rols
 
           }else {
-            this.allRols = [];
+            this.allRols = []
           }
         }else {
-          this.allRols = [];
+          this.allRols = []
         }
       } catch (error) {
-        this.allRols = [];
-        this.snackbarMutation({value: true, text: 'Error al obtener los roles', color: 'error'});
+        this.allRols = []
+        this.snackbarMutation({value: true, text: 'Error al obtener los roles', color: 'error'})
       }finally {
-        this.isLoadingRols = false;
+        this.isLoadingRols = false
       }
     },
 
     // ABRIR USUARIO DETAIL MODAL
     async detailUsuariolModal(index){
-      let usuario = this.usuarios[index];
-      this.isLoadingPersonal = true;
+      let usuario = this.usuarios[index]
+      this.isLoadingPersonal = true
 
-      this.usuarioDetail = true;
+      this.usuarioDetail = true
 
-      await this.getAllPersonal();
+      await this.getAllPersonal()
 
       let personal = this.allPersonal.filter(function(e){
-        return e.id ==  usuario.empleado_id;
-      });
-      personal = personal[0];
+        return e.id ==  usuario.empleado_id
+      })
+      personal = personal[0]
 
-      this.apellidosDetail = personal.apellidos;
-      this.nombresDetail = personal.nombres;
-      this.emailDetail = personal.email;
-      this.n_documentoDetail = personal.documento;
-      this.celularDetail = personal.celular;
-      this.rolDetail = usuario.rol;
-      this.areaDetail = personal.area_trabajo;
+      this.apellidosDetail = personal.apellidos
+      this.nombresDetail = personal.nombres
+      this.emailDetail = personal.email
+      this.n_documentoDetail = personal.documento
+      this.celularDetail = personal.celular
+      this.rolDetail = usuario.rol
+      this.areaDetail = personal.area_trabajo
     },
 
     // CERRAR MODAL DETALE
     closeDetailModal(){
-      this.usuarioDetail = false;
-      let self = this;
+      this.usuarioDetail = false
+      let self = this
       setTimeout(function(){
-        self.apellidosDetail = '';
-        self.nombresDetail = '';
-        self.emailDetail = '';
-        self.n_documentoDetail = '';
-        self.celularDetail = '';
-        self.rolDetail = '';
-        self.areaDetail = '';
-      }, 100);
+        self.apellidosDetail = ''
+        self.nombresDetail = ''
+        self.emailDetail = ''
+        self.n_documentoDetail = ''
+        self.celularDetail = ''
+        self.rolDetail = ''
+        self.areaDetail = ''
+      }, 100)
     },
 
     // MODAL PARA EDITAR USUARIO
     async editUsuarioModal(index){
-      this.create = false;
-      this.disabled = false;
+      this.create = false
+      this.disabled = false
 
-      let usuario = this.usuarios[index];
+      let usuario = this.usuarios[index]
       
-      this.color = usuario.color;
-      this.index = index;
+      this.color = usuario.color
+      this.index = index
 
-      this.createModalMutation(true);
+      this.createModalMutation(true)
 
-      this.getAllRols();
+      this.getAllRols()
       
       let rol = {
         id: usuario.rol_id,
         nombre: usuario.rol
       }
 
-      this.rol = rol;
-      this.disabled = true;
+      this.rol = rol
+      this.disabled = true
 
-      await this.getAllPersonal();
+      await this.getAllPersonal()
 
       let personal = this.allPersonal.filter(function(e){
-        return e.id ==  usuario.empleado_id;
-      });
-      this.personal = personal[0];
+        return e.id ==  usuario.empleado_id
+      })
+      this.personal = personal[0]
       
-      this.asignPersonal();
+      this.asignPersonal()
     },
 
     // CERRAR MODAL
     closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMUALRIO
@@ -672,26 +673,26 @@ export default {
       this.password = '',
       this.color = '#000000',
       this.rol = null,
-      this.personal = {};
-      this.apellidos = '';
-      this.nombres = '';
+      this.personal = {}
+      this.apellidos = ''
+      this.nombres = ''
       this.email = '',
-      this.n_documento = '';
-      this.celular = '';
-      this.puesto = '';
-      this.area = '';
-      this.disabled = true;
-      this.create = true;
-      this.isLoadingPersonal = false;
-      this.$refs.form.resetValidation();
+      this.n_documento = ''
+      this.celular = ''
+      this.puesto = ''
+      this.area = ''
+      this.disabled = true
+      this.create = true
+      this.isLoadingPersonal = false
+      this.$refs.form.resetValidation()
     },
 
     // REGISTRAR USUARIO
     async registrarUsuario(){
       try {
         if (this.$refs.form.validate()) {
-          this.isLoadBtn = true;
-          this.disabled = true;
+          this.isLoadBtn = true
+          this.disabled = true
 
           let response = await axios.post(this.url + 'auth/signup', 
             {
@@ -708,38 +709,38 @@ export default {
                 'X-Requested-With': 'XMLHttpRequest'
               }
             }
-          );
+          )
 
-          this.closeModal();
+          this.closeModal()
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
+              this.pageTotal = this.backup.pageTotal
           }
 
           if(response.data){
-            this.allUsuarios.reverse();
-            this.allUsuarios.push(response.data);
-            this.allUsuarios.reverse();
-            this.snackbarMutation({value: true, text: 'Usuario creado correctamente', color: 'success'});
-            this.paginate();
-            this.page = 1;
-            this.backup.usuarios = [];
-            this.messageUsuarios = '';
-            this.backup.usuariosIndex = true;
-            let self = this;
+            this.allUsuarios.reverse()
+            this.allUsuarios.push(response.data)
+            this.allUsuarios.reverse()
+            this.snackbarMutation({value: true, text: 'Usuario creado correctamente', color: 'success'})
+            this.paginate()
+            this.page = 1
+            this.backup.usuarios = []
+            this.messageUsuarios = ''
+            this.backup.usuariosIndex = true
+            let self = this
             this.allValidPersonal = this.allValidPersonal.filter(function(e){
               return e.id !== self.id
-            });
+            })
           }else{
-            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al usuario', color: 'error'});
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al usuario', color: 'error'})
           }
         }
       } catch (error) {
-        this.closeModal();
-        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+        this.closeModal()
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'})
       }finally {
-        this.isLoadBtn = false;
-        this.disabled = false;
+        this.isLoadBtn = false
+        this.disabled = false
       }
     },
 
@@ -748,25 +749,25 @@ export default {
       try {
         if (this.$refs.form.validate()) {
 
-          let colorBup = this.color;
-          let rolNombreBup = this.rol.nombre;
-          let rolIdBup = this.rol.id;
+          let colorBup = this.color
+          let rolNombreBup = this.rol.nombre
+          let rolIdBup = this.rol.id
 
-          this.closeModal();
+          this.closeModal()
 
-          this.usuarios[this.index].color = colorBup;
-          this.usuarios[this.index].rol = rolNombreBup;
-          this.usuarios[this.index].rol_id = rolIdBup;
+          this.usuarios[this.index].color = colorBup
+          this.usuarios[this.index].rol = rolNombreBup
+          this.usuarios[this.index].rol_id = rolIdBup
 
 
           let response = await axios.put(this.url + 'user/actualizar/' + this.usuarios[this.index].id, {
             color: colorBup,
             rol_id: rolIdBup
-          }, this.config);
-          this.snackbarMutation({value: true, text: 'Usuario editado correctamente', color: 'success'});
+          }, this.config)
+          this.snackbarMutation({value: true, text: 'Usuario editado correctamente', color: 'success'})
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el usuario', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el usuario', color: 'error'})
       }
     },
 
@@ -774,67 +775,67 @@ export default {
     async changePass() {
       try {
         if (this.$refs.pass.validate()) {
-          this.isLoadBtn = true;
-          this.disabled = true;
+          this.isLoadBtn = true
+          this.disabled = true
 
           let response = await axios.put(this.url + 'user/updatePass/' + this.usuarios[this.index].id, {
             password: this.password
-          }, this.config);
+          }, this.config)
 
-          this.closeModal();
+          this.closeModal()
 
           if(response.data){
-            this.snackbarMutation({value: true, text: 'Contraseña cambiada correctamente', color: 'success'});
+            this.snackbarMutation({value: true, text: 'Contraseña cambiada correctamente', color: 'success'})
           }else{
-            this.snackbarMutation({value: true, text: 'Ocurrio un error al cambiar la contraseña', color: 'error'});
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al cambiar la contraseña', color: 'error'})
           }
         }
       } catch (error) {
-        this.closeModal();
-        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
+        this.closeModal()
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'})
       }finally {
-        this.isLoadBtn = false;
-        this.disabled = false;
+        this.isLoadBtn = false
+        this.disabled = false
       }
     },
 
     // ACTIVAR MODAL / INACTIVE
     activarModal(index){
-      this.index = index;
+      this.index = index
       if(this.usuarios[index].condicion){
-        this.activarText = 'desactivar';
+        this.activarText = 'desactivar'
       }else{
-        this.activarText = 'activar';
+        this.activarText = 'activar'
       }
-      this.activeDialog = true;
+      this.activeDialog = true
     },
 
     //  ACTIVAR 
     async activarUsuario(index){
       try {
-        this.id = this.usuarios[index].id;
-        this.activeDialog = false;
-        var self = this;
+        this.id = this.usuarios[index].id
+        this.activeDialog = false
+        var self = this
         if(this.usuarios[index].condicion){
-          this.usuarios[index].condicion = 0;
-          let response = await axios.put(this.url + 'user/desactivar/' + this.id, {},this.config);
-          this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'});
+          this.usuarios[index].condicion = 0
+          let response = await axios.put(this.url + 'user/desactivar/' + this.id, {},this.config)
+          this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'})
         }else { 
-          this.usuarios[index].condicion = 1;
-          let response = await axios.put(this.url + 'user/activar/' + this.id, {}, this.config);
-          this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'});
+          this.usuarios[index].condicion = 1
+          let response = await axios.put(this.url + 'user/activar/' + this.id, {}, this.config)
+          this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'})
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
     async formAction(){
       if(this.create){
-        await this.registrarUsuario();
+        await this.registrarUsuario()
       }else {
-        await this.editarUsuario();
+        await this.editarUsuario()
       }
     },
 
@@ -853,25 +854,25 @@ export default {
   },
     watch: {
     searchQuery(){
-      this.searchUsuarios(this.searchQuery);
+      this.searchUsuarios(this.searchQuery)
     },
     changePassModal() {
       if(this.changePassModal == false){
-        this.$refs.pass.resetValidation();
-        this.valid = true;
+        this.$refs.pass.resetValidation()
+        this.valid = true
       }
     }
   },
   async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    this.loadingFishMutation(true);
-    await this.getUsuarios();
-    this.loadingFishMutation(false);
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    this.loadingFishMutation(true)
+    await this.getUsuarios()
+    this.loadingFishMutation(false)
   },
   beforeMount(){
-    this.breadcrumbMutation('Recursos Humanos \\ Usuarios');
-    this.searchPlaceholderMutation('Nombre del usuario...');
+    this.breadcrumbMutation('Recursos Humanos \\ Usuarios')
+    this.searchPlaceholderMutation('Nombre del usuario...')
   }
 }
 </script>

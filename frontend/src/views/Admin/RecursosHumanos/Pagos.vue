@@ -131,14 +131,15 @@
 </template>
 
 <script>
-import axios from 'axios';
-import LoadingDialog from '@/components/loading/LoadingDialog';
-import LoadingFish from '@/components/loading/LoadingFish';
-import PersonalBox from '@/components/box/PersonalBox';
-import ErrorMessage from '@/components/messages/ErrorMessage';
-import AlertNotifications from '@/components/messages/AlertNotifications';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import adminService from '@/services/admin'
+
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import PersonalBox from '@/components/box/PersonalBox'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 export default {
   components: {
@@ -179,59 +180,59 @@ export default {
     async getPersonal(){
       try {
         if(this.backup.personal.length != 0){
-          this.searchQueryMutation('');
-          return;
+          this.searchQueryMutation('')
+          return
         }
 
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
-        // let response = await axios.get(this.url + 'empleados', this.config);
+        // let response = await axios.get(this.url + 'empleados', this.config)
         if(this.allPersonalState.length == 0 || this.refresh){
-          await this.allPersonalAction();
-          this.refresh = false;
+          await this.allPersonalAction()
+          this.refresh = false
         }
         if(this.allPersonalState.data){
-          let personal = this.allPersonalState.data;
+          let personal = this.allPersonalState.data
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
               return e.condicion
-            });
-            this.paginatePersonal();
-            this.messagePersonal = '';
-            this.searchDisabledMutation(false);
+            })
+            this.paginatePersonal()
+            this.messagePersonal = ''
+            this.searchDisabledMutation(false)
           }else {
-            this.messagePersonal = 'No se encontro ningún personal';
-            this.pageTotal = 0;
+            this.messagePersonal = 'No se encontro ningún personal'
+            this.pageTotal = 0
           }
         }else {
-          this.messagePersonal = response.data.message;
-          this.personal = [];
-          this.pageTotal = 0;
-          this.searchDisabledMutation(true);
+          this.messagePersonal = response.data.message
+          this.personal = []
+          this.pageTotal = 0
+          this.searchDisabledMutation(true)
         }
       } catch (error) {
-        this.pageTotal = 0;
-        this.messagePersonal = 'Error al conctar con el servidor';
-        this.searchDisabledMutation(true);
+        this.pageTotal = 0
+        this.messagePersonal = 'Error al conctar con el servidor'
+        this.searchDisabledMutation(true)
       }finally {
-        this.loadingDialogMutation(false);
+        this.loadingDialogMutation(false)
       }
     },
 
     refreshPersonal(){
-      this.refresh = true;
-      this.getPersonal();
+      this.refresh = true
+      this.getPersonal()
     },
 
     // PAGINAR PERSONAL
     paginatePersonal(){
       if(this.allPersonal.length > this.pagination){
-        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination);
+        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination)
       }else {
-         this.personal = this.allPersonal;
-          this.pageTotal = 0;
+         this.personal = this.allPersonal
+          this.pageTotal = 0
       }
     },
 
@@ -239,60 +240,60 @@ export default {
     searchPersonal(query){
       if(query != '' && query != null){
         if(this.personal.length != 0 && this.backup.personalIndex){
-          this.backup.personal = this.personal;
+          this.backup.personal = this.personal
           if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
+            this.backup.pageTotal = this.pageTotal
           }
-          this.backup.personalIndex = false;
+          this.backup.personalIndex = false
         }
 
         if(this.messagePersonal.length != 0){
-          this.messagePersonal = '';
+          this.messagePersonal = ''
         }
 
         this.personal = this.allPersonal.filter(function(e){
-          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 ;
-        });
+          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 
+        })
 
         if(this.personal.length == 0){
-          this.messagePersonal = 'No se encontro personal con el nombre ' + query;
+          this.messagePersonal = 'No se encontro personal con el nombre ' + query
         }
         
-        this.pageTotal = 0;
+        this.pageTotal = 0
       }else {
         if(this.backup.personal.length != 0){
-          this.personal = this.backup.personal;
-          this.backup.personal = [];
-          this.messagePersonal = '';
+          this.personal = this.backup.personal
+          this.backup.personal = []
+          this.messagePersonal = ''
           if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
+            this.pageTotal = this.backup.pageTotal
+            this.backup.pageTotal = 0
           }
-          this.backup.personalIndex = true;
+          this.backup.personalIndex = true
         }
       }
     },
 
     pagoModal(index){
-      this.apellidos = this.personal[index].apellidos;
-      this.nombres = this.personal[index].nombres;
-      this.n_documento = this.personal[index].documento;
-      this.celular = this.personal[index].celular;
-      this.sueldo = this.personal[index].sueldo;
-      this.createModalMutation(true);
+      this.apellidos = this.personal[index].apellidos
+      this.nombres = this.personal[index].nombres
+      this.n_documento = this.personal[index].documento
+      this.celular = this.personal[index].celular
+      this.sueldo = this.personal[index].sueldo
+      this.createModalMutation(true)
     },
 
     closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     resetForm(){
-      this.apellidos = '';
-      this.nombres = '';
-      this.n_documento = '';
-      this.celular = '';
-      this.sueldo = '';
+      this.apellidos = ''
+      this.nombres = ''
+      this.n_documento = ''
+      this.celular = ''
+      this.sueldo = ''
     },
 
     activarModal(i){
@@ -307,19 +308,19 @@ export default {
   },
     watch: {
     searchQuery(){
-      this.searchPersonal(this.searchQuery);
+      this.searchPersonal(this.searchQuery)
     }
   },
   async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    this.loadingFishMutation(true);
-    await this.getPersonal();
-    this.loadingFishMutation(false);
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    this.loadingFishMutation(true)
+    await this.getPersonal()
+    this.loadingFishMutation(false)
   },
   beforeMount(){
-    this.breadcrumbMutation('Recursos Humanos \\ Pagos');
-    this.searchPlaceholderMutation('Nombre del personal...');
+    this.breadcrumbMutation('Recursos Humanos \\ Pagos')
+    this.searchPlaceholderMutation('Nombre del personal...')
   }
 }
 </script>

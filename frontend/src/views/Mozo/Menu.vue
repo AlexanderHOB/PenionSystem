@@ -66,9 +66,9 @@
                 >
                   <template v-slot:item.action="{ item }">
                     <div class="text-center px-0">
-                      <img src="../../assets/img/mozo/eliminar.svg" alt="aumentar" class="actions" @click="removePlatillo(item.id)">
-                      <img src="../../assets/img/mozo/aumentar.svg" alt="aumentar" class="actions" @click="increasePlatillo(item.id)">
-                      <img src="../../assets/img/mozo/disminuir.svg" alt="aumentar" class="actions" @click="decreasePlatillo(item.id)">
+                      <img src="@/assets/img/mozo/eliminar.svg" alt="aumentar" class="actions" @click="removePlatillo(item.id)">
+                      <img src="@/assets/img/mozo/aumentar.svg" alt="aumentar" class="actions" @click="increasePlatillo(item.id)">
+                      <img src="@/assets/img/mozo/disminuir.svg" alt="aumentar" class="actions" @click="decreasePlatillo(item.id)">
                     </div>
                   </template>
                 </v-data-table>
@@ -108,13 +108,13 @@
 </template>
 
 <script>
-import axios from 'axios';
-import LoadingDialog from '../../components/loading/LoadingDialog';
-import LoadingFish from '../../components/loading/LoadingFish';
-import ErrorMessage from '../../components/messages/ErrorMessage';
-import AlertNotifications from '../../components/messages/AlertNotifications';
-import MozoPlatilloBox from '../../components/box/MozoPlatilloBox';
-import { mapState, mapMutations, mapActions } from 'vuex';
+import { mapState, mapMutations, mapActions } from 'vuex'
+
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
+import MozoPlatilloBox from '@/components/box/MozoPlatilloBox'
 
 export default {
   components: {
@@ -170,58 +170,58 @@ export default {
           this.searchQuery = ''
           return
         }
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
         if(this.allPlatillosState.length == 0 || this.refresh){
-          await this.allPlatillosAction();
-          this.refresh = false;
+          await this.allPlatillosAction()
+          this.refresh = false
         }
         
         if(this.allPlatillosState.data){
-          let platillos = this.allPlatillosState.data;
+          let platillos = this.allPlatillosState.data
           if(platillos.length > 0){
             this.allPlatillos = platillos.filter(function(e){
               return e.condicion
-            });
-            this.page = 1;
-            this.paginate();
-            this.searchDisabled = false;
-            this.messagePlatillos = '';
+            })
+            this.page = 1
+            this.paginate()
+            this.searchDisabled = false
+            this.messagePlatillos = ''
           }else {
-            this.messagePlatillos= 'No se encontraron platillos';
-            this.pageTotal = 0;
+            this.messagePlatillos= 'No se encontraron platillos'
+            this.pageTotal = 0
           }
         }else {
-          this.messagePlatillos = response.data.message;
-          this.platillos = [];
-          this.pageTotal = 0;
+          this.messagePlatillos = response.data.message
+          this.platillos = []
+          this.pageTotal = 0
         }
         
       }catch (error) {
-        this.pageTotal = 0;
-        this.messagePlatillos = 'Error al conctar con el servidor';
+        this.pageTotal = 0
+        this.messagePlatillos = 'Error al conctar con el servidor'
       }finally {
-        this.loadingDialogMutation(false);
+        this.loadingDialogMutation(false)
       }
     },
 
     refreshPlatillos(){
       if(this.refreshUI) {
-        this.refreshUIMutation(false);
+        this.refreshUIMutation(false)
       }
-      this.refresh = true;
-      this.getPlatillos();
+      this.refresh = true
+      this.getPlatillos()
     },
 
     // PAGINAR PLATILLOS
     paginate(){
       if(this.allPlatillos.length > this.pagination){
-        this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination);
+        this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination)
       }else {
-         this.platillos = this.allPlatillos;
-          this.pageTotal = 0;
+         this.platillos = this.allPlatillos
+          this.pageTotal = 0
       }
     },
 
@@ -229,34 +229,34 @@ export default {
     searchPlatillos(query){
       if(query != '' && query != null){
         if(this.platillos.length != 0 && this.backup.platillosIndex){
-          this.backup.platillos = this.platillos;
+          this.backup.platillos = this.platillos
           if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
+            this.backup.pageTotal = this.pageTotal
           }
-          this.backup.platillosIndex = false;
+          this.backup.platillosIndex = false
         }
 
         if(this.searchMessage.length != 0){
-          this.searchMessage = '';
+          this.searchMessage = ''
         }
 
         this.platillos = this.allPlatillos.filter(function(e){
-          return  e.nombre.toLowerCase().includes(query.toLowerCase());
-        });
+          return  e.nombre.toLowerCase().includes(query.toLowerCase())
+        })
         if(this.platillos.length == 0){
-          this.searchMessage = `No se encontraron platillos con el nombre "${query}"`;
+          this.searchMessage = `No se encontraron platillos con el nombre "${query}"`
         }
-        this.pageTotal = 0;
+        this.pageTotal = 0
       }else {
         if(this.backup.platillos.length != 0){
-          this.platillos =this.backup.platillos;
-          this.backup.platillos = [];
-          this.searchMessage = '';
+          this.platillos =this.backup.platillos
+          this.backup.platillos = []
+          this.searchMessage = ''
           if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
+            this.pageTotal = this.backup.pageTotal
+            this.backup.pageTotal = 0
           }
-          this.backup.platillosIndex = true;
+          this.backup.platillosIndex = true
         }
       }
     },
@@ -265,25 +265,25 @@ export default {
     async getCategorias(){
       try {
         if(this.allCategoriasState.length == 0){
-          await this.allCategoriasAction();
+          await this.allCategoriasAction()
         }
         if(this.allCategoriasState.data){
-          let categorias = this.allCategoriasState.data;
+          let categorias = this.allCategoriasState.data
           if(categorias.length > 0){
               this.categorias = categorias.filter(function(e){
               return e.condicion
-            });
+            })
           }
-          this.disabledCategories = false;
+          this.disabledCategories = false
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'})
       }
     },
 
     platillosFiltered(categoria) {
-      this.filtered = true;
-      this.pageTotal = 0;
+      this.filtered = true
+      this.pageTotal = 0
       const platillos = this.allPlatillos.filter(e => {
         return categoria.id === e.categoria_id 
       })
@@ -350,7 +350,7 @@ export default {
     ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'allPlatillosState', 'allCategoriasState', 'refreshUI'])
+    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState', 'refreshUI'])
   },
   watch: {
     searchQuery(){
@@ -373,13 +373,13 @@ export default {
     }
   },
   async created(){
-    this.loadingFishMutation(true);
-    this.getCategorias();
-    await this.getPlatillos();
-    this.loadingFishMutation(false);
+    this.loadingFishMutation(true)
+    this.getCategorias()
+    await this.getPlatillos()
+    this.loadingFishMutation(false)
   },
   beforeMount(){
-    this.breadcrumbMutation('Mozo \\ Menu');
+    this.breadcrumbMutation('Mozo \\ Menu')
   }
 }
 </script>
