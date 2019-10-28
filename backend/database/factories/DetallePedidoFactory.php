@@ -21,8 +21,8 @@ $factory->define(DetallePedido::class, function (Faker $faker) {
         'igv' => $igv,
         'subtotal' => $precio*$cant,
         'total' => ($precio*$cant)+($precio*$cant-$desc)*$igv,
-        'pedido_id' => $faker->numberBetween($min = 1, $max = 100),
-        'mesa_id' => $faker->numberBetween($min = 1, $max = 30),
+        'pedido_id' => $faker->numberBetween($min = 1, $max = 60),
+        'mesa_id' => $faker->unique()->numberBetween($min = 1, $max = 60),
         'platillo_id'=>$faker->numberBetween($min = 1, $max = 30)
 
     ];

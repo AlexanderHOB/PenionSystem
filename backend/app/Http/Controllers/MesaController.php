@@ -86,8 +86,12 @@ class MesaController extends Controller
                 "descuento"         => $pedido->descuento,
                 "especial"          => $pedido->especial,
                 "nombre_mozo"       => $pedido->user->empleado->persona['nombres'],
+                "color_mozo"        => $pedido->user['color'],
                 "rol_mozo"          => $pedido->user->rol['nombre'],
-                "detalles_pedidos"  =>$dp,
+                "detalles_pedidos"  => $dp,
+                "mesa_id"           => $dp[0]->mesa['id'],
+                "mesa_capacidad"    => $dp[0]->mesa['capacidad'],
+                "mesa_numero"       => $dp[0]->mesa['numero'],
             ];
             array_push( $pedidosFiltrados,$response);
         }
