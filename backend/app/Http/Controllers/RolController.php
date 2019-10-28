@@ -11,4 +11,5 @@ class RolController extends Controller
         $rols = Rol::orderBy('nombre', 'desc')->get();
         return  $rols;
     }
+    
 }

@@ -18,7 +18,7 @@ class Pedido extends Model
         ];
         
     protected function user(){
-        return $this->belongsTo('App\User','mozo_id');
+        return $this->belongsTo('App\User','mozo_id','empleado_id');
     }
     protected function DetallesPedidos(){
         return $this->hasMany('App\DetallePedido');
