@@ -385,8 +385,9 @@
 </template>
 
 <script>
-import axios from 'axios'
 import { mask } from 'vue-the-mask'
+
+import adminService from '@/services/admin'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
@@ -407,7 +408,7 @@ export default {
   directives: {
     mask,
   },
-  data(){
+  data () {
     return {
       title: 'Personal',
       //Datos para el personal
@@ -499,226 +500,224 @@ export default {
   },
   methods: {
     // OBTENER PERSONAL
-    async getPersonal(){
+    async getPersonal () {
       try {
-        if(this.backup.personal.length != 0){
-          this.searchQueryMutation('');
-          return;
+        if (this.backup.personal.length != 0) {
+          this.searchQueryMutation('')
+          return
         }
 
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
-        // let response = await axios.get(this.url + 'empleados', this.config);
-        if(this.allPersonalState.length == 0 || this.refresh){
-          await this.allPersonalAction();
-          this.refresh = false;
+        if (this.allPersonalState.length == 0 || this.refresh) {
+          await this.allPersonalAction()
+          this.refresh = false
         }
-        if(this.allPersonalState.data){
-          let personal = this.allPersonalState.data;
+        if (this.allPersonalState.data) {
+          let personal = this.allPersonalState.data
           if(personal.length > 0){
-            this.allPersonal = personal;
-            this.page = 1;
-            this.paginate();
-            this.messagePersonal = '';
-          }else {
-            this.messagePersonal = 'No se encontro ningun personal';
-            this.pageTotal = 0;
+            this.allPersonal = personal
+            this.page = 1
+            this.paginate()
+            this.messagePersonal = ''
+          } else {
+            this.messagePersonal = 'No se encontro ningun personal'
+            this.pageTotal = 0
           }
-          this.searchDisabledMutation(false);
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.searchDisabledMutation(true);
-          this.messagePersonal = response.data.message;
-          this.personal = [];
-          this.pageTotal = 0;
+          this.searchDisabledMutation(false)
+          this.headerActionsMutation({create: true, report: false})
+        } else {
+          this.headerActionsMutation({create: false, report: false})
+          this.searchDisabledMutation(true)
+          this.messagePersonal = response.data.message
+          this.personal = []
+          this.pageTotal = 0
         }
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.searchDisabledMutation(true);
-        this.messagePersonal = 'Error al conctar con el servidor';
-        this.pageTotal = 0;
-      }finally {
-        this.loadingDialogMutation(false);
+        this.headerActionsMutation({create: false, report: false})
+        this.searchDisabledMutation(true)
+        this.messagePersonal = 'Error al conctar con el servidor'
+        this.pageTotal = 0
+      } finally {
+        this.loadingDialogMutation(false)
       }
     },
 
-    refreshPersonal(){
-      this.refresh = true;
-      this.getPersonal();
+    refreshPersonal () {
+      this.refresh = true
+      this.getPersonal()
     },
 
     // PAGINAR PESONAL
-    paginate(){
-      if(this.allPersonal.length > this.pagination){
-        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination);
-      }else {
-         this.personal = this.allPersonal;
-          this.pageTotal = 0;
+    paginate () {
+      if (this.allPersonal.length > this.pagination) {
+        this.personal = this.allPersonal.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allPersonal.length / this.pagination)
+      } else {
+         this.personal = this.allPersonal
+          this.pageTotal = 0
       }
     },
 
     // SEARCH PERSONAL
-    searchPersonal(query){
-      if(query != '' && query != null){
-        if(this.personal.length != 0 && this.backup.personalIndex){
-          this.backup.personal = this.personal;
-          if(this.pageTotal != 0){
-            this.backup.pageTotal = this.pageTotal;
+    searchPersonal (query) {
+      if (query != '' && query != null) {
+        if (this.personal.length != 0 && this.backup.personalIndex) {
+          this.backup.personal = this.personal
+          if (this.pageTotal != 0) {
+            this.backup.pageTotal = this.pageTotal
           }
-          this.backup.personalIndex = false;
+          this.backup.personalIndex = false
         }
 
-        if(this.messagePersonal.length != 0){
-          this.messagePersonal = '';
+        if (this.messagePersonal.length != 0) {
+          this.messagePersonal = ''
         }
         this.personal = this.allPersonal.filter(function(e){
-          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 ;
-        });
+          return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1 
+        })
 
-        if(this.personal.length == 0){
-          this.messagePersonal = 'No se encontro personal con el nombre ' + query;
+        if (this.personal.length == 0) {
+          this.messagePersonal = 'No se encontro personal con el nombre ' + query
         }
-        this.pageTotal = 0;
-      }else {
+        this.pageTotal = 0
+      } else {
         if(this.backup.personal.length != 0){
-          this.personal = this.backup.personal;
-          this.backup.personal = [];
-          this.messagePersonal = '';
-          if(this.backup.pageTotal != 0){
-            this.pageTotal = this.backup.pageTotal;
-            this.backup.pageTotal = 0;
+          this.personal = this.backup.personal
+          this.backup.personal = []
+          this.messagePersonal = ''
+          if (this.backup.pageTotal != 0) {
+            this.pageTotal = this.backup.pageTotal
+            this.backup.pageTotal = 0
           }
-          this.backup.personalIndex = true;
+          this.backup.personalIndex = true
         }
       }
     },
 
     // MODAL DE DETALLE
-    async detailPersonalModal(index){
+    async detailPersonalModal (index) {
       try {
-        this.historialSearch = '';
-        this.historial = [];
-        this.montoDescontar = 0;
+        this.historialSearch = ''
+        this.historial = []
+        this.montoDescontar = 0
         //
-        this.apellidosDetail = this.personal[index].apellidos;
-        this.nombreDetail = this.personal[index].nombres;
-        this.direccionDetail = this.personal[index].direccion;
-        this.emailDetail = this.personal[index].email;
-        this.n_documentoDetail = this.personal[index].documento;
-        this.celularDetail = this.personal[index].celular;
-        this.puestoDetail = this.personal[index].puesto_trabajo;
-        this.areaDetail = this.personal[index].area_trabajo;
-        this.tipo_contratoDetail = this.personal[index].tipo_contrato;
-        this.fechaRegistroDetail = this.personal[index].fecha_registro;
-        this.fechaRegistroFormatDetail = this.personal[index].fecha_registro;
-        this.sueldoDetail = this.personal[index].sueldo;
+        this.apellidosDetail = this.personal[index].apellidos
+        this.nombreDetail = this.personal[index].nombres
+        this.direccionDetail = this.personal[index].direccion
+        this.emailDetail = this.personal[index].email
+        this.n_documentoDetail = this.personal[index].documento
+        this.celularDetail = this.personal[index].celular
+        this.puestoDetail = this.personal[index].puesto_trabajo
+        this.areaDetail = this.personal[index].area_trabajo
+        this.tipo_contratoDetail = this.personal[index].tipo_contrato
+        this.fechaRegistroDetail = this.personal[index].fecha_registro
+        this.fechaRegistroFormatDetail = this.personal[index].fecha_registro
+        this.sueldoDetail = this.personal[index].sueldo
         // 
-        this.id = this.personal[index].id;
-        this.historialLoading = true;
-        this.personalDetail = true;
-        let response = await axios.get(this.url + 'historial', {
-          params: {
-            id: this.id,
-            fecha: this.fechaRegistroDetail
-          },
-          headers: {
-            Apikey: this.config.headers.Apikey,
-            'Content-Type': 'application/json'
-          }
-        });
-        this.historialLoading = false;
-        this.historial = response.data[0][0].transacciones;
+        this.id = this.personal[index].id
+        this.historialLoading = true
+        this.personalDetail = true
+
+        const params = {
+          id: this.id,
+          fecha: this.fechaRegistroDetail
+        }
+
+        const response = await adminService.getHistorialOfPersonal(params)
+
+        this.historialLoading = false
+        this.historial = response.data[0][0].transacciones
         if(typeof response.data[1][0] != 'undefined'){
-          this.montoDescontar = response.data[1][0].total;
+          this.montoDescontar = response.data[1][0].total
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al traer la información', color: 'error'});
-        this.historial = [];
-        this.historialLoading = false;
-        this.montoDescontar = 0;
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al traer la información', color: 'error'})
+        this.historial = []
+        this.historialLoading = false
+        this.montoDescontar = 0
       }
     },
 
     // CERRAR MODAL DE DETALLE
-    closeDetailModal(){
-      this.personalDetail = false;
+    closeDetailModal () {
+      this.personalDetail = false
       
-      let self = this;
-      setTimeout(function(){
-        self.apellidosDetail = '';
-        self.nombreDetail = '';
-        self.emailDetail = '';
-        self.n_documentoDetail = '';
-        self.celularDetail = '';
-        self.puestoDetail = '';
-        self.areaDetail = '';
-        self.fechaRegistroDetail = '';
-        self.sueldoDetail = '';
-        self.historial = [];
-        self.historialSearch = '';
-        self.montoDescontar = 0;
-      }, 100);
+      let self = this
+      setTimeout(function () {
+        self.apellidosDetail = ''
+        self.nombreDetail = ''
+        self.emailDetail = ''
+        self.n_documentoDetail = ''
+        self.celularDetail = ''
+        self.puestoDetail = ''
+        self.areaDetail = ''
+        self.fechaRegistroDetail = ''
+        self.sueldoDetail = ''
+        self.historial = []
+        self.historialSearch = ''
+        self.montoDescontar = 0
+      }, 100)
     },
 
     // MODAL PARA EDITAR PERSONAL
-    editarPersonalModal(index){
-      this.apellidos = this.personal[index].apellidos;
-      this.nombre = this.personal[index].nombres;
-      this.direccion = this.personal[index].direccion;
-      this.email = this.personal[index].email;
-      this.n_documento = this.personal[index].documento;
-      this.celular = this.personal[index].celular;
-      this.puesto = this.personal[index].puesto_trabajo;
-      this.area = this.personal[index].area_trabajo;
-      this.tipo_documento = this.personal[index].tipo_documento;
-      this.tipo_contrato = this.personal[index].tipo_contrato;
-      this.sueldo = this.personal[index].sueldo;
-      this.fechaRegistro = this.personal[index].fecha_registro.split('-').reverse().join('-');
-      this.index = index;
-      this.id = this.personal[index].id;
-      this.create = false;
-      this.disabledDate = true;
-      this.createModalMutation(true);
+    editarPersonalModal (index) {
+      this.apellidos = this.personal[index].apellidos
+      this.nombre = this.personal[index].nombres
+      this.direccion = this.personal[index].direccion
+      this.email = this.personal[index].email
+      this.n_documento = this.personal[index].documento
+      this.celular = this.personal[index].celular
+      this.puesto = this.personal[index].puesto_trabajo
+      this.area = this.personal[index].area_trabajo
+      this.tipo_documento = this.personal[index].tipo_documento
+      this.tipo_contrato = this.personal[index].tipo_contrato
+      this.sueldo = this.personal[index].sueldo
+      this.fechaRegistro = this.personal[index].fecha_registro.split('-').reverse().join('-')
+      this.index = index
+      this.id = this.personal[index].id
+      this.create = false
+      this.disabledDate = true
+      this.createModalMutation(true)
     },
 
     // CERRAR MODAL
-    closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+    closeModal () {
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMUALRIO
-    resetForm(){
-      this.apellidos = '';
-      this.nombre = '';
-      this.direccion = '';
-      this.email = '';
-      this.n_documento = '';
-      this.celular = '';
-      this.puesto = '';
-      this.area = '';
-      this.tipo_documento = 'Dni';
-      this.tipo_contrato = '';
-      this.date = new Date().toISOString().substr(0, 10);
-      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-');
-      this.sueldo = '';
-      this.create = true;
-      this.disabledDate = false;
-      this.$refs.form.resetValidation();
+    resetForm () {
+      this.apellidos = ''
+      this.nombre = ''
+      this.direccion = ''
+      this.email = ''
+      this.n_documento = ''
+      this.celular = ''
+      this.puesto = ''
+      this.area = ''
+      this.tipo_documento = 'Dni'
+      this.tipo_contrato = ''
+      this.date = new Date().toISOString().substr(0, 10)
+      this.fechaRegistro = new Date().toISOString().substr(0, 10).split('-').reverse().join('-')
+      this.sueldo = ''
+      this.create = true
+      this.disabledDate = false
+      this.$refs.form.resetValidation()
     },
 
     // CREAR PERSONAL
     async registrarPersonal() {
       try {
         if (this.$refs.form.validate()) {
-          this.isLoadBtn = true;
-          this.disabled = true;
-          this.disabledDate = true;
-          this.sueldo = parseFloat(parseFloat(this.sueldo).toFixed(2));
-          let response = await axios.post(this.url + 'empleado/registrar', {
+          this.isLoadBtn = true
+          this.disabled = true
+          this.disabledDate = true
+          this.sueldo = parseFloat(parseFloat(this.sueldo).toFixed(2))
+
+          const data = {
             apellidos: this.apellidos,
             nombres: this.nombre,
             documento: this.n_documento,
@@ -731,69 +730,70 @@ export default {
             tipo_contrato: this.tipo_contrato,
             fecha_registro: this.date,
             sueldo: this.sueldo
-          }, this.config);
+          }
+          const  response = await adminService.createPersonal(data)
 
-          this.closeModal();
+          this.closeModal()
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
+              this.pageTotal = this.backup.pageTotal
           }
-          if(response.data){
-            this.allPersonal.reverse();
-            this.allPersonal.push(response.data);
-            this.allPersonal.reverse();
-            this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'});
-            this.paginate();
-            this.page = 1;
-            this.backup.personal = [];
-            this.messagePersonal = '';
-            this.backup.personalIndex = true;
-          }else{
-            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al personal', color: 'error'});
+          if (response.data) {
+            this.allPersonal.reverse()
+            this.allPersonal.push(response.data)
+            this.allPersonal.reverse()
+            this.snackbarMutation({value: true, text: 'Personal creado correctamente', color: 'success'})
+            this.paginate()
+            this.page = 1
+            this.backup.personal = []
+            this.messagePersonal = ''
+            this.backup.personalIndex = true
+          } else {
+            this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar al personal', color: 'error'})
           }
         }
       } catch (error) {
-        this.closeModal();
-        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'});
-      }finally {
-        this.isLoadBtn = false;
-        this.disabled = false;
-        this.disabledDate = false;
+        this.closeModal()
+        this.snackbarMutation({value: true, text: 'Ocurrio un error en el servidor', color: 'error'})
+      } finally {
+        this.isLoadBtn = false
+        this.disabled = false
+        this.disabledDate = false
       }
     },
 
     // EDITAR PERSONAL
-    async editarPersonal(){
+    async editarPersonal () {
       try {
         if (this.$refs.form.validate()) {
 
-          let apellidosBup = this.apellidos;
-          let nombresBup = this.nombre;
-          let n_documentoBup = this.n_documento;
-          let tipo_documentoBup = this.tipo_documento;
-          let celularBup = this.celular;
-          let emailBup = this.email;
-          let direccionBup = this.direccion;
-          let area_trabajoBup = this.area;
-          let puesto_trabajoBup = this.puesto;
-          let tipo_contratoBup = this.tipo_contrato;
-          let sueldoBup =  this.sueldo;
+          let apellidosBup = this.apellidos
+          let nombresBup = this.nombre
+          let n_documentoBup = this.n_documento
+          let tipo_documentoBup = this.tipo_documento
+          let celularBup = this.celular
+          let emailBup = this.email
+          let direccionBup = this.direccion
+          let area_trabajoBup = this.area
+          let puesto_trabajoBup = this.puesto
+          let tipo_contratoBup = this.tipo_contrato
+          let sueldoBup =  this.sueldo
 
-          this.closeModal();
+          this.closeModal()
 
-          this.personal[this.index].apellidos = apellidosBup;
-          this.personal[this.index].nombres = nombresBup;
-          this.personal[this.index].documento = n_documentoBup;
-          this.personal[this.index].tipo_documento = tipo_documentoBup;
-          this.personal[this.index].celular = celularBup;
-          this.personal[this.index].email = emailBup;
-          this.personal[this.index].direccion = direccionBup;
-          this.personal[this.index].area_trabajo = area_trabajoBup;
-          this.personal[this.index].puesto_trabajo = puesto_trabajoBup;
-          this.personal[this.index].tipo_contrato = tipo_contratoBup;
-          this.personal[this.index].sueldo = sueldoBup;
+          this.personal[this.index].apellidos = apellidosBup
+          this.personal[this.index].nombres = nombresBup
+          this.personal[this.index].documento = n_documentoBup
+          this.personal[this.index].tipo_documento = tipo_documentoBup
+          this.personal[this.index].celular = celularBup
+          this.personal[this.index].email = emailBup
+          this.personal[this.index].direccion = direccionBup
+          this.personal[this.index].area_trabajo = area_trabajoBup
+          this.personal[this.index].puesto_trabajo = puesto_trabajoBup
+          this.personal[this.index].tipo_contrato = tipo_contratoBup
+          this.personal[this.index].sueldo = sueldoBup
 
-          let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
+          const data = {
             apellidos: apellidosBup,
             nombres: nombresBup,
             documento: n_documentoBup,
@@ -805,83 +805,89 @@ export default {
             puesto_trabajo: puesto_trabajoBup,
             tipo_contrato: tipo_contratoBup,
             sueldo: sueldoBup
-          }, this.config);
-          this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'});
+          }
+
+          await adminService.updatePersonal(this.id, data)
+
+          this.snackbarMutation({value: true, text: 'Personal editado correctamente', color: 'success'})
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el personal', color: 'error'})
       }
     },
 
     // MODAL PARA ACTIVAR
-    activarModal(index){
-        this.index = index;
-        if(this.personal[index].condicion){
-          this.activarText = 'desactivar';
-        }else{
-          this.activarText = 'activar';
+    activarModal (index) {
+        this.index = index
+        if (this.personal[index].condicion) {
+          this.activarText = 'desactivar'
+        } else {
+          this.activarText = 'activar'
         }
-        this.activeDialog = true;
+        this.activeDialog = true
     },    
 
     //  ACTIVAR 
-    async activarPersonal(index){
+    async activarPersonal (index) {
       try {
-        this.id = this.personal[index].id;
-        this.activeDialog = false;
-        var self = this;
-        if(this.personal[index].condicion){
-          this.personal[index].condicion = 0;
-          let response = await axios.put(this.url + 'empleado/desactivar/' + this.id, {},this.config);
-          this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'});
-        }else { 
-          this.personal[index].condicion = 1;
-          let response = await axios.put(this.url + 'empleado/activar/' + this.id, {}, this.config);
-          this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'});
+        this.id = this.personal[index].id
+        this.activeDialog = false
+        var self = this
+        if (this.personal[index].condicion) {
+          this.personal[index].condicion = 0
+
+          await adminService.disabledPersonal(this.id)
+
+          this.snackbarMutation({value: true, text: 'Personal desactivado correctamente', color: 'success'})
+        } else { 
+          this.personal[index].condicion = 1
+
+         await adminService.enabledPersonal(this.id)
+
+          this.snackbarMutation({value: true, text: 'Personal activado correctamente', color: 'success'})
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
-    async formAction(){
-      if(this.create){
-        await this.registrarPersonal();
+    async formAction () {
+      if (this.create) {
+        await this.registrarPersonal()
       }else {
-        await this.editarPersonal();
+        await this.editarPersonal()
       }
     },
-
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'createModalMutation', 'headerActionsMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
     ...mapActions(['allPersonalAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allPersonalState'])
+    ...mapState(['loadingFish', 'createModalState', 'searchQuery', 'allPersonalState'])
   },
   watch: {
-    date(val) {
-      this.fechaRegistro = val.split('-').reverse().join('-');
+    date (val) {
+      this.fechaRegistro = val.split('-').reverse().join('-')
     },
-    searchQuery(){
-      this.searchPersonal(this.searchQuery);
+    searchQuery () {
+      this.searchPersonal(this.searchQuery)
     }
   },
   filters: {
-    reverseDate(str) {
+    reverseDate (str) {
       return str.split('-').reverse().join('-')
     }
   },
-  async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    this.loadingFishMutation(true);
-    await this.getPersonal();
-    this.loadingFishMutation(false);
+  async created () {
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    this.loadingFishMutation(true)
+    await this.getPersonal()
+    this.loadingFishMutation(false)
   },
-  beforeMount(){
-    this.breadcrumbMutation('Recursos Humanos \\ Personal');
-    this.searchPlaceholderMutation('Nombre del personal...');
+  beforeMount () {
+    this.breadcrumbMutation('Recursos Humanos \\ Personal')
+    this.searchPlaceholderMutation('Nombre del personal...')
   }
 }
 </script>

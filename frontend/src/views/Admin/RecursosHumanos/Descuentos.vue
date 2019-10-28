@@ -175,10 +175,11 @@
 </template>
 
 <script>
-import axios from 'axios';
-import AlertNotifications from '@/components/messages/AlertNotifications';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import adminService from '@/services/admin'
+
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 export default {
   components: {
@@ -243,194 +244,194 @@ export default {
     async getDescuentos(){
       try {
         if(this.backup.descuentos.length != 0){
-          this.searchQueryMutation('');
-          return;
+          this.searchQueryMutation('')
+          return
         }
 
-        this.searchDisabledMutation(true);
-        this.isLoad = true;
+        this.searchDisabledMutation(true)
+        this.isLoad = true
 
-        // let response = await axios.get(this.url + 'historial/descuento', this.config);
+        // let response = await axios.get(this.url + 'historial/descuento', this.config)
         if(this.allDescuentosState.length == 0 || this.refresh){
-          await this.allDescuentosAction();
-          this.refresh = false;
+          await this.allDescuentosAction()
+          this.refresh = false
         }
         if(this.allDescuentosState.data){
-          let descuentos = this.allDescuentosState.data;
+          let descuentos = this.allDescuentosState.data
           if(descuentos.length > 0){
-            this.descuentos = descuentos;
-            this.searchDisabledMutation(false);
+            this.descuentos = descuentos
+            this.searchDisabledMutation(false)
           }else {
-            this.descuentos = [];
+            this.descuentos = []
           }
-          this.headerActionsMutation({create: true, report: false});
+          this.headerActionsMutation({create: true, report: false})
         }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.descuentos = [];
-          this.snackbarMutation({value: true, text: 'Error al recibir la información', color: 'error'});
-          this.searchDisabledMutation(true);
+          this.headerActionsMutation({create: false, report: false})
+          this.descuentos = []
+          this.snackbarMutation({value: true, text: 'Error al recibir la información', color: 'error'})
+          this.searchDisabledMutation(true)
         }
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.snackbarMutation({value: true, text: 'Error al conctar con el servidor', color: 'error'});
-        this.searchDisabledMutation(true);
+        this.headerActionsMutation({create: false, report: false})
+        this.snackbarMutation({value: true, text: 'Error al conctar con el servidor', color: 'error'})
+        this.searchDisabledMutation(true)
       }finally {
-        this.isLoad = false;
+        this.isLoad = false
       }
     },
 
     refreshDescuentos(){
-      this.refresh = true;
-      this.getDescuentos();
+      this.refresh = true
+      this.getDescuentos()
     },
 
         // OBTENER TODO EL PERSONAL
     async getAllPersonal(){
       try {
         if(this.allPersonal.length != 0){
-          return;
+          return
         }
 
-        this.isLoadingPersonal = true;
+        this.isLoadingPersonal = true
 
-        // let response = await axios.get(this.url + 'empleados', this.config);
+        // let response = await axios.get(this.url + 'empleados', this.config)
         if(this.allPersonalState.length == 0){
-          await this.allPersonalAction();
+          await this.allPersonalAction()
         }
         if(this.allPersonalState.data){
-          let personal = this.allPersonalState.data;
+          let personal = this.allPersonalState.data
           if(personal.length > 0){
             this.allPersonal = personal.filter(function(e){
               return e.condicion
-            });
+            })
           }else {
-            this.allPersonal = [];
+            this.allPersonal = []
           }
         }else {
-          this.allPersonal = [];
+          this.allPersonal = []
         }
       } catch (error) {
-        this.allPersonal = [];
+        this.allPersonal = []
       }finally {
-        this.isLoadingPersonal = false;
+        this.isLoadingPersonal = false
       }
     },
 
     // ASIGNAR PERSONAL
     asignPersonal(){
-      this.apellidos = this.personal.apellidos;
-      this.nombres = this.personal.nombres;
-      this.n_documento = this.personal.documento;
-      this.celular = this.personal.celular;
-      this.puesto = this.personal.puesto_trabajo;
-      this.area = this.personal.area_trabajo;
-      this.id = this.personal.id;
-      this.disabled = false;
-      this.disabledDate = false;
+      this.apellidos = this.personal.apellidos
+      this.nombres = this.personal.nombres
+      this.n_documento = this.personal.documento
+      this.celular = this.personal.celular
+      this.puesto = this.personal.puesto_trabajo
+      this.area = this.personal.area_trabajo
+      this.id = this.personal.id
+      this.disabled = false
+      this.disabledDate = false
     },
 
     // SEARCH DESCUENTOS
     searchDescuentos(query){
       if(query != '' && query != null){
         if(this.descuentos.length != 0 && this.backup.descuentosIndex){
-          this.backup.descuentos = this.descuentos;
-          this.backup.descuentosIndex = false;
+          this.backup.descuentos = this.descuentos
+          this.backup.descuentosIndex = false
         }
 
         // this.descuentos = this.backup.descuentos.filter(function(e){
-        //   return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1;
-        // });
+        //   return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1
+        // })
 
         this.descuentos = this.backup.descuentos.filter(function(e){
-          return e.fecha_transaccion.search(query) != -1;
-        });
+          return e.fecha_transaccion.search(query) != -1
+        })
 
       }else {
         if(this.backup.descuentos.length != 0){
-          this.descuentos = this.backup.descuentos;
-          this.backup.descuentos = [];
-          this.searchQueryMutation('');
-          this.backup.descuentosIndex = true;
+          this.descuentos = this.backup.descuentos
+          this.backup.descuentos = []
+          this.searchQueryMutation('')
+          this.backup.descuentosIndex = true
         }
       }
     },
 
     // MODAL PARA EDITAR DESCUENTO
     async editarDescuentoModal(id){
-      this.create = false;
+      this.create = false
       let descuento = this.descuentos.filter(function(e){
-        return e.id == id;
-      });
-      descuento = descuento[0];
-      this.fechaDescuento = descuento.fecha_transaccion.split('-').reverse().join('-');
-      this.monto = descuento.monto;
-      this.motivo = descuento.motivo;
-      this.disabled = false;
+        return e.id == id
+      })
+      descuento = descuento[0]
+      this.fechaDescuento = descuento.fecha_transaccion.split('-').reverse().join('-')
+      this.monto = descuento.monto
+      this.motivo = descuento.motivo
+      this.disabled = false
 
-      this.isLoadingPersonal = true;
-      var personal = [];
+      this.isLoadingPersonal = true
+      var personal = []
 
-      this.createModalMutation(true);
+      this.createModalMutation(true)
 
-      await this.getAllPersonal();
+      await this.getAllPersonal()
 
       personal = this.allPersonal.filter(function(e){
-        return e.id ==  descuento.persona_id;
-      });
-      this.personal = personal[0];
+        return e.id ==  descuento.persona_id
+      })
+      this.personal = personal[0]
 
-      this.asignPersonal();
-      this.disabledDate = true;
+      this.asignPersonal()
+      this.disabledDate = true
     },
 
     // CERRAR MODAL
     closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMUALRIO
     resetForm(){
-      this.personal = {};
-      this.apellidos = '';
-      this.nombres = '';
-      this.n_documento = '';
-      this.celular = '';
-      this.puesto = '';
-      this.area = '';
-      this.date = new Date().toISOString().substr(0, 10);
-      this.fechaDescuento = this.date.split('-').reverse().join('-');
-      this.disabled = true;
-      this.disabledDate = true;
-      this.monto = '';
-      this.motivo = '';
-      this.create = true;
-      this.isLoadingPersonal = false;
-      this.$refs.form.resetValidation();
+      this.personal = {}
+      this.apellidos = ''
+      this.nombres = ''
+      this.n_documento = ''
+      this.celular = ''
+      this.puesto = ''
+      this.area = ''
+      this.date = new Date().toISOString().substr(0, 10)
+      this.fechaDescuento = this.date.split('-').reverse().join('-')
+      this.disabled = true
+      this.disabledDate = true
+      this.monto = ''
+      this.motivo = ''
+      this.create = true
+      this.isLoadingPersonal = false
+      this.$refs.form.resetValidation()
     },
 
     // REGISTRAR DESCUENTO
     async registrarDescuento() {
       try {
         if (this.$refs.form.validate()) {
-        // this.loadingDialogMutation(true);
-          this.createModalMutation(false);
+        // this.loadingDialogMutation(true)
+          this.createModalMutation(false)
 
           let response = await axios.post(this.url + 'empleado/registrar', {
 
-          }, this.config);
+          }, this.config)
 
-          this.snackbarMutation({value: true, text: 'Aumento registrado correctamente', color: 'success'});
+          this.snackbarMutation({value: true, text: 'Aumento registrado correctamente', color: 'success'})
 
-          this.resetForm();
+          this.resetForm()
 
-          this.backup.descuentos = [];
-          await this.getDescuentos();
+          this.backup.descuentos = []
+          await this.getDescuentos()
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el aumento', color: 'error'});
-        this.resetForm();
-        // this.loadingDialogMutation(false);
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el aumento', color: 'error'})
+        this.resetForm()
+        // this.loadingDialogMutation(false)
       }
     },
 
@@ -439,30 +440,30 @@ export default {
       try {
         if (this.$refs.form.validate()) {
 
-          // let apellidosBup = this.apellidos;
+          // let apellidosBup = this.apellidos
 
-          this.closeModal();
+          this.closeModal()
 
-          // this.descuentos[this.index].apellidos = apellidosBup;
+          // this.descuentos[this.index].apellidos = apellidosBup
 
           let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
 
-          }, this.config);
-          this.snackbarMutation({value: true, text: 'Descuento editado correctamente', color: 'success'});
+          }, this.config)
+          this.snackbarMutation({value: true, text: 'Descuento editado correctamente', color: 'success'})
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el descuento', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el descuento', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
     async formAction(){
       if(this.create){
-        await this.registrarDescuento();
+        await this.registrarDescuento()
       }else {
-        await this.editarDescuento();
+        await this.editarDescuento()
       }
-      this.$refs.form.resetValidation();  
+      this.$refs.form.resetValidation()  
     },
 
     ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
@@ -480,7 +481,7 @@ export default {
   },
   watch: {
     searchQuery(){
-      this.searchDescuentos(this.searchQuery);
+      this.searchDescuentos(this.searchQuery)
     }
   },
   filters: {
@@ -489,13 +490,13 @@ export default {
     }
   },
   async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    await this.getDescuentos();
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    await this.getDescuentos()
   },
   beforeMount(){
-    this.breadcrumbMutation('Recursos Humanos \\ Descuentos');
-    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
+    this.breadcrumbMutation('Recursos Humanos \\ Descuentos')
+    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...')
   }
 }
 </script>

@@ -13,7 +13,7 @@
             <v-flex v-for="(mesa, i) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
               <v-card @click="mesaSelected(i)">
                 <v-img
-                  :src="require('../../assets/img/mesas/mesaLibre.svg')"
+                  :src="require('@/assets/img/mesas/mesaLibre.svg')"
                   contain
                   height="100"
                   class="mesa"
@@ -72,14 +72,13 @@
 </template>
 
 <script>
-import axios from 'axios';
-
-import LoadingDialog from '../../components/loading/LoadingDialog'
-import LoadingFish from '../../components/loading/LoadingFish'
-import ErrorMessage from '../../components/messages/ErrorMessage'
-import AlertNotifications from '../../components/messages/AlertNotifications'
-
 import { mapState, mapMutations, mapActions } from 'vuex'
+
+import LoadingDialog from '@/components/loading/LoadingDialog'
+import LoadingFish from '@/components/loading/LoadingFish'
+import ErrorMessage from '@/components/messages/ErrorMessage'
+import AlertNotifications from '@/components/messages/AlertNotifications'
+
 
 export default {
   components: {
@@ -114,61 +113,61 @@ export default {
     // OBTENER MESAS
     async getMesas(){
       try {
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
         if(this.allMesasState.length == 0 || this.refresh){
-          await this.allMesasAction();
-          this.refresh = false;
+          await this.allMesasAction()
+          this.refresh = false
         }
         if(this.allMesasState.data){
-          let mesas = this.allMesasState.data;
+          let mesas = this.allMesasState.data
           if(mesas.length > 0){
             this.allMesas = mesas.filter(e => {
               return e.condicion
-            });
+            })
             if(!this.allMesas.length) {
-              this.messageMesas = 'No se encontraron mesas libres';
+              this.messageMesas = 'No se encontraron mesas libres'
               return
             }
             this.mesaSelect = this.allMesas[0]
-            this.page = 1;
-            this.paginate();
-            this.messageMesas = '';
+            this.page = 1
+            this.paginate()
+            this.messageMesas = ''
           }else {
-            this.messageMesas = 'No se encontraron mesas';
-            this.pageTotal = 0;
+            this.messageMesas = 'No se encontraron mesas'
+            this.pageTotal = 0
           }
         }else {
-          this.messageMesas = response.data.message;
-          this.mesas = [];
-          this.pageTotal = 0;
+          this.messageMesas = response.data.message
+          this.mesas = []
+          this.pageTotal = 0
         }
         
       } catch (error) {
-        this.pageTotal = 0;
-        this.messageMesas = 'Error al conectar con el servidor';
+        this.pageTotal = 0
+        this.messageMesas = 'Error al conectar con el servidor'
       }finally {
-        this.loadingDialogMutation(false);
+        this.loadingDialogMutation(false)
       }
     },
 
     refreshMesas(){
       if(this.refreshUI) {
-        this.refreshUIMutation(false);
+        this.refreshUIMutation(false)
       }
-      this.refresh = true;
-      this.getMesas();
+      this.refresh = true
+      this.getMesas()
     },
 
     // PAGINAR MESAS
     paginate(){
       if(this.allMesas.length > this.pagination){
-        this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allMesas.length / this.pagination);
+        this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allMesas.length / this.pagination)
       }else {
-         this.mesas = this.allMesas;
-          this.pageTotal = 0;
+         this.mesas = this.allMesas
+          this.pageTotal = 0
       }
     },
 
@@ -199,9 +198,9 @@ export default {
     }
   },
   async created() {
-    this.loadingFishMutation(true);
-    await this.getMesas();
-    this.loadingFishMutation(false);
+    this.loadingFishMutation(true)
+    await this.getMesas()
+    this.loadingFishMutation(false)
   }
 }
 </script>

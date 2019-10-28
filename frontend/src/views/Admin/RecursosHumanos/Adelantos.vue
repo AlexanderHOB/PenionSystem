@@ -175,16 +175,17 @@
 </template>
 
 <script>
-import axios from 'axios';
-import AlertNotifications from '@/components/messages/AlertNotifications';
+import { mapState, mapMutations, mapActions } from 'vuex'
 
-import { mapState, mapMutations, mapActions } from 'vuex';
+import adminService from '@/services/admin'
+
+import AlertNotifications from '@/components/messages/AlertNotifications'
 
 export default {
   components: {
     AlertNotifications
   },
-  data(){
+  data () {
     return {
       title: 'Adelantos',
       //Datos para los adelantos
@@ -238,232 +239,232 @@ export default {
   },
   methods: {
     // OBTENER ADELANTOS
-    async getAdelantos(){
+    async getAdelantos () {
       try {
         if(this.backup.adelantos.length != 0){
-          this.searchQueryMutation('');
-          return;
+          this.searchQueryMutation('')
+          return
         }
 
-        this.searchDisabledMutation(true);
-        this.isLoad = true;
+        this.searchDisabledMutation(true)
+        this.isLoad = true
 
-        // let response = await axios.get(this.url + 'historial/adelanto', this.config);
         if(this.allAdelantosState.length == 0 || this.refresh){
-          await this.allAdelantosAction();
-          this.refresh = false;
+          await this.allAdelantosAction()
+          this.refresh = false
         }
-        if(this.allAdelantosState.data){
-          let adelantos = this.allAdelantosState.data;
+        if (this.allAdelantosState.data) {
+          let adelantos = this.allAdelantosState.data
           if(adelantos.length > 0){
-            this.adelantos = adelantos;
-            this.searchDisabledMutation(false);
-          }else {
-            this.adelantos = [];
+            this.adelantos = adelantos
+            this.searchDisabledMutation(false)
+          } else {
+            this.adelantos = []
           }
-          this.headerActionsMutation({create: true, report: false});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.adelantos = [];
-          this.snackbarMutation({value: true, text: 'Error al recibir la información', color: 'error'});
-          this.searchDisabledMutation(true);
+          this.headerActionsMutation({create: true, report: false})
+        } else {
+          this.headerActionsMutation({create: false, report: false})
+          this.adelantos = []
+          this.snackbarMutation({value: true, text: 'Error al recibir la información', color: 'error'})
+          this.searchDisabledMutation(true)
         }
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.snackbarMutation({value: true, text: 'Error al conctar con el servidor', color: 'error'});
-        this.searchDisabledMutation(true);
-      }finally {
-        this.isLoad = false;
+        this.headerActionsMutation({create: false, report: false})
+        this.snackbarMutation({value: true, text: 'Error al conctar con el servidor', color: 'error'})
+        this.searchDisabledMutation(true)
+      } finally {
+        this.isLoad = false
       }
     },
 
-    refreshAdelantos(){
-      this.refresh = true;
-      this.getAdelantos();
+    refreshAdelantos () {
+      this.refresh = true
+      this.getAdelantos()
     },
 
     // OBTENER TODO EL PERSONAL
-    async getAllPersonal(){
+    async getAllPersonal () {
       try {
-        if(this.allPersonal.length != 0){
-          return;
+        if (this.allPersonal.length != 0) {
+          return
         }
 
-        this.isLoadingPersonal = true;
+        this.isLoadingPersonal = true
 
-        // let response = await axios.get(this.url + 'empleados', this.config);
-        if(this.allPersonalState.length == 0){
-          await this.allPersonalAction();
+        if (this.allPersonalState.length == 0) {
+          await this.allPersonalAction()
         }
-        if(this.allPersonalState.data){
-          let personal = this.allPersonalState.data;
-          if(personal.length > 0){
-            this.allPersonal = personal.filter(function(e){
-              return e.condicion
-            });
-          }else {
-            this.allPersonal = [];
+        if (this.allPersonalState.data) {
+          let personal = this.allPersonalState.data
+          if (personal.length > 0) {
+            this.allPersonal = personal.filter(e => e.condicion)
+          } else {
+            this.allPersonal = []
           }
-        }else {
-          this.allPersonal = [];
+        } else {
+          this.allPersonal = []
         }
       } catch (error) {
-        this.allPersonal = [];
-        this.snackbarMutation({value: true, text: 'Error al obtener el personal', color: 'error'});
+        this.allPersonal = []
+        this.snackbarMutation({value: true, text: 'Error al obtener el personal', color: 'error'})
 
-      }finally {
-        this.isLoadingPersonal = false;
+      } finally {
+        this.isLoadingPersonal = false
       }
     },
 
     // ASIGNAR PERSONAL
-    asignPersonal(){
-      this.apellidos = this.personal.apellidos;
-      this.nombres = this.personal.nombres;
-      this.n_documento = this.personal.documento;
-      this.celular = this.personal.celular;
-      this.puesto = this.personal.puesto_trabajo;
-      this.area = this.personal.area_trabajo;
-      this.id = this.personal.id;
-      this.disabled = false;
-      this.disabledDate = false;
+    asignPersonal () {
+      this.apellidos = this.personal.apellidos
+      this.nombres = this.personal.nombres
+      this.n_documento = this.personal.documento
+      this.celular = this.personal.celular
+      this.puesto = this.personal.puesto_trabajo
+      this.area = this.personal.area_trabajo
+      this.id = this.personal.id
+      this.disabled = false
+      this.disabledDate = false
     },
 
     // SEARCH ADELANTOS
     searchAdelantos(query){
       if(query != '' && query != null){
         if(this.adelantos.length != 0 && this.backup.adelantosIndex){
-          this.backup.adelantos = this.adelantos;
-          this.backup.adelantosIndex = false;
+          this.backup.adelantos = this.adelantos
+          this.backup.adelantosIndex = false
         }
 
         // this.adelantos = this.adelantos.filter(function(e){
-        //   return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1;
-        // });
+        //   return e.nombres.toLowerCase().search(query.toLowerCase()) != -1 || e.apellidos.toLowerCase().search(query.toLowerCase()) != -1
+        // })
 
         this.adelantos = this.backup.adelantos.filter(function(e){
-          return e.fecha_transaccion.search(query) != -1;
-        });
+          return e.fecha_transaccion.search(query) != -1
+        })
 
       }else {
         if(this.backup.adelantos.length != 0){
-          this.adelantos = this.backup.adelantos;
-          this.backup.adelantos = [];
-          this.searchQueryMutation('');
-          this.backup.adelantosIndex = true;
+          this.adelantos = this.backup.adelantos
+          this.backup.adelantos = []
+          this.searchQueryMutation('')
+          this.backup.adelantosIndex = true
         }
       }
     },
 
     // MODAL PARA EDITAR ADELANTO
-    async editarAdelantoModal(id){
-      this.create = false;
+    async editarAdelantoModal (id) {
+      this.create = false
       let adelanto = this.adelantos.filter(function(e){
-        return e.id == id;
-      });
-      adelanto = adelanto[0];
-      this.fechaAdelanto = adelanto.fecha_transaccion.split('-').reverse().join('-');
-      this.monto = adelanto.monto;
-      this.motivo = adelanto.motivo;
-      this.disabled = false;
+        return e.id == id
+      })
+      adelanto = adelanto[0]
+      this.fechaAdelanto = adelanto.fecha_transaccion.split('-').reverse().join('-')
+      this.monto = adelanto.monto
+      this.motivo = adelanto.motivo
+      this.disabled = false
 
-      this.isLoadingPersonal = true;
-      var personal = [];
+      this.isLoadingPersonal = true
+      var personal = []
 
-      this.createModalMutation(true);
+      this.createModalMutation(true)
 
-      await this.getAllPersonal();
+      await this.getAllPersonal()
 
       personal = this.allPersonal.filter(function(e){
-        return e.id ==  adelanto.persona_id;
-      });
-      this.personal = personal[0];
+        return e.id ==  adelanto.persona_id
+      })
+      this.personal = personal[0]
 
-      this.asignPersonal();
-      this.disabledDate = true;
+      this.asignPersonal()
+      this.disabledDate = true
     },
 
     // CERRAR MODAL
-    closeModal(){
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+    closeModal () {
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMUALRIO
-    resetForm(){
-      this.personal = {};
-      this.apellidos = '';
-      this.nombres = '';
-      this.n_documento = '';
-      this.celular = '';
-      this.puesto = '';
-      this.area = '';
-      this.disabledDate = false;
-      this.date = new Date().toISOString().substr(0, 10);
-      this.fechaAdelanto = this.date.split('-').reverse().join('-');
-      this.disabled = true;
-      this.disabledDate = true;
-      this.monto = '';
-      this.motivo = '';
-      this.create = true;
-      this.isLoadingPersonal = false;
-      this.$refs.form.resetValidation();
+    resetForm () {
+      this.personal = {}
+      this.apellidos = ''
+      this.nombres = ''
+      this.n_documento = ''
+      this.celular = ''
+      this.puesto = ''
+      this.area = ''
+      this.disabledDate = false
+      this.date = new Date().toISOString().substr(0, 10)
+      this.fechaAdelanto = this.date.split('-').reverse().join('-')
+      this.disabled = true
+      this.disabledDate = true
+      this.monto = ''
+      this.motivo = ''
+      this.create = true
+      this.isLoadingPersonal = false
+      this.$refs.form.resetValidation()
     },
 
     // REGISTRAR ADELANTO
-    async registrarAdelanto() {
+    async registrarAdelanto () {
       try {
         if (this.$refs.form.validate()) {
-        // this.loadingDialogMutation(true);
-          this.createModalMutation(false);
+        // this.loadingDialogMutation(true)
+          this.createModalMutation(false)
 
-          let response = await axios.post(this.url + 'empleado/registrar', {
+          const data = {}
 
-          }, this.config);
+          const response = await axios.post(this.url + 'empleado/registrar', {
 
-          this.snackbarMutation({value: true, text: 'Aumento registrado correctamente', color: 'success'});
+          }, this.config)
 
-          this.resetForm();
+          this.snackbarMutation({value: true, text: 'Aumento registrado correctamente', color: 'success'})
 
-          this.backup.adelantos = [];
-          await this.getAdelantos();
+          this.resetForm()
+
+          this.backup.adelantos = []
+          await this.getAdelantos()
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el aumento', color: 'error'});
-        this.resetForm();
-        // this.loadingDialogMutation(false);
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al registrar el aumento', color: 'error'})
+        this.resetForm()
+        // this.loadingDialogMutation(false)
       }
     },
 
     // EDITAR ADELANTO
-    async editarAdelanto(){
+    async editarAdelanto () {
       try {
         if (this.$refs.form.validate()) {
 
-          // let apellidosBup = this.apellidos;
+          // let apellidosBup = this.apellidos
 
-          this.closeModal();
+          this.closeModal()
 
-          // this.adelantos[this.index].apellidos = apellidosBup;
+          // this.adelantos[this.index].apellidos = apellidosBup
 
-          let response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
+          const data = {}
 
-          }, this.config);
-          this.snackbarMutation({value: true, text: 'Adelanto editado correctamente', color: 'success'});
+          const response = await axios.put(this.url + 'empleado/actualizar/' + this.id, {
+
+          }, this.config)
+          this.snackbarMutation({value: true, text: 'Adelanto editado correctamente', color: 'success'})
         }
       }catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el adelanto', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar el adelanto', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
-    async formAction(){
+    async formAction () {
       if(this.create){
-        await this.registrarAdelanto();
+        await this.registrarAdelanto()
       }else {
-        await this.editarAdelanto();
+        await this.editarAdelanto()
       }
-      this.$refs.form.resetValidation();  
+      this.$refs.form.resetValidation()  
     },
 
     ...mapMutations(['createModalMutation', 'headerActionsMutation', 'breadcrumbMutation', 'snackbarMutation', 'searchQueryMutation', 'searchPlaceholderMutation', 'searchDisabledMutation']),
@@ -471,7 +472,7 @@ export default {
   },
   computed: {
     ...mapState(['url', 'config', 'createModalState', 'searchQuery', 'allAdelantosState', 'allPersonalState']),
-    items(){
+    items () {
       return this.allPersonal.map(entry => {
         const fullName = `${entry.apellidos} ${entry.nombres}`
 
@@ -480,26 +481,26 @@ export default {
     }
   },
   watch: {
-    date(val) {
-      this.fechaAdelanto = val.split('-').reverse().join('-');
+    date (val) {
+      this.fechaAdelanto = val.split('-').reverse().join('-')
     },
-    searchQuery(){
-      this.searchAdelantos(this.searchQuery);
+    searchQuery () {
+      this.searchAdelantos(this.searchQuery)
     }
   },
   filters: {
-    reverseDate(str) {
+    reverseDate (str) {
       return str.split('-').reverse().join('-')
     }
   },
-  async created(){
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    await this.getAdelantos();
+  async created () {
+    this.headerActionsMutation({create: false, report: false})
+    this.searchDisabledMutation(true)
+    await this.getAdelantos()
   },
-  beforeMount(){
-    this.breadcrumbMutation('Recursos Humanos \\ Adelantos');
-    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...');
+  beforeMount () {
+    this.breadcrumbMutation('Recursos Humanos \\ Adelantos')
+    this.searchPlaceholderMutation('Nombre del personal o fecha de transacción...')
   }
 }
 </script>

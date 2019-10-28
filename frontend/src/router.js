@@ -50,7 +50,6 @@ function requireCajeroRol (to, from, next) {
     next({ name: 'login' })
     return
   }
-  console.log(store.getters.getRol)
   if (store.getters.getRol !== 'Cajero') {
     redirect(next)
   }
@@ -164,7 +163,7 @@ export default new Router({
       path: '/mozo',
       name: 'mozo',
       beforeEnter: requireMozoRol,
-      component: () => import('./views/Mozo/Mozo.vue'),
+      component: () => import('./views/Mozo/Layout.vue'),
       redirect: { name: 'mozo-mesas' },
       children: [
         {

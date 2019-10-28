@@ -128,15 +128,16 @@
 </template>
 
 <script>
-import adminService from '@/services/admin'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
+
+import adminService from '@/services/admin'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
 import ErrorMessage from '@/components/messages/ErrorMessage'
 import AlertNotifications from '@/components/messages/AlertNotifications'
 
-import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   components: {
@@ -148,7 +149,7 @@ export default {
   directives: {
     mask
   },
-  data:() => ({
+  data: () => ({
     title: 'Mesas',
     // Data para las mesas
     messageMesas: '',
@@ -185,141 +186,141 @@ export default {
   }),
   methods: {
     // OBTENER MESAS
-    async getMesas(){
+    async getMesas () {
       try {
-        if(this.backup.mesas.length != 0){
-          this.searchQueryMutation('');
-          return;
+        if (this.backup.mesas.length !== 0) {
+          this.searchQueryMutation('')
+          return
         }
-        this.loadingTitleMutation('Actualizando información');
-        this.loadingDialogMutation(true);
+        this.loadingTitleMutation('Actualizando información')
+        this.loadingDialogMutation(true)
 
-        if(this.allMesasState.length == 0 || this.refresh){
-          await this.allMesasAction();
-          this.refresh = false;
+        if (this.allMesasState.length == 0 || this.refresh) {
+          await this.allMesasAction()
+          this.refresh = false
         }
-        if(this.allMesasState.data){
-          let mesas = this.allMesasState.data;
-          if(mesas.length > 0){
-            this.allMesas = mesas;
-            this.page = 1;
-            this.paginate();
-            this.messageMesas = '';
-          }else {
-            this.messageMesas = 'No se encontraron mesas';
-            this.pageTotal = 0;
+        if (this.allMesasState.data) {
+          let mesas = this.allMesasState.data
+          if (mesas.length > 0) {
+            this.allMesas = mesas
+            this.page = 1
+            this.paginate()
+            this.messageMesas = ''
+          } else {
+            this.messageMesas = 'No se encontraron mesas'
+            this.pageTotal = 0
           }
-          this.searchDisabledMutation(false);
-          this.headerActionsMutation({create: true, report: true});
-        }else {
-          this.headerActionsMutation({create: false, report: false});
-          this.messageMesas = response.data.message;
-          this.mesas = [];
-          this.pageTotal = 0;
-          this.searchDisabledMutation(true);
+          this.searchDisabledMutation(false)
+          this.headerActionsMutation({create: true, report: true})
+        } else {
+          this.headerActionsMutation({create: false, report: false})
+          this.messageMesas = response.data.message
+          this.mesas = []
+          this.pageTotal = 0
+          this.searchDisabledMutation(true)
         }
         
       } catch (error) {
-        this.headerActionsMutation({create: false, report: false});
-        this.pageTotal = 0;
-        this.messageMesas = 'Error al conectar con el servidor';
-        this.searchDisabledMutation(true);
-      }finally {
-        this.loadingDialogMutation(false);
+        this.headerActionsMutation({create: false, report: false})
+        this.pageTotal = 0
+        this.messageMesas = 'Error al conectar con el servidor'
+        this.searchDisabledMutation(true)
+      } finally {
+        this.loadingDialogMutation(false)
       }
     },
 
-    refreshMesas(){
-      this.refresh = true;
-      this.getMesas();
+    refreshMesas () {
+      this.refresh = true
+      this.getMesas()
     },
 
     // PAGINAR MESAS
-    paginate(){
-      if(this.allMesas.length > this.pagination){
-        this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page));
-        this.pageTotal = Math.ceil(this.allMesas.length / this.pagination);
-      }else {
-         this.mesas = this.allMesas;
-          this.pageTotal = 0;
+    paginate () {
+      if (this.allMesas.length > this.pagination) {
+        this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
+        this.pageTotal = Math.ceil(this.allMesas.length / this.pagination)
+      } else {
+         this.mesas = this.allMesas
+          this.pageTotal = 0
       }
     },
 
     // SEARCH MESAS
-    searchMesas(query){
-      if(!isNaN(query)){
-        if(query != '' && query != null){
+    searchMesas (query) {
+      if (!isNaN(query)) {
+        if (query != '' && query != null) {
           if(this.mesas.length != 0 && this.backup.mesasIndex){
-            this.backup.mesas = this.mesas;
+            this.backup.mesas = this.mesas
             if(this.pageTotal != 0){
-              this.backup.pageTotal = this.pageTotal;
+              this.backup.pageTotal = this.pageTotal
             }
-            this.backup.mesasIndex = false;
+            this.backup.mesasIndex = false
           }
 
-          if(this.messageMesas.length != 0){
-            this.messageMesas = '';
+          if (this.messageMesas.length != 0) {
+            this.messageMesas = ''
           }
 
-          this.mesas = this.allMesas.filter(function(e){
-            return  e.numero == query;
-          });
-          if(this.mesas.length == 0){
-            this.messageMesas = 'No se encontraron mesas con el número ' + query;
+          this.mesas = this.allMesas.filter(function (e) {
+            return e.numero == query
+          })
+          if(this.mesas.length === 0){
+            this.messageMesas = `No se encontraron mesas con el número ${query}`
           }
-          this.pageTotal = 0;
-        }else {
-          if(this.backup.mesas.length != 0){
-            this.mesas =this.backup.mesas;
-            this.backup.mesas = [];
-            this.messageMesas = '';
-            if(this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
-              this.backup.pageTotal = 0;
+          this.pageTotal = 0
+        } else {
+          if (this.backup.mesas.length != 0) {
+            this.mesas =this.backup.mesas
+            this.backup.mesas = []
+            this.messageMesas = ''
+            if (this.backup.pageTotal != 0) {
+              this.pageTotal = this.backup.pageTotal
+              this.backup.pageTotal = 0
             }
-            this.backup.mesasIndex = true;
+            this.backup.mesasIndex = true
           }
         }
-      }else {
-        this.snackbarMutation({value: true, text: 'Solo valores numericos', color: 'error'});
+      } else {
+        this.snackbarMutation({value: true, text: 'Solo valores numericos', color: 'error'})
       }
     },
 
     // MODAL PARA EDITAR MESA
-    editarMesaModal(index){
-      this.createModalMutation(true);
-      this.numero = this.mesas[index].numero.toString();
-      this.capacidad = this.mesas[index].capacidad;
-      this.descripcion = this.mesas[index].descripcion;
-      this.index = index;
-      this.id = this.mesas[index].id;
-      this.create = false;
+    editarMesaModal (index) {
+      this.createModalMutation(true)
+      this.numero = this.mesas[index].numero.toString()
+      this.capacidad = this.mesas[index].capacidad
+      this.descripcion = this.mesas[index].descripcion
+      this.index = index
+      this.id = this.mesas[index].id
+      this.create = false
     },
 
     // CERRAR MODAL
-    closeModal(){
-      this.$refs.form.resetValidation();
-      this.createModalMutation(false);
-      setTimeout(this.resetForm, 100);
+    closeModal () {
+      this.$refs.form.resetValidation()
+      this.createModalMutation(false)
+      setTimeout(this.resetForm, 100)
     },
 
     // LIMPIAR FORMULARIO
-    resetForm(){
-      this.numero = '';
-      this.capacidad = '';
-      this.descripcion = '';
-      this.create = true;
+    resetForm () {
+      this.numero = ''
+      this.capacidad = ''
+      this.descripcion = ''
+      this.create = true
     },
 
     // CREAR MESAS
-    async crearMesa(){
+    async crearMesa () {
       try {
         if (this.$refs.form.validate()) {
-          this.isLoadBtn = true;
-          this.disabled = true;
+          this.isLoadBtn = true
+          this.disabled = true
 
           if(this.descripcion == '' || this.descripcion == null){
-            this.descripcion = 'Mesa sin descripción';
+            this.descripcion = 'Mesa sin descripción'
           }
 
           const data = {
@@ -330,54 +331,54 @@ export default {
 
           const response = await adminService.createMesa(data)
 
-          this.closeModal();
+          this.closeModal()
 
           if(this.pageTotal == 0 && this.backup.pageTotal != 0){
-              this.pageTotal = this.backup.pageTotal;
+              this.pageTotal = this.backup.pageTotal
           }
 
           if(this.allMesas.length % 10 === 0){
-            this.pageTotal++;
+            this.pageTotal++
           }
 
-          if(response.data){
-            this.allMesas.push(response.data);
-            this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'});
-            this.page = this.pageTotal;
-            this.paginate();
-            this.messageMesas = '';
-            this.backup.mesas = [];
-             this.backup.mesasIndex = true;
-          }else{
-          this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
+          if (response.data) {
+            this.allMesas.push(response.data)
+            this.snackbarMutation({value: true, text: 'Mesa creada correctamente', color: 'success'})
+            this.page = this.pageTotal
+            this.paginate()
+            this.messageMesas = ''
+            this.backup.mesas = []
+             this.backup.mesasIndex = true
+          } else {
+          this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'})
           }
         }
       } catch (error) {
-        this.closeModal();
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'});
-      }finally {
-        this.isLoadBtn = false;
-        this.disabled = false;
+        this.closeModal()
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al crear la mesa', color: 'error'})
+      } finally {
+        this.isLoadBtn = false
+        this.disabled = false
       }
     },
 
     // EDITAR MESA
-    async editarMesa(){
+    async editarMesa () {
       try {
         if (this.$refs.form.validate()) {
           if(this.descripcion == '' || this.descripcion == null){
-            this.descripcion = 'Mesa sin descripción';
+            this.descripcion = 'Mesa sin descripción'
           }
 
-          let numeroBup = parseInt(this.numero);
-          let capacidadBup = parseInt(this.capacidad);
-          let descripcionBup = this.descripcion;
+          let numeroBup = parseInt(this.numero)
+          let capacidadBup = parseInt(this.capacidad)
+          let descripcionBup = this.descripcion
 
-          this.closeModal();
+          this.closeModal()
 
-          this.mesas[this.index].numero = numeroBup;
-          this.mesas[this.index].capacidad = capacidadBup;
-          this.mesas[this.index].descripcion = descripcionBup;
+          this.mesas[this.index].numero = numeroBup
+          this.mesas[this.index].capacidad = capacidadBup
+          this.mesas[this.index].descripcion = descripcionBup
 
           const data = {
             numero: numeroBup,
@@ -387,19 +388,19 @@ export default {
 
           const response = await adminService.updateMesa(this.id, data)
 
-          this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'});
+          this.snackbarMutation({value: true, text: 'Mesa editada correctamente', color: 'success'})
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la mesa', color: 'error'});
+        this.snackbarMutation({value: true, text: 'Ocurrio un error al editar la mesa', color: 'error'})
       }
     },
 
     // ACCION DEL FORMULARIO
-    async formAction(){
-      if(this.create){
-        await this.crearMesa();
-      }else {
-        await this.editarMesa();
+    async formAction () {
+      if (this.create) {
+        await this.crearMesa()
+      } else {
+        await this.editarMesa()
       }
     },
 
@@ -407,36 +408,36 @@ export default {
     ...mapActions(['allMesasAction'])
   },
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'createModalState', 'searchQuery', 'allMesasState']),
-    unique(){
-        var counter = 0;
-        var self = this;
+    ...mapState(['loadingFish', 'createModalState', 'searchQuery', 'allMesasState']),
+    unique () {
+        var counter = 0
+        var self = this
         for(let i of this.allMesas){
           if(this.numero == i.numero){
-            counter++;
+            counter++
             if(!this.create && this.numero == this.mesas[this.index].numero){
-              counter = 0;
+              counter = 0
             }
           }
         }
         return !counter || 'Este número ya esta en uso'
       },
-      zero() {
-        // var zero = false;
+      zero () {
+        // var zero = false
         // if(this.numero.charAt(0) == 0){
         // if(this.numero.substr(0, 1) == 0){
-          // zero = true;
+          // zero = true
         // }
         // return !zero || 'El primer digito no puede ser 0'
       }
   },
   watch: {
-    searchQuery(){
-        this.searchMesas(this.searchQuery);
+    searchQuery () {
+        this.searchMesas(this.searchQuery)
     }
   },
   filters: {
-    persona(capacidad){
+    persona (capacidad) {
       if(capacidad == 1){
         return capacidad + ' persona'
       }else {
@@ -444,16 +445,16 @@ export default {
       }
     }
   },
-  async created() {
-    this.loadingFishMutation(true);
-    this.headerActionsMutation({create: false, report: false});
-    this.searchDisabledMutation(true);
-    await this.getMesas();
-    this.loadingFishMutation(false);
+  async created () {
+    this.loadingFishMutation(true)
+    this.headerActionsMutation({ create: false, report: false })
+    this.searchDisabledMutation(true)
+    await this.getMesas()
+    this.loadingFishMutation(false)
   },
-  beforeMount(){
-    this.breadcrumbMutation('Mesas');
-    this.searchPlaceholderMutation('Número de mesa...');
+  beforeMount () {
+    this.breadcrumbMutation('Mesas')
+    this.searchPlaceholderMutation('Número de mesa...')
   }
 }
 </script>

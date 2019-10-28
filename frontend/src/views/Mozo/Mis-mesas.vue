@@ -5,7 +5,7 @@
         <v-flex xs12 sm6 md4 lg3>
           <v-card class="mesa-card">
             <v-img
-            :src="require('../../assets/img/mesas/mesaOcupada.svg')"
+            :src="require('@/assets/img/mesas/mesaOcupada.svg')"
             contain
             height="100"
             class="mesa"

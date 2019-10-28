@@ -17,14 +17,14 @@
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex';
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   methods: {
     ...mapMutations(['breadcrumbMutation'])
   },
-  mounted(){
-    this.breadcrumbMutation('Mozo \\ Mesas');
+  mounted () {
+    this.breadcrumbMutation('Mozo \\ Mesas')
   }
 }
 </script>
