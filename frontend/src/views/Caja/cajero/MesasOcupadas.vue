@@ -68,12 +68,29 @@
             </v-col>
             <v-col cols="3" class="pa-0 pl-4 my-2"># Orden</v-col>
             <v-col cols="3" class="pa-0 pr-4 my-2 text-right Details-divider">{{ details.nOrden }}</v-col>
-            <v-col cols="3" class="pa-0 pl-4 my-2">Mesa</v-col>
-            <v-col cols="3" class="pa-0 pr-4 my-2 text-right">{{ details.mesa }}</v-col>
-            <v-col cols="3" class="pa-0 pl-4 my-2">Mozo</v-col>
-            <v-col cols="3" class="pa-0 pr-4 my-2 text-right Details-divider">{{ details.mozo }}</v-col>
             <v-col cols="3" class="pa-0 my-2">
-              <v-btn text color="blue" x-small class="px-4">
+              <v-btn
+                text
+                color="blue"
+                :loading="loadingMesaBtn"
+                @click="toggleEspecial"
+                x-small
+                class="px-4"
+              >
+                Mesa
+              </v-btn>
+            </v-col>
+            <v-col cols="3" class="pa-0 pr-4 my-2 text-right">{{ details.mesa }} {{ details.especial ? '(*)' : '' }}</v-col>
+            <v-col cols="3" class="pa-0 pl-4 my-2">Mozo</v-col>
+            <v-col cols="3" class="pa-0 pr-4 my-2 text-right Details-divider text-truncate">{{ details.mozo }}</v-col>
+            <v-col cols="3" class="pa-0 my-2">
+              <v-btn
+                text
+                color="blue"
+                x-small
+                class="px-4"
+                @click="pax = true"
+              >
                 PAX
               </v-btn>
             </v-col>
@@ -116,7 +133,7 @@
               </v-col>
             <v-col cols="12" class="pa-0 my-2 font-weight-bold text-center">FORMAS DE PAGO</v-col>
             <v-col cols="4" class="pa-0 my-2 text-center">
-              <v-btn text color="blue" small>
+              <v-btn text color="blue" small @click="soles = true">
                 Soles
               </v-btn>
             </v-col>
@@ -211,13 +228,7 @@
         ></v-pagination>
       </div>
     </template>
-
-
-    <v-overlay
-          :value="overlay"
-          z-index="99"
-    />
-
+    
     <v-dialog
       v-model="descuentos.show"
       width="500"
@@ -302,16 +313,14 @@
 
         <v-card-text>
           <h4 class="title mt-3">Lista de pedidos</h4>
-          <!-- <v-row class="mx-0 my-3" v-for="(pedido, i) in details.pedidos" :key="pedido.id"> -->
-          <div class="my-3">
+          <div class="my-3" v-for="(pedido, i) in selectedPedidos" :key="pedido.id">
             <v-row class="mx-0 mb-2">
               <v-col class="pa-0" cols="8">
                 <div class="subtitle-2">Ronda Marina (C/S, A/M Causa Lec/S) Doncella</div>
-                <!-- <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small> -->
-                <small class="Details-pedidos-desc caption">Auth</small>
+                <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
               </v-col>
-              <!-- <v-col class="pa-0 d-flex align-center justify-center" cols="2">{{ pedido.cantidad }}</v-col> --> <v-col class="pa-0 d-flex align-center justify-center" cols="2">1</v-col>
-              <!-- <v-col class="pa-0 d-flex align-center justify-center" cols="2"> {{ pedido.total }}</v-col> --> <v-col class="pa-0 d-flex align-center justify-center" cols="2"> 2</v-col>
+              <v-col class="pa-0 d-flex align-center justify-center" cols="2">{{ pedido.cantidad }}</v-col>
+              <v-col class="pa-0 d-flex align-center justify-center" cols="2"> {{ pedido.total }}</v-col>
             </v-row>
             <v-divider></v-divider>
           </div>
@@ -325,6 +334,7 @@
             <v-textarea
               v-model="justificacion"
               counter
+              :rules="[rules.required]"
               label="Justificación"
             ></v-textarea>
           </v-form>
@@ -344,11 +354,111 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    
+
+    <v-dialog
+      v-model="pax"
+      width="500"
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-3"
+          primary-title
+        >
+          PAX - Mesa {{ details.mesa }}
+        </v-card-title>
+
+        <v-card-text>
+          <v-form
+            ref="formReducir"
+            lazy-validation
+            v-model="validPax"
+            @submit.prevent="handlePax"
+          >
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field
+                    label="Nro. Comensales"
+                    v-model="nComensales"
+                    v-mask="'##'"
+                  />
+                </v-col>
+                <v-col cols="12">
+                  <v-select
+                    :items="mozos"
+                    label="Seleccione Mozo"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+        </v-card-text>
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="handlePax"
+            :disabled="!validPax" 
+          >
+            Confirmar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="soles"
+      width="500"
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-3"
+          primary-title
+        >
+          Soles
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="5">Efectivo</v-col>
+              <v-col cols="2" class="text-center">S/.</v-col>
+              <v-col cols="5" class="text-right">60.00</v-col>
+              <v-col cols="5">Total a cobrar</v-col>
+              <v-col cols="2" class="text-center">S/.</v-col>
+              <v-col cols="5" class="text-right">49.00</v-col>
+              <v-col cols="5">Cambio</v-col>
+              <v-col cols="2" class="text-center">S/.</v-col>
+              <v-col cols="5" class="text-right">11.00</v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="soles = false"
+          >
+            Confirmar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-overlay
+      :value="overlay"
+      z-index="99"
+    />
+
     <v-btn
-          v-show="overlay"
-          class="Overlay-close"
-          @click="toggleDetails"
+      v-show="overlay"
+      class="Overlay-close"
+      @click="toggleDetails"
     >
       Close
     </v-btn>
@@ -420,6 +530,7 @@ export default {
       // Pedidos
       checkboxs: [],
       selected:[],
+      loadingMesaBtn: false,
       // Descuentos
       descuentos: {
         show: false,
@@ -435,7 +546,18 @@ export default {
       // Reducir
       reducir: false,
       validReducir: true,
-      justificacion: ''
+      selectedPedidos: [],
+      justificacion: '',
+      // Pax
+      pax: false,
+      validPax: true,
+      nComensales: 0,
+      mozos: [
+        'aomine',
+        'nose'
+      ],
+      // Pagos
+      soles: false
     }
   },
   methods: {
@@ -443,9 +565,7 @@ export default {
     // Get mesas
     async getMesas () {
       try {
-        if (this.allMesasState.length === 0) {
-          await this.getMesasAction()
-        }
+        if (this.allMesasState.length === 0)  await this.getMesasAction()
 
         this.allPedidos = [ ...this.allMesasState.pedidos ]
         this.page = 1
@@ -502,6 +622,7 @@ export default {
       const config = {
         nOrden: pedido.numero_orden,
         mesa: pedido.mesa_numero,
+        especial: pedido.especial,
         mozo: nombre[0]+pedido.rol_mozo,
         pax: pedido.mesa_capacidad,
         pedidos: pedido.detalles_pedidos,
@@ -520,15 +641,14 @@ export default {
 
       this.toggleDetails()
     },
+    // DETAILS ACTIONS
     // Descuentos
     toggleDescuentoType () {
       this.descuentosInput = !this.descuentosInput
       this.$refs.form.resetValidation()
     },
     setDescuento () {
-      if (!this.$refs.form.validate()) {
-        return
-      }
+      if (!this.$refs.form.validate()) return
       if (this.descuentosInput) {
         this.details.descuento = (this.details.preTotal * (this.porcentaje / 100)).toFixed(2)
       } else {
@@ -561,10 +681,49 @@ export default {
     },
     // Reducir
     openReducir () {
+      if (this.selected.length === 0) return
+      this.selectedPedidos = this.details.pedidos.filter(e => {
+        let verify = false
+        this.selected.forEach(item => {
+          if (item.id === e.id) {
+            verify = true
+          }
+        })
+        return verify
+      })
       this.reducir = true
     },
-    handleReducir () {
-      
+    async handleReducir () {
+      if (!this.$refs.formReducir.validate()) return
+      try {
+      this.reducir = false
+      } catch (error) {
+        
+      } finally {
+
+      }
+    },
+    // Mesa
+    async toggleEspecial () {
+      try {
+        this.loadingMesaBtn = true
+        this.details.especial = !this.details.especial
+      } catch (error) {
+        console.log(error)        
+      } finally {
+        this.loadingMesaBtn = false
+      }
+    },
+    // Pax
+    handlePax () {
+      if (!this.$refs.formPax.validate()) return
+      try {
+        this.pax = false
+      } catch (error) {
+        
+      } finally {
+
+      }
     },
     // ASSIGN
     // assign details
