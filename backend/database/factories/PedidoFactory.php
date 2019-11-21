@@ -15,5 +15,6 @@ $factory->define(App\Pedido::class, function (Faker $faker) {
         'especial'          => rand(0,1),
         'estado'            => $faker->randomELement(['Produccion','Pendiente','Finalizado']),
         'mozo_id'           => rand(1,10),
+        'mesa_id'           => rand(1,15)
     ];
 });

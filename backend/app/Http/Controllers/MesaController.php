@@ -14,7 +14,10 @@ class MesaController extends Controller
         $mesas = Mesa::orderBy('id')->get(); // aomine
         return  $mesas;
     }
-
+    public function mesasLibres(){
+        $mesasLibres = Mesa::where('estado','=','Disponible')->orderBy('numero','asc')->get();
+        return $mesasLibres;
+    }
     public function selectMesa(Request $request){
         //seleccionar mesa especifica donde estan los clientes comiendo
         $filtro = $request->filtro;
