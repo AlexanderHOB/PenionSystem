@@ -15,11 +15,14 @@ class CreateReservasTable extends Migration
     {
         Schema::create('reservas', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('nombre',80);
             $table->date('fecha_reserva');
             $table->date('fecha_evento');
             $table->decimal('adelanto');
-            $table->integer('cliente_id');
-            $table->foreign('cliente_id')->references('id')->on('personas');
+            $table->string('estado',50);
+            $table->string('detalles',200);
+            $table->integer('persona_id')->unsigned();
+            $table->foreign('persona_id')->references('id')->on('personas');
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ class CreateReservasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reserva');
+        Schema::dropIfExists('reservas');
     }
 }

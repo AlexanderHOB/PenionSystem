@@ -85,6 +85,11 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/comensal/activar/{id}', 'ComensalController@activar');
     //Crear historial de pedidos
     Route::post('/estadoDeCuenta/registrar','EstadoDeCuentaComensalController@store'); //registrar un nuevo estado de cuenta
+    //Reservas
+    Route::get('/reservas','ReservaController@index');
+    Route::post('/reservas/registrar','ReservaController@store');
+    Route::patch('/reserva/close/{id}','ReservaController@close');
+
 
 });
 
