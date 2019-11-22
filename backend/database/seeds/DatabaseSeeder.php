@@ -22,10 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ComensalTableSeeder::class);
         $this->call(PedidoTableSeeder::class);
         $this->call(DetallePedidoTableSeeder::class);
-
-
-
-
+        $this->call(ReservaTableSeeder::class);
 
     }
 }

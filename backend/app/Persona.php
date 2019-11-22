@@ -29,9 +29,9 @@ class Persona extends Model
     {
         return $this->hasOne('App\Comensal');
     }
-    public function reserva()
+    public function reservas()
     {
-        return $this->hasMany('App\Reserva');
+        return $this->hasMany('App\Reserva','persona_id');
     }
     public function evento()
     {

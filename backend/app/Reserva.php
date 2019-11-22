@@ -11,9 +11,10 @@ class Reserva extends Model
         'fecha_reserva',
         'fecha_evento',
         'adelanto',
-        'cliente_id',
+        'persona_id',
+        'estado'
         ];
-   protected function cliente(){
-       return $this->belongsTo('App\Persona','cliente_id');
+   public function persona(){
+       return $this->belongsTo('App\Persona','persona_id');
    }
 }
