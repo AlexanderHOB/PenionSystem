@@ -15,12 +15,12 @@ class PedidoController extends Controller
         foreach ($pedidos as $pedido){
             $response=[
                 'id'            =>$pedido->id,
-                'tipo_pedido'   =>$pedido->tipo_pedido,
-                'fecha_registro'=>$pedido->fecha_registro,
-                'total'         =>$pedido->total,
                 'estado'        =>$pedido->estado,
                 'mozo_id'       =>$pedido->mozo_id,
-                'mesa_id'       =>$pedido->mesa_id
+                'mesa_id'       =>$pedido->mesa_id,
+                'mesa_numero'   =>$pedido->mesa->numero,
+                'mesa_capacidad'=>$pedido->mesa->capacidad,
+                'mozo_color'    =>$pedido->user->color
             ];
             array_push($pedidoSimplificado,$response);
         }
