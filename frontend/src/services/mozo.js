@@ -1,9 +1,9 @@
 import { service } from './service'
 
-const cajaService = {
-  getMesas: () => {
-    return service.get(`/mesas`)
-  },
+const mozoService = {
+  getPedidos: () => {
+    return service.get('/pedidos')
+  }
 }
 
-export default cajaService
+export default mozoService

@@ -1,23 +1,36 @@
 <template>
   <v-layout>
     <v-flex xs8>
-      <v-layout row wrap>
-        <v-flex xs12 sm6 md4 lg3>
+      <v-layout
+        row
+        wrap
+      >
+        <v-flex
+          xs12
+          sm6
+          md4
+          lg3
+        >
           <v-card class="mesa-card">
             <v-img
-            :src="require('@/assets/img/mesas/mesaOcupada.svg')"
-            contain
-            height="100"
-            class="mesa"
-            ></v-img>
+              :src="require('@/assets/img/mesas/mesaOcupada.svg')"
+              contain
+              height="100"
+              class="mesa"
+            />
             <v-card-title class="pt-0">
-                <!-- <h2>{{ mesa.numero }}</h2> -->
-                <h2>1</h2>
-                <div class="mesa-color"  :style="{'background-color':  '#2151aa'}"></div>
+              <!-- <h2>{{ mesa.numero }}</h2> -->
+              <h2>1</h2>
+              <div
+                class="mesa-color"
+                :style="{'background-color': '#2151aa'}"
+              />
             </v-card-title>
             <v-card-text class="pb-0">
               <!-- <p><strong>Capacidad: {{ mesa.capacidad }} {{ mesa.capacidad == 1 ? 'persona' : 'personas' }}</strong></p> -->
-              <p class="black--text"><strong>Capacidad: 1 persona</strong></p>
+              <p class="black--text">
+                <strong>Capacidad: 1 persona</strong>
+              </p>
               <p>descripción</p>
             </v-card-text>
           </v-card>
@@ -28,19 +41,24 @@
       <v-card>
         <v-container>
           <v-card-title class="pb-5">
-          <v-spacer></v-spacer>
-          <h2>Mesa Número 1</h2>
-          <v-spacer></v-spacer>
-        </v-card-title>
-        <v-card-text class="pb-0">
-          <p>Capacidad: 25 personas</p>
-          <p>Descripción: Mesa con reserva</p>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text color="green">Ver pedidos</v-btn>
-          <v-spacer></v-spacer>
-        </v-card-actions>
+            <v-spacer />
+            <h2>Mesa Número 1</h2>
+            <v-spacer />
+          </v-card-title>
+          <v-card-text class="pb-0">
+            <p>Capacidad: 25 personas</p>
+            <p>Descripción: Mesa con reserva</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              text
+              color="green"
+            >
+              Ver pedidos
+            </v-btn>
+            <v-spacer />
+          </v-card-actions>
         </v-container>
       </v-card>
     </v-flex>

@@ -1,51 +1,70 @@
 <template>
-
   <LoadingFish v-if="loadingFish" />
 
   <div v-else>
-    <v-layout>
-      <v-flex xs12 v-if="messageMesas">
-        <ErrorMessage :errorMessage="messageMesas" :refresh="refreshMesas" />
+    <v-layout wrap>
+      <v-flex
+        v-if="messageMesas"
+        xs12
+      >
+        <ErrorMessage
+          :error-message="messageMesas"
+          :refresh="refreshMesas"
+        />
       </v-flex>
       <template v-else>
-        <v-flex xs8>
-          <v-layout row wrap>
-            <v-flex v-for="(mesa, i) of mesas" :key="mesa.id" xs12 sm6 md4 lg3>
-              <v-card class="mesa-card">
-                <v-img
-                  :src="require('@/assets/img/mesas/mesaOcupada.svg')"
-                  contain
-                  height="100"
-                  class="mesa"
-                ></v-img>
-                <v-card-title class="pt-0">
-                  <h2>{{ mesa.numero }}</h2>
-                  <div class="mesa-color"  :style="{'background-color':  '#2151aa'}"></div>
-                </v-card-title>
-                <v-card-text class="pb-0">
-                  <p class="black--text">Capacidad: {{ mesa.capacidad | persona }}</p>
-                  <p>{{ mesa.descripcion }}</p>
-                </v-card-text>
-              </v-card>
-            </v-flex>
-          </v-layout>
+        <v-flex xs12>
+          <header class="d-flex justify-space-between align-center my-3">
+            <h3 class="title">
+              Mesas Ocupadas
+            </h3>
+            <v-btn
+              small
+              fab
+              dark
+              color="blue"
+              @click="refreshMesas"
+            >
+              <v-icon>refresh</v-icon>
+            </v-btn>
+          </header>
         </v-flex>
-        <v-flex xs4>
+        <v-flex
+          v-for="mesa of mesas"
+          :key="mesa.id"
+          xs12
+          sm6
+          md4
+          lg3
+        >
           <v-card>
-            <v-container>
-              <v-card-title class="pb-5">
-              <v-spacer></v-spacer>
-              <h2>Mozos</h2>
-              <v-spacer></v-spacer>
-            </v-card-title>
-            <v-card-text class="text-center">
-              <p class="mozo-name" :style="{'background-color':  '#2151aa'}">Tenorio Camarena Felix Martin</p>
-              <p class="mozo-name" :style="{'background-color':  '#ffa12a'}">Tenorio Camarena Felix Martin</p>
-              <p class="mozo-name" :style="{'background-color':  '#02aab2'}">Tenorio Camarena Felix Martin</p>
-              <p class="mozo-name" :style="{'background-color':  '#c2a2ac'}">Luisn Enrique Roque Ccantp</p>
-              <p class="mozo-name" :style="{'background-color':  '#f55ac4'}">Tenorio Camarena Felix Martin</p>
-            </v-card-text>
-            </v-container>
+            <div class="d-flex flex-no-wrap justify-space-between">
+              <div>
+                <v-card-title
+                  class="title pr-0 pl-1"
+                >
+                  Mesa {{ mesa.numero }}
+                </v-card-title>
+
+                <v-card-text class="pl-1">
+                  <p class="Mesa-capacidad mb-1">
+                    Capacidad
+                  </p>
+                  {{ mesa.capacidad | persona }}
+                </v-card-text>
+              </div>
+
+              <div
+                class="Mesa-img-box pa-2 pt-4"
+                :style="{'background-color': '#dff'}"
+              >
+                <img
+                  src="@/assets/img/mesas/mesaOcupada.svg"
+                  alt="mesa"
+                  class="Mesa-img"
+                >
+              </div>
+            </div>
           </v-card>
         </v-flex>
       </template>
@@ -60,7 +79,7 @@
           @input="paginate"
           @next="paginate"
           @previous="paginate"
-        ></v-pagination>
+        />
       </div>
     </template>
 
@@ -78,7 +97,6 @@ import LoadingFish from '@/components/loading/LoadingFish'
 import ErrorMessage from '@/components/messages/ErrorMessage'
 import AlertNotifications from '@/components/messages/AlertNotifications'
 
-
 export default {
   components: {
     LoadingDialog,
@@ -86,7 +104,16 @@ export default {
     ErrorMessage,
     AlertNotifications
   },
-  data:() => ({
+  filters: {
+    persona (capacidad) {
+      if (capacidad === 1) {
+        return capacidad + ' persona'
+      } else {
+        return capacidad + ' personas'
+      }
+    }
+  },
+  data: () => ({
     title: 'Mesas',
     // Data para las mesas
     messageMesas: '',
@@ -104,126 +131,88 @@ export default {
     // Data para la paginación
     pagination: 10,
     pageTotal: 0,
-    page: 1,
-    // Datos para selección de mesa
-    mesaSelect: {}
+    page: 1
   }),
+  computed: {
+    ...mapState(['url', 'config', 'loadingFish', 'allPedidosState'])
+  },
+  async created () {
+    this.loadingFishMutation(true)
+    await this.getMesas()
+    this.loadingFishMutation(false)
+  },
   methods: {
     // OBTENER MESAS
-    async getMesas(){
+    async getMesas () {
       try {
         this.loadingTitleMutation('Actualizando información')
         this.loadingDialogMutation(true)
 
-        if(this.allMesasState.length == 0 || this.refresh){
-          await this.allMesasAction()
+        if (this.allPedidosState.length === 0 || this.refresh) {
+          await this.getPedidosAction()
           this.refresh = false
         }
-        if(this.allMesasState.data){
-          let mesas = this.allMesasState.data
-          if(mesas.length > 0){
-            this.allMesas = mesas.filter(e => {
-              return !e.condicion
-            })
-            if(!this.allMesas.length) {
+
+        console.log(this.allPedidosState)
+
+        if (this.allPedidosState) {
+          const mesas = this.allPedidosState
+          if (mesas.length > 0) {
+            this.allMesas = mesas.filter(e => e.estado === 'Ocupado' && e.condicion)
+            if (!this.allPedidosState.length) {
               this.messageMesas = 'No se encontraron mesas ocupadas'
               return
             }
-            this.mesaSelect = this.allMesas[0]
             this.page = 1
             this.paginate()
             this.messageMesas = ''
-          }else {
+          } else {
             this.messageMesas = 'No se encontraron mesas'
             this.pageTotal = 0
           }
-        }else {
-          this.messageMesas = response.data.message
+        } else {
+          this.messageMesas = 'No se encontraron mesas'
           this.mesas = []
           this.pageTotal = 0
         }
-        
       } catch (error) {
         this.pageTotal = 0
         this.messageMesas = 'Error al conectar con el servidor'
-      }finally {
+      } finally {
         this.loadingDialogMutation(false)
       }
     },
 
-    refreshMesas(){
-      if(this.refreshUI) {
-        this.refreshUIMutation(false)
-      }
+    refreshMesas () {
       this.refresh = true
       this.getMesas()
     },
 
     // PAGINAR MESAS
-    paginate(){
-      if(this.allMesas.length > this.pagination){
+    paginate () {
+      if (this.allMesas.length > this.pagination) {
         this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
         this.pageTotal = Math.ceil(this.allMesas.length / this.pagination)
-      }else {
-         this.mesas = this.allMesas
-          this.pageTotal = 0
+      } else {
+        this.mesas = this.allMesas
+        this.pageTotal = 0
       }
     },
-
-    mesaSelected(index) {
-      this.mesaSelect = this.mesas[index]      
-    },
-
-    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation', 'refreshUIMutation']),
-    ...mapActions(['allMesasAction'])
-  },
-  computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'allMesasState', 'refreshUI'])
-  },
-  watch: {
-    refreshUI() {
-      if(this.refreshUI) {
-        this.refreshMesas()
-      }
-    }
-  },
-  filters: {
-    persona(capacidad){
-      if(capacidad == 1){
-        return capacidad + ' persona'
-      }else {
-        return capacidad + ' personas'
-      }
-    }
-  },
-  async created() {
-    this.loadingFishMutation(true)
-    await this.getMesas()
-    this.loadingFishMutation(false)
+    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
+    ...mapActions(['getPedidosAction'])
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.mesa {
-  transform: translateY(25px);
-  &-card {
-    position: relative;
+.Mesa {
+  &-img {
+    &-box {
+      width: 120px;
+    }
   }
-  &-color {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-  }
-}
-.mozo {
-  &-name {
-    padding: 8px 0;
-    font-size: 16px;
-    border-radius: 8px;
+  &-capacidad {
+    color: #212121;
   }
 }
 </style>

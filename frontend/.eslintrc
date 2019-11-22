@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "extends": [
+    "./node_modules/standard/eslintrc.json",
+    "plugin:vue/recommended"
+  ],
+  "env": {
+    "es6": true,
+    "node": true,
+    "browser": true
+  },
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "sourceType": "module"
+  }
+}

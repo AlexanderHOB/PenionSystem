@@ -79,7 +79,7 @@ const adminService = {
   // Roles
   getRoles: () => {
     return service.get('/roles')
-  },
+  }
 }
 
 export default adminService

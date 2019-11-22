@@ -15,13 +15,10 @@ export default {
       const link = document.querySelector('.Navbar-link-eventos')
       link.classList.add('Navbar-link-active')
     },
-    ...mapMutations(['cajaBreadcrumbMutation'])
-  },
-  computed: {
-    ...mapState(['cajaBreadcrumb'])
+    ...mapMutations(['headerBreadcrumbMutation'])
   },
   created () {
-    this.cajaBreadcrumbMutation('Eventos')
+    this.headerBreadcrumbMutation('Eventos')
   },
   mounted () {
     this.activeClass()
