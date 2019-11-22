@@ -10,18 +10,64 @@ use Illuminate\Support\Facades\DB;
 class PedidoController extends Controller
 {
     public function index(Request $request){
-        //if (!$request->ajax()) return redirect('/');
-
-        $buscar = $request->buscar;
-        $criterio = $request->criterio;
-
-        if ($buscar==''){
-            $pedidos = Pedido::orderBy('fecha_registro','desc')->paginate(40);
+        $pedidos = Pedido::orderBy('fecha_registro','desc')->where('estado','=','Produccion')->paginate(40);
+        $pedidoSimplificado=[];
+        foreach ($pedidos as $pedido){
+            $response=[
+                'id'            =>$pedido->id,
+                'tipo_pedido'   =>$pedido->tipo_pedido,
+                'fecha_registro'=>$pedido->fecha_registro,
+                'total'         =>$pedido->total,
+                'estado'        =>$pedido->estado,
+                'mozo_id'       =>$pedido->mozo_id,
+                'mesa_id'       =>$pedido->mesa_id
+            ];
+            array_push($pedidoSimplificado,$response);
         }
-        else{
-            $pedidos = Pedido::where($criterio, 'like', '%'. $buscar . '%')->orderBy('id', 'desc')->paginate(40);
+        return [$pedidoSimplificado];
+    }
+    public function detallePedido($id){
+        $pedido = Pedido::findOrFail($id);
+        $detallesPedidos=[];
+        $detalles=$pedido->detallesPedidos;
+        $pedidoSimplificado=[
+            'id'            =>$pedido->id,
+            'tipo_pedido'   =>$pedido->tipo_pedido,
+            'fecha_registro'=>$pedido->fecha_registro,
+            'total'         =>$pedido->total,
+            'estado'        =>$pedido->estado,
+            'mozo_id'       =>$pedido->mozo_id,
+        ];
+    
+        foreach($detalles as $d){
+            $response=[
+                'nombre_platillo'   =>$d->platillo->nombre,
+                'comentario'        =>$d->comentario,
+                'cantidad'          =>$d->cantidad,
+                'unidad_medida'     =>$d->platillo->unidad_de_medida,
+                'valor_unitario'    =>$d->platillo->precio,
+                'subtotal'          =>($d->platillo->precio * $d->cantidad),
+                'platillo_id'       =>$d->platillo->id,
+                'detalle_pedido_id' =>$d->id,
+                
+            ];
+            array_push($detallesPedidos,$response);
         }
-        return ['pedidos'=>$pedidos];
+        $pedidoSimplificado['detalles_pedidos']=$detallesPedidos;
+        return $pedidoSimplificado;
+    
+    }
+    public function split(Request $request){
+        $detalle_pedido_id = $request->detalle_pedido_id;
+        $pedido = $request->pedido_id;
+        $mesa   = $request->mesa_id;
+
+        $detalle_pedido = DetallePedido::findOrFail($detalle_pedido_id);
+        $detalle_pedido->pedido_id  = $pedido;
+        $detalle_pedido->mesa_id    = $mesa;
+        $detalle_pedido->save();
+
+        return['Exito'];
     }
     public function store(Request $request){
         //if (!$request->ajax()) return redirect('/');
@@ -36,7 +82,8 @@ class PedidoController extends Controller
             $pedido->total          =$request->total;
             $pedido->descuento      =$request->descuento;
             $pedido->especial       =$request->especial;
-            $pedido->estado         ='Pendiente';
+            $pedido->mesa_id        =$request->mesa_id;
+            $pedido->estado         ='Produccion';
             $pedido->save();
             $detalles =$request->detalles_pedido;
                 //Array de detalles
@@ -68,6 +115,34 @@ class PedidoController extends Controller
         }
         
     }
+    public function aumentarPedido(Request $request,$id){
+        $pedido=Pedido::findOrFail($id);
+        try{
+            DB::beginTransaction();
+
+            $detalles =$request->detalles_pedido;
+            foreach($detalles as $ep=>$det)
+                {
+                    $detalle = new DetallePedido();
+                    $detalle->pedido_id         = $pedido->id;
+                    $detalle->mesa_id           = $det['mesa_id'];
+                    $detalle->platillo_id       = $det['platillo_id'];
+                    $detalle->cantidad          = $det['cantidad'];
+                    $detalle->valor_unitario    = $det['valor_unitario'];
+                    $detalle->precio_unitario   = $det['precio_unitario'];
+                    $detalle->comentario        = $det['comentario'];
+                    $detalle->estado            = $det['estado'];
+                    $detalle->tipo_de_igv       = '8';
+                    $detalle->igv               = 0;
+                    $detalle->subtotal          = $det['subtotal'];
+                    $detalle->total             = $det['total'];      
+                    $detalle->save();
+                }  
+            DB::commit();    
+        } catch (Exception $e){
+            DB::rollBack();
+        }
+}
     public function update(Request $request){
         //if (!$request->ajax()) return redirect('/');
         try{
@@ -129,5 +204,10 @@ class PedidoController extends Controller
         $pedido->estado='Anulado';
         $pedido->save();
 
+    }
+    public function especial($id){
+        $pedido = Pedido::findOrFail($id);
+        $pedido->especial = 1;
+        $pedido->save();
     }
 } 

@@ -25,6 +25,9 @@ class CreatePedidosTable extends Migration
             $table->string('estado',50)->default('Iniciado');
             $table->integer('mozo_id')->unsigned();
             $table->foreign('mozo_id')->references('id')->on('users');
+            $table->integer('mesa_id')->unsigned();
+            $table->foreign('mesa_id')->references('id')->on('mesas');
+
 
             $table->timestamps();
         

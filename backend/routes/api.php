@@ -20,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::group(['middleware' => 'cors'], function(){
     //Routas Mesas
     Route::get('/mesas','MesaController@index');
+    Route::get('/mesas/libres','MesaController@mesasLibres'); //obtener todas las mesas libres 
+
     Route::get('/caja/mesas','MesaController@getAllMesas'); // obtener todas las mesas
     Route::post('/mesa/registrar','MesaController@store');
     Route::post('/mesa/actualizar/{id}','MesaController@update');
@@ -67,9 +69,14 @@ Route::group(['middleware' => 'cors'], function(){
     Route::get('/roles','RolController@index'); // aomine
     //Pedido
     Route::get('/pedidos','PedidoController@index'); // obetener todos los pedidos ordenado por fecha des
-    Route::post('/pedido/registrar','PedidoController@store'); // crear un nuevo pedido con todos sus items
+    Route::get('/pedido/{id}','PedidoController@detallePedido');// Obtener detalles de un pedido
+    Route::post('/pedido/registrar','PedidoController@store'); // crear un nuevo pedido con todos sus itemsaumentarPedido
+    Route::put('/pedido/aumentar/{id}','PedidoController@aumentarPedido');
     Route::put('/pedido/anular/{id}','PedidoController@anular');// anular un pedido
     Route::put('/pedido/actualizar','PedidoController@update'); // actualizar algun pedido en caja
+    Route::patch('/pedido/especial/{id}','PedidoController@especial'); //definir un pedido como especial
+    //splits
+    Route::put('/pedido/split','PedidoController@Split');
     //Comensales
     Route::get('/comensales','ComensalController@index'); // obetener todos los comensales
     Route::post('/comensal/registrar','ComensalController@store'); // Crear nuevo comensal
