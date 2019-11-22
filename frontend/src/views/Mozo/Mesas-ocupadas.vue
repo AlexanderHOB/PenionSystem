@@ -152,20 +152,17 @@ export default {
           await this.getPedidosAction()
           this.refresh = false
         }
-            console.log(this.allPedidosState)
 
         if (this.allPedidosState) {
           const mesas = this.allPedidosState
           if (mesas.length > 0) {
             this.allMesas = mesas
-            console.log(this.allMesas)
             if (!this.allPedidosState.length) {
               this.messageMesas = 'No se encontraron mesas ocupadas'
               return
             }
             this.page = 1
             this.paginate()
-            console.log(this.mesas)
             this.messageMesas = ''
           } else {
             this.messageMesas = 'No se encontraron mesas'

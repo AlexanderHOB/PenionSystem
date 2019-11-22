@@ -172,7 +172,6 @@ export default new Vuex.Store({
     },
     async getPedidosAction ({ commit }) {
       const { data } = await mozoService.getPedidos()
-      console.log(data)
       commit('allPedidosMutation', data)
     }
   },
