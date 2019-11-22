@@ -43,20 +43,20 @@
                 <v-card-title
                   class="title pr-0 pl-1"
                 >
-                  Mesa {{ mesa.numero }}
+                  Mesa {{ mesa.mesa_numero }}
                 </v-card-title>
 
                 <v-card-text class="pl-1">
                   <p class="Mesa-capacidad mb-1">
                     Capacidad
                   </p>
-                  {{ mesa.capacidad | persona }}
+                  {{ mesa.mesa_capacidad | persona }}
                 </v-card-text>
               </div>
 
               <div
                 class="Mesa-img-box pa-2 pt-4"
-                :style="{'background-color': '#dff'}"
+                :style="{'background-color': mesa.mozo_color}"
               >
                 <img
                   src="@/assets/img/mesas/mesaOcupada.svg"
@@ -129,7 +129,7 @@ export default {
       pageTotal: 0
     },
     // Data para la paginación
-    pagination: 10,
+    pagination: 12,
     pageTotal: 0,
     page: 1
   }),
@@ -152,19 +152,20 @@ export default {
           await this.getPedidosAction()
           this.refresh = false
         }
-
-        console.log(this.allPedidosState)
+            console.log(this.allPedidosState)
 
         if (this.allPedidosState) {
           const mesas = this.allPedidosState
           if (mesas.length > 0) {
-            this.allMesas = mesas.filter(e => e.estado === 'Ocupado' && e.condicion)
+            this.allMesas = mesas
+            console.log(this.allMesas)
             if (!this.allPedidosState.length) {
               this.messageMesas = 'No se encontraron mesas ocupadas'
               return
             }
             this.page = 1
             this.paginate()
+            console.log(this.mesas)
             this.messageMesas = ''
           } else {
             this.messageMesas = 'No se encontraron mesas'
