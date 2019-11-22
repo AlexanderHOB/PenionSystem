@@ -111,12 +111,12 @@ export default {
   }),
   methods: {
     // OBTENER MESAS
-    async getMesas(){
+    async getMesas () {
       try {
         this.loadingTitleMutation('Actualizando información')
         this.loadingDialogMutation(true)
 
-        if(this.allMesasState.length == 0 || this.refresh){
+        if (this.allMesasState.length === 0 || this.refresh) {
           await this.allMesasAction()
           this.refresh = false
         }
@@ -161,11 +161,11 @@ export default {
     },
 
     // PAGINAR MESAS
-    paginate(){
-      if(this.allMesas.length > this.pagination){
+    paginate () {
+      if (this.allMesas.length > this.pagination) {
         this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
         this.pageTotal = Math.ceil(this.allMesas.length / this.pagination)
-      }else {
+      } else {
          this.mesas = this.allMesas
           this.pageTotal = 0
       }
