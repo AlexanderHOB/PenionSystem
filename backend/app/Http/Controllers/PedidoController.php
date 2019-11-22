@@ -24,7 +24,7 @@ class PedidoController extends Controller
             ];
             array_push($pedidoSimplificado,$response);
         }
-        return [$pedidoSimplificado];
+        return $pedidoSimplificado;
     }
     public function detallePedido($id){
         $pedido = Pedido::findOrFail($id);
