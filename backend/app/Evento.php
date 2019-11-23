@@ -13,7 +13,9 @@ class Evento extends Model
         'fecha_evento',
         'ubicacion',
         'tipo_evento',
-        'cliente_id'
+        'cliente_id',
+        'total',
+        'estado'
     ];
     protected function cliente(){
         return $this->belongsTo('App\Persona','cliente_id');
@@ -21,5 +23,9 @@ class Evento extends Model
     //Relacion con la tabla categorias 
     public function tipoEvento(){
         return $this->belongsTo('App\TipoEvento','tipo_evento');
+    }
+    public function adelantos(){
+        return $this->hasMany('App\AdelantoEvento');
+
     }
 }

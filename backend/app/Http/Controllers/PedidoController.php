@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\{Pedido,DetallePedido,Modificacion};
+use App\{Pedido,DetallePedido,Modificacion,Mesa};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -90,6 +90,10 @@ class PedidoController extends Controller
             $pedido->save();
             $pedido->numero_orden   =$pedido->id;
             $pedido->save();
+
+            $mesa = Mesa::findOrFail($request->mesa_id);
+            $mesa->estado='Ocupado';
+            $mesa->save();
 
             $detalles =$request->detalles_pedido;
                 //Array de detalles
