@@ -3,7 +3,6 @@
 
   <v-container
     v-else
-    fluid
     grid-list-xl
   >
     <v-layout
@@ -22,15 +21,15 @@
       </v-flex>
       <v-flex
         v-show="!messagePlatillos"
-        xs8
+        xs12
       >
         <v-layout
           row
           wrap
         >
           <v-flex xs12>
-            <v-layout justify-space-around>
-              <v-flex xs4>
+            <v-layout>
+              <v-flex xs2>
                 <v-select
                   v-model="categoria"
                   :items="categorias"
@@ -41,7 +40,15 @@
                   return-object
                 />
               </v-flex>
-              <v-flex xs5>
+              <v-flex xs2 />
+              <v-flex xs2>
+                <v-select
+                  v-model="typeOfSearch"
+                  :items="typesOfSearch"
+                  label="Buscar por"
+                />
+              </v-flex>
+              <v-flex xs4>
                 <v-text-field
                   v-model="searchQuery"
                   solo
@@ -50,6 +57,22 @@
                   append-icon="search"
                   :disabled="searchDisabled"
                 />
+              </v-flex>
+              <v-flex xs1 />
+              <v-flex
+                xs1
+                class="text-center"
+              >
+                <v-btn
+                  small
+                  fab
+                  dark
+                  color="blue"
+                  class="mt-2"
+                  @click="refreshPlatillos"
+                >
+                  <v-icon>refresh</v-icon>
+                </v-btn>
               </v-flex>
             </v-layout>
           </v-flex>
@@ -65,7 +88,7 @@
             v-for="(platillo, i) of platillos"
             :key="platillo.id"
             class="platillo"
-            xs4
+            xs3
           >
             <mozo-platillo-box
               class="platillo-bg"
@@ -79,7 +102,7 @@
           </v-flex>
         </v-layout>
       </v-flex>
-      <v-flex
+      <!-- <v-flex
         v-show="!messagePlatillos"
         xs4
       >
@@ -155,7 +178,7 @@
             <v-spacer />
           </v-card-actions>
         </v-card>
-      </v-flex>
+      </v-flex> -->
     </v-layout>
 
     <div
@@ -176,11 +199,13 @@
         <v-pagination
           v-model="page"
           :length="pageTotal"
+          :total-visible="7"
           circle
           @input="paginate"
           @next="paginate"
           @previous="paginate"
         />
+        <div class="Pagination-help" />
       </div>
     </template>
 
@@ -225,6 +250,8 @@ export default {
       searchQuery: '',
       searchDisabled: true,
       searchMessage: '',
+      typeOfSearch: 'nombre',
+      typesOfSearch: ['codigo', 'nombre'],
       // Datos para las categorias
       categorias: [],
       categoria: {},
@@ -246,7 +273,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState', 'refreshUI'])
+    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState'])
   },
   watch: {
     searchQuery () {
@@ -260,11 +287,6 @@ export default {
     categoria () {
       if (this.categoria) {
         this.platillosFiltered(this.categoria)
-      }
-    },
-    refreshUI () {
-      if (this.refreshUI) {
-        this.refreshPlatillos()
       }
     }
   },
@@ -297,9 +319,7 @@ export default {
         if (this.allPlatillosState.data) {
           const platillos = this.allPlatillosState.data
           if (platillos.length > 0) {
-            this.allPlatillos = platillos.filter(function (e) {
-              return e.condicion
-            })
+            this.allPlatillos = platillos.filter(e => e.condicion)
             this.page = 1
             this.paginate()
             this.searchDisabled = false
@@ -352,9 +372,12 @@ export default {
           this.searchMessage = ''
         }
 
-        this.platillos = this.allPlatillos.filter(function (e) {
-          return e.nombre.toLowerCase().includes(query.toLowerCase())
-        })
+        if (this.typeOfSearch === 'codigo') {
+          this.platillos = this.allPlatillos.filter(e => e.codigo.toLowerCase().includes(query.toLowerCase()))
+        } else {
+          this.platillos = this.allPlatillos.filter(e => e.nombre.toLowerCase().includes(query.toLowerCase()))
+        }
+
         if (this.platillos.length === 0) {
           this.searchMessage = `No se encontraron platillos con el nombre "${query}"`
         }
@@ -455,7 +478,7 @@ export default {
         active.classList.remove('Navbar-link-active')
       }
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'loadingTitleMutation', 'headerBreadcrumbMutation', 'snackbarMutation', 'refreshUIMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'loadingTitleMutation', 'headerBreadcrumbMutation', 'snackbarMutation']),
     ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
   }
 }
@@ -488,5 +511,10 @@ export default {
   cursor: pointer;
   display: inline-block;
   width: 32px;
+}
+.Pagination {
+  &-help {
+    min-height: 12vh;
+  }
 }
 </style>

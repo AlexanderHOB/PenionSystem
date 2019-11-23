@@ -126,7 +126,6 @@
                 cols="3"
                 class="pa-0 my-2"
               >
-                <!-- @click="toggleEspecial" -->
                 <v-btn
                   text
                   color="blue"
@@ -141,7 +140,7 @@
                 cols="3"
                 class="pa-0 pr-4 my-2 text-right"
               >
-                {{ details.mesa }} {{ details.especial ? '(*)' : '' }}
+                {{ details.mesa }}
               </v-col>
               <v-col
                 cols="3"
@@ -157,17 +156,9 @@
               </v-col>
               <v-col
                 cols="3"
-                class="pa-0 my-2"
+                class="pa-0 pl-4 my-2"
               >
-                <v-btn
-                  text
-                  color="blue"
-                  x-small
-                  class="px-4"
-                  @click="pax = true"
-                >
-                  PAX
-                </v-btn>
+                PAX
               </v-col>
               <v-col
                 cols="3"
@@ -209,46 +200,21 @@
               </v-col>
               <v-col
                 cols="6"
-                class="pa-0 my-2 text-center"
+                class="pa-0 my-2 mb-5 pb-5 text-center"
               >
                 Consumo
               </v-col>
               <v-col
                 cols="2"
-                class="pa-0 my-2 pl-4 green--text"
+                class="pa-0 my-2 mb-5 pb-5 pl-4 green--text"
               >
                 S/.
               </v-col>
               <v-col
                 cols="4"
-                class="pa-0 my-2 text-right pr-4"
+                class="pa-0 my-2 mb-5 pb-5 text-right pr-4"
               >
                 {{ details.preTotal }}
-              </v-col>
-              <v-col
-                cols="6"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                  @click="descuentos.show = true"
-                >
-                  Descuento
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="2"
-                class="pa-0 my-2 pl-4 green--text"
-              >
-                S/.
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-right pr-4"
-              >
-                {{ details.descuento }}
               </v-col>
               <v-col
                 cols="6"
@@ -321,30 +287,23 @@
                   color="blue"
                   small
                 >
+                  ENVIAR ORDEN
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
                   PRE-CUENTA
                 </v-btn>
               </v-col>
               <v-col
-                cols="12"
-                class="pa-0 my-2 font-weight-bold text-center"
-              >
-                FORMAS DE PAGO
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                  @click="soles = true"
-                >
-                  Soles
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="4"
+                cols="6"
                 class="pa-0 my-2 text-center"
               >
                 <v-btn
@@ -352,55 +311,7 @@
                   color="blue"
                   small
                 >
-                  Dolar
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                >
-                  Crédito
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                >
-                  Tarjeto
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                >
-                  Combo
-                </v-btn>
-              </v-col>
-              <v-col
-                cols="4"
-                class="pa-0 my-2 text-center"
-              >
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                >
-                  Registrar
+                  NUEVA ORDEN
                 </v-btn>
               </v-col>
             </template>
@@ -442,13 +353,19 @@
                 Selección
               </v-col>
               <v-col
-                cols="6"
+                cols="2"
+                class="pa-0 my-2 "
+              >
+                Opciones
+              </v-col>
+              <v-col
+                cols="5"
                 class="pa-0 my-2 text-center"
               >
                 Descripción
               </v-col>
               <v-col
-                cols="2"
+                cols="1"
                 class="pa-0 my-2 text-center"
               >
                 Cantidad
@@ -469,8 +386,8 @@
                   class="mx-0 my-3"
                 >
                   <v-col
-                    class="pa-0 d-flex justify-center align-center"
-                    cols="2"
+                    class="pa-0 checkBox d-flex justify-center align-center"
+                    cols="1"
                   >
                     <v-checkbox
                       v-model="checkboxs[i].value"
@@ -481,17 +398,40 @@
                     />
                   </v-col>
                   <v-col
+                    class="pa-0 pt-3 text-center"
+                    cols="3"
+                  >
+                    <!-- @click="removePlatillo(item.id)" -->
+                    <!-- @click="increasePlatillo(item.id)" -->
+                    <!-- @click="decreasePlatillo(item.id)" -->
+                    <img
+                      src="@/assets/img/mozo/eliminar.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                    <img
+                      src="@/assets/img/mozo/aumentar.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                    <img
+                      src="@/assets/img/mozo/disminuir.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                  </v-col>
+                  <v-col
                     class="pa-0"
-                    cols="6"
+                    cols="5"
                   >
                     <div class="subtitle-2">
-                      Ronda Marina (C/S, A/M Causa Lec/S) Doncella
+                      {{ pedido.nombre_platillo }}
                     </div>
                     <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
                   </v-col>
                   <v-col
                     class="pa-0 d-flex align-center justify-center"
-                    cols="2"
+                    cols="1"
                   >
                     {{ pedido.cantidad }}
                   </v-col>
@@ -499,13 +439,13 @@
                     class="pa-0 d-flex align-center justify-center"
                     cols="2"
                   >
-                    {{ pedido.total }}
+                    {{ pedido.subtotal }}
                   </v-col>
                 </v-row>
               </v-col>
               <v-col
-                class="pa-0 my-2 d-flex justify-center align-center"
-                cols="2"
+                class="pa-0 my-2 checkBox d-flex justify-center align-center"
+                cols="1"
               >
                 <v-checkbox
                   v-model="checkbox"
@@ -517,13 +457,13 @@
               </v-col>
               <v-col
                 class="pa-0 my-2 text-center"
-                cols="6"
+                cols="8"
               >
                 Seleccionar Todo
               </v-col>
               <v-col
                 class="pa-0 my-2 text-center"
-                cols="4"
+                cols="3"
               >
                 <!-- @click="openReducir" -->
                 <v-btn
@@ -715,30 +655,29 @@ export default {
       this.overlay = !this.overlay
     },
     async selectDetail (i) {
+      const pedido = this.mesas[i]
       try {
         this.toggleDetails()
-        const { data } = await mozoService.getPedido(this.mesas[i].id)
-        console.log(data)
-        // const nombre = pedido.nombre_mozo.split(' ')
-        // const config = {
-        //   nOrden: pedido.numero_orden,
-        //   mesa: pedido.mesa_numero,
-        //   especial: pedido.especial,
-        //   mozo: nombre[0] + pedido.rol_mozo,
-        //   pax: pedido.mesa_capacidad,
-        //   pedidos: pedido.detalles_pedidos,
-        //   descuento: 0
-        // }
-        // this.assignDetaials(config)
-
-        // this.selected = []
-        // this.checkboxs = []
-        // config.pedidos.forEach(e => {
-        //   this.checkboxs.push({
-        //     value: 0,
-        //     id: e.id
-        //   })
-        // })
+        this.loadingPedido = true
+        const { data } = await mozoService.getPedido(pedido.id)
+        const nombre = data.mozo_nombre.split(' ')
+        const config = {
+          nOrden: data.numero_orden,
+          mesa: pedido.mesa_numero,
+          mozo: nombre[0] + data.rol,
+          pax: pedido.mesa_capacidad,
+          pedidos: data.detalles_pedidos
+        }
+        this.assignDetaials(config)
+        console.log(config.pedidos)
+        this.selected = []
+        this.checkboxs = []
+        config.pedidos.forEach(e => {
+          this.checkboxs.push({
+            value: 0,
+            id: e.id
+          })
+        })
         this.loadingPedido = false
       } catch (error) {
         console.log(error)
@@ -773,17 +712,17 @@ export default {
       let preTotal = 0
 
       config.pedidos.forEach(e => {
-        preTotal += parseFloat(e.total)
+        preTotal += parseFloat(e.subtotal)
       })
       preTotal = preTotal.toFixed(2)
       this.details = {
         ...config,
         preTotal
       }
-      this.assignTotales(preTotal, config.descuento)
+      this.assignTotales(preTotal)
     },
-    assignTotales (preTotal, descuento) {
-      const total = (preTotal - descuento).toFixed(2)
+    assignTotales (preTotal) {
+      const total = preTotal
       let totalD = total / 3.2
       totalD = totalD.toFixed(2)
       let totalE = total / 2.1
@@ -888,5 +827,13 @@ export default {
   width: 100%;
   height: 100% !important;
   opacity: 0;
+}
+.checkBox {
+  transform: translateX(2.25em)
+}
+.actions {
+  cursor: pointer;
+  display: inline-block;
+  width: 32px;
 }
 </style>
