@@ -19,6 +19,11 @@ class CreateEventosTable extends Migration
             $table->date('fecha_reserva');
             $table->date('fecha_evento');
             $table->string('ubicacion');
+            $table->decimal('total',10,2);
+            $table->string('estado',50)->default('Pendiente');
+            
+            $table->integer('mozo_id')->unsigned();
+            $table->foreign('mozo_id')->references('id')->on('users');
             $table->smallInteger('tipo_evento')->unsigned();
             $table->foreign('tipo_evento')->references('id')->on('tipo_evento');
             $table->integer('cliente_id')->unsigned();
