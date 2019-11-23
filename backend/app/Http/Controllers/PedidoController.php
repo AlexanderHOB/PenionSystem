@@ -40,6 +40,9 @@ class PedidoController extends Controller
             'mozo_nombre'   =>$pedido->user->empleado->persona->nombres,
             'rol'           =>$pedido->user->rol->nombre,
             'numero_orden'  =>$pedido->id,
+            'mesa_id'       =>$pedido->mesa_id,
+            'mesa_capacidad'=>$pedido->mesa->capacidad,
+            'mesa_numero'   =>$pedido->mesa->numero,
         ];
     
         foreach($detalles as $d){
