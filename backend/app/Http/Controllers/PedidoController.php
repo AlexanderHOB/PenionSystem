@@ -79,7 +79,7 @@ class PedidoController extends Controller
 
             $pedido = new Pedido();
             $pedido->tipo_pedido    =$request->tipo_pedido;
-            $pedido->numero_orden   =$request->numero_orden;
+            $pedido->numero_orden   ='1';
             $pedido->fecha_registro =Carbon::now('America/Lima');
             $pedido->mozo_id        =$request->user_id;
             $pedido->total          =$request->total;
@@ -88,6 +88,9 @@ class PedidoController extends Controller
             $pedido->mesa_id        =$request->mesa_id;
             $pedido->estado         ='Produccion';
             $pedido->save();
+            $pedido->numero_orden   =$pedido->id;
+            $pedido->save();
+
             $detalles =$request->detalles_pedido;
                 //Array de detalles
             //Recorro todos los elementos
@@ -110,9 +113,6 @@ class PedidoController extends Controller
                 $detalle->save();
             }       
             DB::commit();
-            return [
-                'id' => $pedido->id
-            ];
         } catch (Exception $e){
             DB::rollBack();
         }
