@@ -258,9 +258,10 @@ export default {
           mesa_id: this.mesaSelect.id,
           detalles_pedido: []
         }
-        console.log(pedido)
-        const response = await mozoService.createPedido(pedido)
-        console.log(response)
+
+        await mozoService.createPedido(pedido)
+
+        this.$router.push({ name: 'mozo-menu', params: { id: this.mesaSelect.id } })
       } catch (error) {
         console.log(error)
         this.snackbarMutation({
