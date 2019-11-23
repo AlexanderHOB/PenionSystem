@@ -129,7 +129,6 @@
                 <v-btn
                   text
                   color="blue"
-                  :loading="loadingMesaBtn"
                   x-small
                   class="px-4"
                 >
@@ -507,9 +506,9 @@
       Close
     </v-btn>
 
-    <LoadingDialog />
+    <loading-dialog />
 
-    <AlertNotifications />
+    <alert-notifications />
   </div>
 </template>
 
@@ -542,7 +541,6 @@ export default {
   data: () => ({
     // General
     title: 'Mesas',
-    checkbox: false,
     overlay: false,
     // Data para las mesas
     messageMesas: '',
@@ -562,7 +560,6 @@ export default {
     pageTotal: 0,
     page: 1,
     // Details
-    detailActive: false,
     details: {
       nOrden: 0,
       mesa: 0,
@@ -576,9 +573,9 @@ export default {
       totalE: 0
     },
     // Pedidos
+    checkbox: false,
     checkboxs: [],
     selected: [],
-    loadingMesaBtn: false,
     loadingPedido: true
   }),
   computed: {
@@ -669,7 +666,6 @@ export default {
           pedidos: data.detalles_pedidos
         }
         this.assignDetaials(config)
-        console.log(config.pedidos)
         this.selected = []
         this.checkboxs = []
         config.pedidos.forEach(e => {

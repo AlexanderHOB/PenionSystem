@@ -194,6 +194,417 @@
       </v-btn>
     </div>
 
+    <section
+      v-if="detailShow"
+      ref="details"
+      class="Details"
+    >
+      <v-btn
+        fab
+        class="Details-arrow"
+        small
+        color="red"
+        dark
+        @click="toggleDetails"
+      >
+        <v-icon>keyboard_arrow_up</v-icon>
+      </v-btn>
+
+      <v-row class="mx-0 justify-space-between Details-wrapper">
+        <v-col
+          class="Details-card red lighten-1"
+          cols="4"
+        >
+          <v-row class="mx-0 Details-content white pa-2">
+            <div
+              v-if="loadingPedido"
+              class="Loader fill-height d-flex justify-center align-center"
+            >
+              <v-progress-circular
+                :size="50"
+                color="primary"
+                indeterminate
+              />
+            </div>
+            <template v-else>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
+                  ORDEN
+                </h3>
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                # Orden
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider"
+              >
+                {{ details.nOrden }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 my-2"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  x-small
+                  class="px-4"
+                >
+                  Mesa
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                {{ details.mesa }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                Mozo
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider text-truncate"
+              >
+                {{ details.mozo }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                PAX
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                {{ details.pax }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                T/C
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider"
+              >
+                3.20
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                T/C
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                1.00
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-2 mx-5 title mb-2 text-center">
+                  PAGOS
+                </h3>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 mb-5 pb-5 text-center"
+              >
+                Consumo
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 mb-5 pb-5 pl-4 green--text"
+              >
+                S/.
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 my-2 mb-5 pb-5 text-right pr-4"
+              >
+                {{ details.preTotal }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 Details-divider"
+              />
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                S/.
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.total }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 text-center Details-divider"
+              >
+                TOTAL A PAGAR
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                $
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.totalD }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 Details-divider"
+              />
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                €
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.totalE }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  SPLITMEZA
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  ENVIAR ORDEN
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  PRE-CUENTA
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  NUEVA ORDEN
+                </v-btn>
+              </v-col>
+            </template>
+          </v-row>
+        </v-col>
+        <v-col
+          class="Details-card red lighten-1 pt-5 pr-5"
+          cols="7"
+        >
+          <img
+            src="@/assets/img/carta/aros.svg"
+            alt="aros"
+            class="Details-card-aros"
+          >
+          <v-row class="mx-0 Details-content white pa-2">
+            <div
+              v-if="loadingPedido"
+              class="Loader fill-height d-flex justify-center align-center"
+            >
+              <v-progress-circular
+                :size="50"
+                color="primary"
+                indeterminate
+              />
+            </div>
+            <template v-else>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
+                  PEDIDOS
+                </h3>
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 text-center"
+              >
+                Selección
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 "
+              >
+                Opciones
+              </v-col>
+              <v-col
+                cols="5"
+                class="pa-0 my-2 text-center"
+              >
+                Descripción
+              </v-col>
+              <v-col
+                cols="1"
+                class="pa-0 my-2 text-center"
+              >
+                Cantidad
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 text-center"
+              >
+                Precio
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(pedido, i) in details.pedidos"
+                  :key="pedido.id"
+                  class="mx-0 my-3"
+                >
+                  <v-col
+                    class="pa-0 checkBox d-flex justify-center align-center"
+                    cols="1"
+                  >
+                    <v-checkbox
+                      v-model="checkboxs[i].value"
+                      dense
+                      hide-details
+                      class="mt-0 pt-0"
+                      @change="toggleSelect(i)"
+                    />
+                  </v-col>
+                  <v-col
+                    class="pa-0 pt-3 text-center"
+                    cols="3"
+                  >
+                    <!-- @click="removePlatillo(item.id)" -->
+                    <!-- @click="increasePlatillo(item.id)" -->
+                    <!-- @click="decreasePlatillo(item.id)" -->
+                    <img
+                      src="@/assets/img/mozo/eliminar.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                    <img
+                      src="@/assets/img/mozo/aumentar.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                    <img
+                      src="@/assets/img/mozo/disminuir.svg"
+                      alt="aumentar"
+                      class="actions"
+                    >
+                  </v-col>
+                  <v-col
+                    class="pa-0"
+                    cols="5"
+                  >
+                    <div class="subtitle-2">
+                      {{ pedido.nombre_platillo }}
+                    </div>
+                    <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
+                  </v-col>
+                  <v-col
+                    class="pa-0 d-flex align-center justify-center"
+                    cols="1"
+                  >
+                    {{ pedido.cantidad }}
+                  </v-col>
+                  <v-col
+                    class="pa-0 d-flex align-center justify-center"
+                    cols="2"
+                  >
+                    {{ pedido.subtotal }}
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col
+                class="pa-0 my-2 checkBox d-flex justify-center align-center"
+                cols="1"
+              >
+                <v-checkbox
+                  v-model="checkbox"
+                  dense
+                  hide-details
+                  class="mt-0 pt-0"
+                  @change="toggleAllSelect"
+                />
+              </v-col>
+              <v-col
+                class="pa-0 my-2 text-center"
+                cols="8"
+              >
+                Seleccionar Todo
+              </v-col>
+              <v-col
+                class="pa-0 my-2 text-center"
+                cols="3"
+              >
+                <!-- @click="openReducir" -->
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  Reducir ({{ numberOfSelecteds }})
+                </v-btn>
+              </v-col>
+              <v-col class="fill-height" />
+            </template>
+          </v-row>
+        </v-col>
+      </v-row>
+    </section>
+
     <template v-if="pageTotal">
       <div class="text-center mt-5">
         <v-pagination
@@ -209,14 +620,29 @@
       </div>
     </template>
 
-    <LoadingDialog />
+    <v-overlay
+      :value="overlay"
+      z-index="99"
+    />
 
-    <AlertNotifications />
+    <v-btn
+      v-show="overlay"
+      class="Overlay-close"
+      @click="toggleDetails"
+    >
+      Close
+    </v-btn>
+
+    <loading-dialog />
+
+    <alert-notifications />
   </v-container>
 </template>
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+
+import mozoService from '@/services/mozo'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
@@ -234,6 +660,8 @@ export default {
   },
   data () {
     return {
+      // General
+      overlay: false,
       // Datos para las platillos
       messagePlatillos: '',
       platillos: [],
@@ -259,7 +687,7 @@ export default {
       // Filtered
       filtered: false,
       // Datos para la paginación
-      pagination: 10,
+      pagination: 12,
       pageTotal: 0,
       page: 1,
       // Datos para los pedidos
@@ -269,10 +697,32 @@ export default {
         { text: 'Cant', align: 'center', class: 'px-0', value: 'cantidad' },
         { text: 'Valor', align: 'center', class: 'px-0', value: 'valor' }
       ],
-      ordenes: []
+      ordenes: [],
+      // Details
+      details: {
+        nOrden: 0,
+        mesa: 0,
+        mozo: '',
+        pax: 0,
+        pedidos: [],
+        preTotal: 0,
+        descuento: 0,
+        total: 0,
+        totalD: 0,
+        totalE: 0
+      },
+      // Pedidos
+      checkbox: false,
+      checkboxs: [],
+      selected: [],
+      loadingPedido: true,
+      detailShow: false
     }
   },
   computed: {
+    numberOfSelecteds () {
+      return this.selected.length
+    },
     ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState'])
   },
   watch: {
@@ -296,6 +746,7 @@ export default {
     this.getCategorias()
     await this.getPlatillos()
     this.loadingFishMutation(false)
+    this.toggleDetailShow()
   },
   beforeMount () {
     this.headerBreadcrumbMutation('Mozo \\ Menu')
@@ -414,6 +865,7 @@ export default {
         this.snackbarMutation({ value: true, text: 'Error al obtener las categorias', color: 'error' })
       }
     },
+    // Filtrar Platillos
     platillosFiltered (categoria) {
       this.filtered = true
       this.pageTotal = 0
@@ -422,12 +874,109 @@ export default {
       })
       this.platillos = platillos
     },
+    // Show All
     showAll () {
       this.categoria = null
       this.filtered = false
       this.page = 1
       this.paginate()
     },
+    // DETAILS
+    // Toggle Detail
+    toggleDetails () {
+      this.$refs.details.classList.toggle('Details-active')
+      document.querySelector('.Details-arrow').classList.toggle('Details-arrow-active')
+      this.overlay = !this.overlay
+    },
+    toggleDetailShow () {
+      if (this.$route.params.id) {
+        this.detailShow = true
+        const self = this
+        setTimeout(function () {
+          self.toggleDetails()
+          self.selectDetail()
+        }, 1000)
+      }
+    },
+    async selectDetail () {
+      try {
+        this.loadingPedido = true
+        const { data } = await mozoService.getPedido(this.$route.params.id)
+        const nombre = data.mozo_nombre.split(' ')
+        const config = {
+          nOrden: data.numero_orden,
+          mesa: '25',
+          mozo: nombre[0] + data.rol,
+          pax: '6',
+          pedidos: data.detalles_pedidos
+        }
+        this.assignDetaials(config)
+        this.selected = []
+        this.checkboxs = []
+        config.pedidos.forEach(e => {
+          this.checkboxs.push({
+            value: 0,
+            id: e.id
+          })
+        })
+        this.loadingPedido = false
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    // Pedidos
+    toggleSelect (i) {
+      const obj = this.checkboxs[i]
+      if (obj.value) {
+        this.selected.push(obj)
+      } else {
+        this.selected.splice(i, 1)
+      }
+    },
+    toggleAllSelect (value) {
+      this.selected = []
+      if (value) {
+        this.checkboxs.forEach((e, i, arr) => {
+          this.selected.push(e)
+          arr[i].value = 1
+        })
+      } else {
+        this.checkboxs.forEach((e, i, arr) => {
+          arr[i].value = 0
+        })
+      }
+    },
+    // ASSIGN
+    // assign details
+    assignDetaials (config) {
+      this.details.preTotal = 0
+      let preTotal = 0
+
+      config.pedidos.forEach(e => {
+        preTotal += parseFloat(e.subtotal)
+      })
+      preTotal = preTotal.toFixed(2)
+      this.details = {
+        ...config,
+        preTotal
+      }
+      this.assignTotales(preTotal)
+    },
+    assignTotales (preTotal) {
+      const total = preTotal
+      let totalD = total / 3.2
+      totalD = totalD.toFixed(2)
+      let totalE = total / 2.1
+      totalE = totalE.toFixed(2)
+      this.details = {
+        ...this.details,
+        total,
+        totalD,
+        totalE
+      }
+    },
+    // ACTIONS
+    // add Platillo
     addPlatillo (index) {
       const platillo = this.platillos[index]
       let pedido = null
@@ -449,10 +998,12 @@ export default {
 
       this.ordenes.push(pedido)
     },
+    // Incrementar platillo
     increasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
       this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad + 1
     },
+    // Decrementar Platillo
     decreasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
       if (this.ordenes[pedidoIndex].cantidad === 1) {
@@ -461,6 +1012,7 @@ export default {
       }
       this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad - 1
     },
+    // Remove Platillo
     removePlatillo (id, index) {
       let pedidoIndex = index
       if (!pedidoIndex) {
@@ -469,9 +1021,11 @@ export default {
 
       this.ordenes.splice(pedidoIndex, 1)
     },
+    // get Index
     getIndex (id, arr) {
       return arr.findIndex(e => e.id === id)
     },
+    // Active Class
     activeClass () {
       const active = document.querySelector('.Navbar-link-active')
       if (active) {
@@ -506,6 +1060,86 @@ export default {
     font-size: 64px;
     pointer-events: none;
   }
+}
+.Details {
+  position: fixed;
+  width: 98%;
+  height: 80%;
+  z-index: 100;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 92%);
+  transition: .45s;
+  &-arrow {
+    position: fixed;
+    top: 0;
+    left: 37.5%;
+    transform: translate(-50%, -50%);
+    transition: .45s;
+    z-index: 1;
+    &-active {
+      transform: translate(-50%, -50%) rotate(180deg);
+    }
+  }
+  &-active {
+    transform: translate(-50%, 0);
+  }
+  /* &-wrapper {
+    max-height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  } */
+  &-wrapper {
+    height: 100%;
+  }
+  &-content {
+    height: 100%;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  &-card {
+    position: relative;
+    height: 100%;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    &-aros {
+      position: absolute;
+      top: 55px;
+      left: -25px;
+      width: 70px;
+    }
+  }
+  &-title {
+    border-bottom: 1px solid #ccc;
+  }
+  &-divider {
+    border-right: 1px solid #ccc;
+  }
+  &-pedidos {
+    &-desc {
+      color: #2196f3;
+    }
+  }
+}
+.Loader {
+  width: 100%;
+}
+.Overlay-close {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  width: 100%;
+  height: 100% !important;
+  opacity: 0;
+}
+.checkBox {
+  transform: translateX(2.25em)
 }
 .actions {
   cursor: pointer;

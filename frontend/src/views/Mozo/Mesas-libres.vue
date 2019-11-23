@@ -70,6 +70,7 @@
     <v-dialog
       v-model="detail"
       max-width="600"
+      :persistent="loadingBtn"
     >
       <v-card>
         <v-container>
@@ -87,6 +88,8 @@
             <v-btn
               text
               color="green"
+              :loading="loadingBtn"
+              @click="goPedido"
             >
               Usar mesa
             </v-btn>
@@ -94,6 +97,7 @@
             <v-btn
               text
               color="red"
+              :disabled="loadingBtn"
               @click="detail = false"
             >
               Cancelar
@@ -125,6 +129,8 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+
+import mozoService from '@/services/mozo'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
@@ -168,10 +174,11 @@ export default {
     page: 1,
     // Datos para selección de mesa
     detail: false,
-    mesaSelect: {}
+    mesaSelect: {},
+    loadingBtn: false
   }),
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'allMesasState'])
+    ...mapState(['auth', 'loadingFish', 'allMesasState'])
   },
   async created () {
     this.loadingFishMutation(true)
@@ -233,12 +240,38 @@ export default {
         this.pageTotal = 0
       }
     },
-
+    // Seleccionar mesa
     mesaSelected (index) {
-      this.detail = true
       this.mesaSelect = this.mesas[index]
+      this.detail = true
     },
-
+    // Ir al pedido
+    async goPedido () {
+      try {
+        this.loadingBtn = true
+        const pedido = {
+          tipo_pedido: 'Normal',
+          user_id: this.auth.user.id,
+          total: 0,
+          descuento: 0,
+          especial: 0,
+          mesa_id: this.mesaSelect.id,
+          detalles_pedido: []
+        }
+        console.log(pedido)
+        const response = await mozoService.createPedido(pedido)
+        console.log(response)
+      } catch (error) {
+        console.log(error)
+        this.snackbarMutation({
+          value: true,
+          text: 'Ocurrio un error en el servidor.',
+          color: 'error'
+        })
+      } finally {
+        this.loadingBtn = false
+      }
+    },
     ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
     ...mapActions(['allMesasAction'])
   }

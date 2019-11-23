@@ -183,7 +183,7 @@ export default new Router({
           ]
         },
         {
-          path: 'menu',
+          path: 'menu/:id?',
           name: 'mozo-menu',
           component: () => import('./views/Mozo/Menu.vue')
         }
