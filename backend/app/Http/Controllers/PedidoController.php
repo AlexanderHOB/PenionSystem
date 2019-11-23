@@ -117,6 +117,9 @@ class PedidoController extends Controller
                 $detalle->save();
             }       
             DB::commit();
+            return[
+                'pedido_id'=>$pedido->id
+            ]; 
         } catch (Exception $e){
             DB::rollBack();
         }
