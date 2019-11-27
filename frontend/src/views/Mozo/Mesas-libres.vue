@@ -162,6 +162,7 @@ export default {
     isLoadBtn: false,
     disabled: false,
     refresh: false,
+    index: 0,
     // Backup
     backup: {
       mesas: [],
@@ -242,6 +243,7 @@ export default {
     },
     // Seleccionar mesa
     mesaSelected (index) {
+      this.index = index
       this.mesaSelect = this.mesas[index]
       this.detail = true
     },
@@ -259,9 +261,10 @@ export default {
           detalles_pedido: []
         }
 
-        await mozoService.createPedido(pedido)
+        const { data } = await mozoService.createPedido(pedido)
 
-        this.$router.push({ name: 'mozo-menu', params: { id: this.mesaSelect.id } })
+        this.mesas.splice(this.index, 1)
+        this.$router.push({ name: 'mozo-menu', params: { id: data.pedido_id } })
       } catch (error) {
         console.log(error)
         this.snackbarMutation({
@@ -270,6 +273,7 @@ export default {
           color: 'error'
         })
       } finally {
+        this.detail = false
         this.loadingBtn = false
       }
     },

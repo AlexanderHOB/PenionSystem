@@ -92,93 +92,16 @@
           >
             <mozo-platillo-box
               class="platillo-bg"
-              :add-platillo="addPlatillo"
+              :add-platillo="toggePedidoModal"
               :index="i"
             />
             <p class="platillo-text text-center">
-              {{ platillo.nombre }}
+              {{ platillo.nombre }}<br>{{ platillo.precio }}
             </p>
             <span class="platillo-add">+</span>
           </v-flex>
         </v-layout>
       </v-flex>
-      <!-- <v-flex
-        v-show="!messagePlatillos"
-        xs4
-      >
-        <v-card>
-          <v-card-title class="pb-5">
-            <v-spacer />
-            <h2>PEDIDO</h2>
-            <v-spacer />
-          </v-card-title>
-          <v-card-text class="black--text">
-            <v-layout
-              row
-              wrap
-            >
-              <v-flex xs4>
-                <strong>N° pedido</strong>
-              </v-flex>
-              <v-flex xs8>
-                12345
-              </v-flex>
-              <v-flex xs4>
-                <strong>Mozo</strong>
-              </v-flex>
-              <v-flex xs8>
-                luisMozo
-              </v-flex>
-              <v-flex xs4>
-                <strong>Mesa</strong>
-              </v-flex>
-              <v-flex xs8>
-                1
-              </v-flex>
-              <v-flex xs12>
-                <v-data-table
-                  :headers="headers"
-                  :items="ordenes"
-                  class="elevation-1"
-                >
-                  <template v-slot:item.action="{ item }">
-                    <div class="text-center px-0">
-                      <img
-                        src="@/assets/img/mozo/eliminar.svg"
-                        alt="aumentar"
-                        class="actions"
-                        @click="removePlatillo(item.id)"
-                      >
-                      <img
-                        src="@/assets/img/mozo/aumentar.svg"
-                        alt="aumentar"
-                        class="actions"
-                        @click="increasePlatillo(item.id)"
-                      >
-                      <img
-                        src="@/assets/img/mozo/disminuir.svg"
-                        alt="aumentar"
-                        class="actions"
-                        @click="decreasePlatillo(item.id)"
-                      >
-                    </div>
-                  </template>
-                </v-data-table>
-              </v-flex>
-            </v-layout>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer />
-            <v-btn
-              class="yellow"
-              rounded
-            >
-              Comanda
-            </v-btn>
-            <v-spacer />
-          </v-card-actions>
-        </v-card>
-      </v-flex> -->
     </v-layout>
 
     <div
@@ -192,6 +115,7 @@
       >
         Mostrar Todos
       </v-btn>
+      <div class="Utils-height" />
     </div>
 
     <section
@@ -410,6 +334,7 @@
                   text
                   color="blue"
                   small
+                  @click="pedido.send = true"
                 >
                   ENVIAR ORDEN
                 </v-btn>
@@ -434,6 +359,7 @@
                   text
                   color="blue"
                   small
+                  disabled
                 >
                   NUEVA ORDEN
                 </v-btn>
@@ -505,8 +431,8 @@
                 class="pa-0"
               >
                 <v-row
-                  v-for="(pedido, i) in details.pedidos"
-                  :key="pedido.id"
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.id"
                   class="mx-0 my-3"
                 >
                   <v-col
@@ -525,23 +451,23 @@
                     class="pa-0 pt-3 text-center"
                     cols="3"
                   >
-                    <!-- @click="removePlatillo(item.id)" -->
-                    <!-- @click="increasePlatillo(item.id)" -->
-                    <!-- @click="decreasePlatillo(item.id)" -->
                     <img
                       src="@/assets/img/mozo/eliminar.svg"
-                      alt="aumentar"
+                      alt="eliminiar"
                       class="actions"
+                      @click="removePlatillo(orden.id)"
                     >
                     <img
                       src="@/assets/img/mozo/aumentar.svg"
                       alt="aumentar"
                       class="actions"
+                      @click="increasePlatillo(orden.id)"
                     >
                     <img
                       src="@/assets/img/mozo/disminuir.svg"
-                      alt="aumentar"
+                      alt="disminuir"
                       class="actions"
+                      @click="decreasePlatillo(orden.id)"
                     >
                   </v-col>
                   <v-col
@@ -549,21 +475,21 @@
                     cols="5"
                   >
                     <div class="subtitle-2">
-                      {{ pedido.nombre_platillo }}
+                      {{ orden.nombre_platillo }}
                     </div>
-                    <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
+                    <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
                   </v-col>
                   <v-col
                     class="pa-0 d-flex align-center justify-center"
                     cols="1"
                   >
-                    {{ pedido.cantidad }}
+                    {{ orden.cantidad }}
                   </v-col>
                   <v-col
                     class="pa-0 d-flex align-center justify-center"
                     cols="2"
                   >
-                    {{ pedido.subtotal }}
+                    {{ orden.subtotal }}
                   </v-col>
                 </v-row>
               </v-col>
@@ -589,13 +515,13 @@
                 class="pa-0 my-2 text-center"
                 cols="3"
               >
-                <!-- @click="openReducir" -->
                 <v-btn
                   text
                   color="blue"
                   small
+                  @click="pedido.remove = true"
                 >
-                  Reducir ({{ numberOfSelecteds }})
+                  Eliminar ({{ numberOfSelecteds }})
                 </v-btn>
               </v-col>
               <v-col class="fill-height" />
@@ -604,6 +530,174 @@
         </v-col>
       </v-row>
     </section>
+
+    <v-dialog
+      v-model="pedido.modal"
+      max-width="660"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            {{ pedido.title }}
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col
+                cols="2"
+                class="d-flex justify-center align-center"
+              >
+                <v-btn
+                  color="green"
+                  dark
+                  fab
+                  small
+                  @click="decreaseQuantityPlatillos"
+                >
+                  -
+                </v-btn>
+              </v-col>
+              <v-col cols="2">
+                <v-text-field
+                  v-model="pedido.cantidad"
+                  v-mask="'###'"
+                  label="Cantidad"
+                  counter
+                  maxlength="3"
+                />
+              </v-col>
+              <v-col
+                cols="2"
+                class="d-flex justify-center align-center"
+              >
+                <v-btn
+                  color="red"
+                  dark
+                  fab
+                  small
+                  @click="pedido.cantidad++"
+                >
+                  +
+                </v-btn>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="pedido.comentario"
+                  label="Comentario"
+                  maxlength="25"
+                  counter
+                />
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="addPlatillo"
+          >
+            Añadir Platillo
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="pedido.modal = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.remove"
+      max-width="320"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            ¿Estás seguro?
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          Los platillos seleccionados serán eliminados.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="removePlatillos"
+          >
+            Aceptar
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="pedido.remove = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.send"
+      max-width="320"
+      :persistent="pedido.loading"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            ¿Estás seguro?
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          Enviar orden.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="sendData"
+            :loading="pedido.loading"
+          >
+            Aceptar
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            :disabled="pedido.disabled"
+            @click="pedido.send = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <template v-if="pageTotal">
       <div class="text-center mt-5">
@@ -616,7 +710,7 @@
           @next="paginate"
           @previous="paginate"
         />
-        <div class="Pagination-help" />
+        <div class="Utils-height" />
       </div>
     </template>
 
@@ -641,6 +735,7 @@
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+import { mask } from 'vue-the-mask'
 
 import mozoService from '@/services/mozo'
 
@@ -657,6 +752,9 @@ export default {
     ErrorMessage,
     AlertNotifications,
     MozoPlatilloBox
+  },
+  directives: {
+    mask
   },
   data () {
     return {
@@ -691,12 +789,6 @@ export default {
       pageTotal: 0,
       page: 1,
       // Datos para los pedidos
-      headers: [
-        { text: 'Actions', align: 'center', sortable: false, value: 'action' },
-        { text: 'Pedido', align: 'center', width: 120, sortable: false, value: 'platillo' },
-        { text: 'Cant', align: 'center', class: 'px-0', value: 'cantidad' },
-        { text: 'Valor', align: 'center', class: 'px-0', value: 'valor' }
-      ],
       ordenes: [],
       // Details
       details: {
@@ -714,14 +806,25 @@ export default {
       // Pedidos
       checkbox: false,
       checkboxs: [],
-      selected: [],
+      selecteds: [],
       loadingPedido: true,
-      detailShow: false
+      detailShow: false,
+      pedido: {
+        modal: false,
+        title: '',
+        disabled: false,
+        loading: false,
+        platillo: null,
+        comentario: '',
+        cantidad: 0,
+        remove: false,
+        send: false
+      }
     }
   },
   computed: {
     numberOfSelecteds () {
-      return this.selected.length
+      return this.selecteds.length
     },
     ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState'])
   },
@@ -862,7 +965,11 @@ export default {
           this.disabledCategories = false
         }
       } catch (error) {
-        this.snackbarMutation({ value: true, text: 'Error al obtener las categorias', color: 'error' })
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al obtener las categorias',
+          color: 'error'
+        })
       }
     },
     // Filtrar Platillos
@@ -902,16 +1009,20 @@ export default {
       try {
         this.loadingPedido = true
         const { data } = await mozoService.getPedido(this.$route.params.id)
+        console.log(data)
         const nombre = data.mozo_nombre.split(' ')
         const config = {
+          id: data.id,
           nOrden: data.numero_orden,
-          mesa: '25',
+          mesa: data.mesa_numero,
+          mesa_id: data.mesa_id,
           mozo: nombre[0] + data.rol,
-          pax: '6',
+          pax: data.mesa_capacidad,
           pedidos: data.detalles_pedidos
         }
+        this.ordenes = data.detalles_pedidos
         this.assignDetaials(config)
-        this.selected = []
+        this.selecteds = []
         this.checkboxs = []
         config.pedidos.forEach(e => {
           this.checkboxs.push({
@@ -919,25 +1030,30 @@ export default {
             id: e.id
           })
         })
-        this.loadingPedido = false
       } catch (error) {
-        console.log(error)
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al obtener el pedido',
+          color: 'error'
+        })
+      } finally {
+        this.loadingPedido = false
       }
     },
     // Pedidos
     toggleSelect (i) {
       const obj = this.checkboxs[i]
       if (obj.value) {
-        this.selected.push(obj)
+        this.selecteds.push(obj)
       } else {
-        this.selected.splice(i, 1)
+        this.selecteds.splice(i, 1)
       }
     },
     toggleAllSelect (value) {
-      this.selected = []
+      this.selecteds = []
       if (value) {
         this.checkboxs.forEach((e, i, arr) => {
-          this.selected.push(e)
+          this.selecteds.push(e)
           arr[i].value = 1
         })
       } else {
@@ -976,27 +1092,39 @@ export default {
       }
     },
     // ACTIONS
+    // Pedidio Modal
+    toggePedidoModal (index) {
+      this.pedido.platillo = this.platillos[index]
+      this.pedido.title = this.pedido.platillo.nombre
+      this.pedido.modal = true
+    },
+    // Disminuir cantidad de platillos
+    decreaseQuantityPlatillos () {
+      if (this.pedido.cantidad !== 0) this.pedido.cantidad--
+    },
     // add Platillo
-    addPlatillo (index) {
-      const platillo = this.platillos[index]
-      let pedido = null
-      if (this.ordenes.length) {
-        const pedidoIndex = this.ordenes.findIndex(e => e.id === platillo.id)
-        if (pedidoIndex !== -1) {
-          this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad + 1
-          return
-        }
+    addPlatillo () {
+      if (!this.pedido.cantidad) return
+      if (!this.pedido.comentario) this.pedido.comentario = '-'
+      const platillo = this.pedido.platillo
+
+      const pedido = {
+        id: platillo.id,
+        nombre_platillo: platillo.nombre,
+        comentario: this.pedido.comentario,
+        cantidad: this.pedido.cantidad,
+        subtotal: platillo.precio
       }
 
-      pedido = {
-        id: platillo.id,
-        platillo: platillo.nombre,
-        msg: 'poca cantidad de sal',
-        cantidad: 1,
-        valor: platillo.precio
-      }
+      this.checkboxs.push({
+        value: 0,
+        id: pedido.id
+      })
 
       this.ordenes.push(pedido)
+      this.pedido.cantidad = 0
+      this.pedido.comentario = ''
+      this.pedido.modal = false
     },
     // Incrementar platillo
     increasePlatillo (id) {
@@ -1021,6 +1149,67 @@ export default {
 
       this.ordenes.splice(pedidoIndex, 1)
     },
+    // Remove Platillos
+    removePlatillos () {
+      if (this.checkbox) {
+        this.checkbox = false
+        this.selecteds = []
+        this.checkboxs = []
+        this.ordenes = []
+      } else {
+        this.selecteds.forEach((e, i) => {
+          const indexOne = this.getIndex(e.id, this.ordenes)
+          this.ordenes.splice(indexOne, 1)
+          const indexTwo = this.getIndex(e.id, this.checkboxs)
+          this.checkboxs.splice(indexTwo, 1)
+        })
+        this.toggleAllSelect()
+      }
+
+      this.pedido.remove = false
+    },
+    // Send data
+    async sendData () {
+      try {
+        this.pedido.loading = true
+        this.pedido.disabled = true
+        const IGV = 0
+        const detallesPedido = []
+        this.ordenes.forEach(e => {
+          const value = Math.round(parseFloat(e.subtotal), 2)
+          const pedido = {
+            mesa_id: this.details.mesa_id,
+            platillo_id: e.id,
+            cantidad: e.cantidad,
+            valor_unitario: value,
+            precio_unitario: value * (1 + IGV),
+            comentario: e.comentario,
+            subtotal: value * e.cantidad,
+            total: (value * (1 + IGV)) * e.cantidad,
+            estado: 'Produccion'
+          }
+          detallesPedido.push(pedido)
+        })
+        await mozoService.updatePedido(detallesPedido, this.details.id)
+        console.log(detallesPedido)
+        this.snackbarMutation({
+          value: true,
+          text: 'Pedido enviado.',
+          color: 'success'
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al enviarp el pedido.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.loading = false
+        this.pedido.disabled = false
+        this.pedido.send = false
+      }
+    },
+    // UTILS
     // get Index
     getIndex (id, arr) {
       return arr.findIndex(e => e.id === id)
@@ -1146,8 +1335,8 @@ export default {
   display: inline-block;
   width: 32px;
 }
-.Pagination {
-  &-help {
+.Utils {
+  &-height {
     min-height: 12vh;
   }
 }

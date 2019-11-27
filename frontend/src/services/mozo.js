@@ -9,6 +9,9 @@ const mozoService = {
   },
   createPedido: data => {
     return service.post('/pedido/registrar', data)
+  },
+  updatePedido: (detalles_pedido, id) => {
+    return service.put(`/pedido/aumentar/${id}`, { detalles_pedido })
   }
 }
 

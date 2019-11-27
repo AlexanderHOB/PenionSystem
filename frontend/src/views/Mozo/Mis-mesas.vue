@@ -309,6 +309,7 @@
                   text
                   color="blue"
                   small
+                  :to="{ name: 'mozo-menu', params: { id: details.id } }"
                 >
                   NUEVA ORDEN
                 </v-btn>
@@ -345,26 +346,15 @@
                   PEDIDOS
                 </h3>
               </v-col>
+              <v-col cols="2" />
               <v-col
-                cols="2"
-                class="pa-0 my-2 text-center"
-              >
-                Selección
-              </v-col>
-              <v-col
-                cols="2"
-                class="pa-0 my-2 "
-              >
-                Opciones
-              </v-col>
-              <v-col
-                cols="5"
+                cols="6"
                 class="pa-0 my-2 text-center"
               >
                 Descripción
               </v-col>
               <v-col
-                cols="1"
+                cols="2"
                 class="pa-0 my-2 text-center"
               >
                 Cantidad
@@ -380,48 +370,14 @@
                 class="pa-0"
               >
                 <v-row
-                  v-for="(pedido, i) in details.pedidos"
+                  v-for="pedido in details.pedidos"
                   :key="pedido.id"
                   class="mx-0 my-3"
                 >
-                  <v-col
-                    class="pa-0 checkBox d-flex justify-center align-center"
-                    cols="1"
-                  >
-                    <v-checkbox
-                      v-model="checkboxs[i].value"
-                      dense
-                      hide-details
-                      class="mt-0 pt-0"
-                      @change="toggleSelect(i)"
-                    />
-                  </v-col>
-                  <v-col
-                    class="pa-0 pt-3 text-center"
-                    cols="3"
-                  >
-                    <!-- @click="removePlatillo(item.id)" -->
-                    <!-- @click="increasePlatillo(item.id)" -->
-                    <!-- @click="decreasePlatillo(item.id)" -->
-                    <img
-                      src="@/assets/img/mozo/eliminar.svg"
-                      alt="aumentar"
-                      class="actions"
-                    >
-                    <img
-                      src="@/assets/img/mozo/aumentar.svg"
-                      alt="aumentar"
-                      class="actions"
-                    >
-                    <img
-                      src="@/assets/img/mozo/disminuir.svg"
-                      alt="aumentar"
-                      class="actions"
-                    >
-                  </v-col>
+                  <v-col cols="2" />
                   <v-col
                     class="pa-0"
-                    cols="5"
+                    cols="6"
                   >
                     <div class="subtitle-2">
                       {{ pedido.nombre_platillo }}
@@ -430,7 +386,7 @@
                   </v-col>
                   <v-col
                     class="pa-0 d-flex align-center justify-center"
-                    cols="1"
+                    cols="2"
                   >
                     {{ pedido.cantidad }}
                   </v-col>
@@ -441,37 +397,6 @@
                     {{ pedido.subtotal }}
                   </v-col>
                 </v-row>
-              </v-col>
-              <v-col
-                class="pa-0 my-2 checkBox d-flex justify-center align-center"
-                cols="1"
-              >
-                <v-checkbox
-                  v-model="checkbox"
-                  dense
-                  hide-details
-                  class="mt-0 pt-0"
-                  @change="toggleAllSelect"
-                />
-              </v-col>
-              <v-col
-                class="pa-0 my-2 text-center"
-                cols="8"
-              >
-                Seleccionar Todo
-              </v-col>
-              <v-col
-                class="pa-0 my-2 text-center"
-                cols="3"
-              >
-                <!-- @click="openReducir" -->
-                <v-btn
-                  text
-                  color="blue"
-                  small
-                >
-                  Reducir ({{ numberOfSelecteds }})
-                </v-btn>
               </v-col>
               <v-col class="fill-height" />
             </template>
@@ -561,6 +486,7 @@ export default {
     page: 1,
     // Details
     details: {
+      id: 0,
       nOrden: 0,
       mesa: 0,
       mozo: '',
@@ -573,9 +499,6 @@ export default {
       totalE: 0
     },
     // Pedidos
-    checkbox: false,
-    checkboxs: [],
-    selected: [],
     loadingPedido: true
   }),
   computed: {
@@ -659,6 +582,7 @@ export default {
         const { data } = await mozoService.getPedido(pedido.id)
         const nombre = data.mozo_nombre.split(' ')
         const config = {
+          id: data.id,
           nOrden: data.numero_orden,
           mesa: pedido.mesa_numero,
           mozo: nombre[0] + data.rol,
@@ -666,39 +590,10 @@ export default {
           pedidos: data.detalles_pedidos
         }
         this.assignDetaials(config)
-        this.selected = []
-        this.checkboxs = []
-        config.pedidos.forEach(e => {
-          this.checkboxs.push({
-            value: 0,
-            id: e.id
-          })
-        })
+
         this.loadingPedido = false
       } catch (error) {
         console.log(error)
-      }
-    },
-    // Pedidos
-    toggleSelect (i) {
-      const obj = this.checkboxs[i]
-      if (obj.value) {
-        this.selected.push(obj)
-      } else {
-        this.selected.splice(i, 1)
-      }
-    },
-    toggleAllSelect (value) {
-      this.selected = []
-      if (value) {
-        this.checkboxs.forEach((e, i, arr) => {
-          this.selected.push(e)
-          arr[i].value = 1
-        })
-      } else {
-        this.checkboxs.forEach((e, i, arr) => {
-          arr[i].value = 0
-        })
       }
     },
     // ASSIGN

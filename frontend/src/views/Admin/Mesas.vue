@@ -138,7 +138,6 @@ import LoadingFish from '@/components/loading/LoadingFish'
 import ErrorMessage from '@/components/messages/ErrorMessage'
 import AlertNotifications from '@/components/messages/AlertNotifications'
 
-
 export default {
   components: {
     LoadingDialog,
