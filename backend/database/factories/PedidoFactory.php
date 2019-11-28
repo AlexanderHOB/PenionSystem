@@ -13,7 +13,7 @@ $factory->define(App\Pedido::class, function (Faker $faker) {
         'total'             => $faker->randomFloat(2,5,2000),
         'descuento'         => $faker->randomFloat(2,0,2000)*0.18,
         'especial'          => rand(0,1),
-        'estado'            => $faker->randomELement(['Produccion','Pendiente','Finalizado']),
+        'estado'            => $faker->randomELement(['Nuevo','Produccion','Pendiente','Finalizado']),
         'mozo_id'           => rand(1,10),
         'mesa_id'           => rand(1,15)
     ];
