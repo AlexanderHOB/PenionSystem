@@ -16,7 +16,7 @@ $factory->define(DetallePedido::class, function (Faker $faker) {
         'valor_unitario' => $faker->randomFloat(2,5,84),
         'precio_unitario' => $precio,
         'comentario' => $faker->sentence(1),
-        'estado' => $faker->randomELement(['Iniciado','Produccion','Finalizado']),
+        'estado' => $faker->randomELement(['Nuevo','Preparado']),
         'tipo_de_igv' => $faker->randomDigit(),
         'igv' => $igv,
         'subtotal' => $precio*$cant,

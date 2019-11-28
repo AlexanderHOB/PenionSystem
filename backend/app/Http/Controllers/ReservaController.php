@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Reserva;
+use Carbon\Carbon;
+
 class ReservaController extends Controller
 {
     public function index(){
@@ -32,7 +34,7 @@ class ReservaController extends Controller
 
             $reserva = new Reserva();
             $reserva->nombre            =   $request->nombres;
-            $reserva->fecha_reserva     =   $request->fecha_reserva;
+            $reserva->fecha_reserva     =   Carbon::now('America/Lima');
             $reserva->fecha_evento      =   $request->fecha_evento;
             $reserva->adelanto          =   $request->adelanto;
             $reserva->estado            =   $request->estado;

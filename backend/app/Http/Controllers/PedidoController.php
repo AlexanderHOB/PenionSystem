@@ -133,7 +133,7 @@ class PedidoController extends Controller
         try{
             DB::beginTransaction();
 
-            $detalles =$request->detalles_pedido;
+            $detalles =$request->detalle_pedidos;
             foreach($detalles as $ep=>$det)
                 {
                     $detalle = new DetallePedido();

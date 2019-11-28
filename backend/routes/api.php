@@ -91,7 +91,8 @@ Route::group(['middleware' => 'cors'], function(){
     Route::patch('/reserva/close/{id}','ReservaController@close');
     //Eventos
     Route::get('/eventos','EventoController@index');
-    Route::post('/eventos/registrar','EventoController@store');
+    Route::post('/evento/registrar','EventoController@store');
+    Route::put('/evento/actualizar/{id}','EventoController@update');
 
 
 });
