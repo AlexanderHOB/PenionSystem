@@ -1,9 +1,24 @@
 <template>
   <header class="header-bg white--text">
-    <v-container fluid class="header pt-0 pb-0">
-      <v-layout row wrap class="header-layout">
-        <v-flex xs12 sm3 class="pt-5">
-          <div class="hidden-md-and-down header-miniIconBox justify-center align-center fill-height" @click.stop="miniMutation(!miniState)" v-ripple>
+    <v-container
+      fluid
+      class="header pt-0 pb-0"
+    >
+      <v-layout
+        row
+        wrap
+        class="header-layout"
+      >
+        <v-flex
+          xs12
+          sm3
+          class="pt-5"
+        >
+          <div
+            v-ripple
+            class="hidden-md-and-down header-miniIconBox justify-center align-center fill-height"
+            @click.stop="miniMutation(!miniState)"
+          >
             <img
               src="../assets/iconos/pez.svg"
               alt="pez"
@@ -11,7 +26,11 @@
               :class="{'header-miniIcon-active': !miniState}"
             >
           </div>
-          <div class="hidden-lg-and-up header-miniIconBox justify-center align-center fill-height" @click="drawerMutation(!drawerState)" v-ripple>
+          <div
+            v-ripple
+            class="hidden-lg-and-up header-miniIconBox justify-center align-center fill-height"
+            @click="drawerMutation(!drawerState)"
+          >
             <img
               src="../assets/iconos/pez.svg"
               alt="pez"
@@ -19,14 +38,26 @@
             >
           </div>
         </v-flex>
-        <v-flex xs12 sm6 class="pt-5">
+        <v-flex
+          xs12
+          sm6
+          class="pt-5"
+        >
           <div class="header-breadcrumbBox d-flex align-center fill-height">
-            <p class="header-breadcrumb mb-0"><span class="yellow--text">El Peñon \</span> {{ breadcrumb }}</p>
+            <p class="header-breadcrumb mb-0">
+              <span class="yellow--text">El Peñon \</span> {{ breadcrumb }}
+            </p>
           </div>
         </v-flex>
-        <v-flex xs12 sm3 class="header-user pt-5">
+        <v-flex
+          xs12
+          sm3
+          class="header-user pt-5"
+        >
           <div class="header-userBox fill-height">
-            <p class="mb-0 header-user-text pl-2 pr-4">Admin</p>
+            <p class="mb-0 header-user-text pl-2 pr-4">
+              Admin
+            </p>
             <v-img
               :src="require('../assets/iconos/administrador.svg')"
               alt="user"
@@ -34,12 +65,20 @@
               height="40"
               contain
               position="10px"
-            ></v-img>
+            />
           </div>
         </v-flex>
       </v-layout>
-      <v-layout row wrap class="header-layout">
-        <v-flex xs12 sm6 class="pt-5">
+      <v-layout
+        row
+        wrap
+        class="header-layout"
+      >
+        <v-flex
+          xs12
+          sm6
+          class="pt-5"
+        >
           <form @submit.prevent="search">
             <v-text-field
               v-model="searchQueryModel"
@@ -48,21 +87,52 @@
               color="blue"
               append-icon="search"
               :disabled="searchDisabled"
-            ></v-text-field>
+            />
           </form>
         </v-flex>
-        <v-flex sm2 class="pt-5 mt-2 text-center text-sm-right">
-            <v-btn dark color="red" rounded @click="logoutUI">Logout</v-btn>
+        <v-flex
+          sm2
+          class="pt-5 mt-2 text-center text-sm-right"
+        >
+          <v-btn
+            dark
+            color="red"
+            rounded
+            @click="logoutUI"
+          >
+            Logout
+          </v-btn>
         </v-flex>
-        <v-flex v-if="headerActionCreate" xs12 sm2 class="pt-5 mt-2 text-center text-sm-right">
-          <v-btn class="indigo white--text" rounded @click="createModalMutation(true)">
-            <v-icon left>add_circle_outline</v-icon>
+        <v-flex
+          v-if="headerActionCreate"
+          xs12
+          sm2
+          class="pt-5 mt-2 text-center text-sm-right"
+        >
+          <v-btn
+            class="indigo white--text"
+            rounded
+            @click="createModalMutation(true)"
+          >
+            <v-icon left>
+              add_circle_outline
+            </v-icon>
             Nuevo
           </v-btn>
         </v-flex>
-        <v-flex v-if="headerActionReport" xs12 sm2 class="pt-5 mt-2 text-center text-sm-right">
-          <v-btn class="deep-purple white--text" rounded>
-            <v-icon left>insert_drive_file</v-icon>
+        <v-flex
+          v-if="headerActionReport"
+          xs12
+          sm2
+          class="pt-5 mt-2 text-center text-sm-right"
+        >
+          <v-btn
+            class="deep-purple white--text"
+            rounded
+          >
+            <v-icon left>
+              insert_drive_file
+            </v-icon>
             Reporte
           </v-btn>
         </v-flex>
@@ -75,7 +145,7 @@
             height="80"
             class="header-waves-img"
             position="center bottom"
-          ></v-img>
+          />
         </v-flex>
       </v-layout>
     </v-container>
@@ -87,10 +157,10 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 
 export default {
   methods: {
-    search(){},
+    search () {},
     async logoutUI () {
       this.logout()
-      this.$router.push({name: 'login'})
+      this.$router.push({ name: 'login' })
     },
     ...mapMutations(['drawerMutation', 'miniMutation', 'createModalMutation', 'searchQueryMutation', 'authMutation']),
     ...mapActions(['logout'])
@@ -98,10 +168,10 @@ export default {
   computed: {
     ...mapState(['drawerState', 'miniState', 'createModalState', 'headerActionCreate', 'headerActionReport', 'breadcrumb', 'searchPlaceholder', 'searchQuery', 'searchDisabled']),
     searchQueryModel: {
-      get() {
+      get () {
         return this.searchQuery
       },
-      set(value) {
+      set (value) {
         this.searchQueryMutation(value)
       }
     }
@@ -169,4 +239,3 @@ export default {
   }
 }
 </style>
-

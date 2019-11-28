@@ -4,8 +4,7 @@ import Vuex from 'vuex'
 import authService from '@/services/auth'
 import cajaService from '@/services/caja'
 import adminService from '@/services/admin'
-
-
+import mozoService from '@/services/mozo'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -20,7 +19,7 @@ export default new Vuex.Store({
     // Data del Loading
     loadingDialog: {
       state: false,
-      title: '' 
+      title: ''
     },
     loadingFish: true,
     // Data  Header
@@ -47,96 +46,92 @@ export default new Vuex.Store({
     allDescuentosState: [],
     allUsuariosState: [],
     allRolsState: [],
+    allPedidosState: [],
     //
-    refreshUI: false,
-    // Caja
-    cajaBreadcrumb: ''
+    headerBreadcrumb: ''
   },
   mutations: {
-    drawerMutation(state, value){
+    drawerMutation (state, value) {
       state.drawerState = value
     },
-    miniMutation(state, value){
+    miniMutation (state, value) {
       state.miniState = value
     },
-    loadingDialogMutation(state, value){
-      state.loadingDialog.state = value;
+    loadingDialogMutation (state, value) {
+      state.loadingDialog.state = value
     },
-    loadingTitleMutation(state, value){
-      state.loadingDialog.title = value;
+    loadingTitleMutation (state, value) {
+      state.loadingDialog.title = value
     },
-    loadingFishMutation(state, value){
-      state.loadingFish = value;
+    loadingFishMutation (state, value) {
+      state.loadingFish = value
     },
-    headerActionsMutation(state, object){
-      state.headerActionCreate = object.create;
-      state.headerActionReport = object.report;
+    headerActionsMutation (state, object) {
+      state.headerActionCreate = object.create
+      state.headerActionReport = object.report
     },
-    createModalMutation(state, value){
-      state.createModalState = value;
+    createModalMutation (state, value) {
+      state.createModalState = value
     },
-    breadcrumbMutation(state, value){
-      state.breadcrumb = value;
+    breadcrumbMutation (state, value) {
+      state.breadcrumb = value
     },
-    snackbarMutation(state, object){
-      state.snackbarState.state = object.value;
-      state.snackbarState.text = object.text;
-      state.snackbarState.color = object.color;
+    snackbarMutation (state, object) {
+      state.snackbarState.state = object.value
+      state.snackbarState.text = object.text
+      state.snackbarState.color = object.color
     },
-    searchQueryMutation(state, value){
-      state.searchQuery = value;
+    searchQueryMutation (state, value) {
+      state.searchQuery = value
     },
-    searchPlaceholderMutation(state, value){
-      state.searchPlaceholder = value;
+    searchPlaceholderMutation (state, value) {
+      state.searchPlaceholder = value
     },
-    searchDisabledMutation(state, value){
-      state.searchDisabled = value;
+    searchDisabledMutation (state, value) {
+      state.searchDisabled = value
     },
-    authMutation(state, value){
-      state.auth = {...value};
+    authMutation (state, value) {
+      state.auth = { ...value }
     },
-    allMesasMutation(state, object){
-      state.allMesasState = object;
+    allMesasMutation (state, object) {
+      state.allMesasState = object
     },
-    allCategoriasMutation(state, action){
-      state.allCategoriasState = action;
+    allCategoriasMutation (state, action) {
+      state.allCategoriasState = action
     },
-    allPlatillosMutation(state, action){
-      state.allPlatillosState = action;
+    allPlatillosMutation (state, action) {
+      state.allPlatillosState = action
     },
-    allPersonalMutation(state, action){
-      state.allPersonalState = action;
+    allPersonalMutation (state, action) {
+      state.allPersonalState = action
     },
-    allAdelantosMutation(state, action){
-      state.allAdelantosState = action;
+    allAdelantosMutation (state, action) {
+      state.allAdelantosState = action
     },
-    allDescuentosMutation(state, action){
-      state.allDescuentosState = action;
+    allDescuentosMutation (state, action) {
+      state.allDescuentosState = action
     },
-    allUsuariosMutation(state, action){
-      state.allUsuariosState = action;
+    allUsuariosMutation (state, action) {
+      state.allUsuariosState = action
     },
-    allUsuariosMutation(state, action){
-      state.allUsuariosState = action;
+    allRolsMutation (state, action) {
+      state.allRolsState = action
     },
-    allRolsMutation(state, action){
-      state.allRolsState = action;
+    allPedidosMutation (state, action) {
+      state.allPedidosState = action
     },
-    refreshUIMutation(state, value) {
-      state.refreshUI = value
-    },
-    cajaBreadcrumbMutation (state, value) {
-      state.cajaBreadcrumb = value
+    headerBreadcrumbMutation (state, value) {
+      state.headerBreadcrumb = value
     }
   },
   actions: {
     async login ({ commit }, credentials) {
       const { data } = await authService.login(credentials)
-      localStorage.setItem('auth', JSON.stringify(data))
+      window.localStorage.setItem('auth', JSON.stringify(data))
       commit('authMutation', data)
     },
     async logout ({ commit }) {
-      localStorage.removeItem('auth')
+      window.localStorage.removeItem('auth')
       commit('authMutation', {})
     },
     allMesasAction: async function ({ commit }) {
@@ -174,6 +169,10 @@ export default new Vuex.Store({
     async getMesasAction ({ commit }) {
       const { data } = await cajaService.getMesas()
       commit('allMesasMutation', data)
+    },
+    async getPedidosAction ({ commit }) {
+      const { data } = await mozoService.getPedidos()
+      commit('allPedidosMutation', data)
     }
   },
   getters: {

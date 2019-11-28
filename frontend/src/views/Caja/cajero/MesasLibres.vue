@@ -1,10 +1,14 @@
 <template>
-
   <loading-fish v-if="loadingFish" />
 
-  <v-container v-else fluid>
+  <v-container
+    v-else
+    fluid
+  >
     <header class="d-flex justify-space-between align-center my-3">
-      <h3 class="title">Mesas Libres</h3>
+      <h3 class="title">
+        Mesas Libres
+      </h3>
       <v-btn
         small
         fab
@@ -32,13 +36,19 @@
               </v-card-title>
 
               <v-card-text>
-                <p class="Mesa-capacidad mb-1">Capacidad</p>
+                <p class="Mesa-capacidad mb-1">
+                  Capacidad
+                </p>
                 {{ mesa.capacidad }}
               </v-card-text>
             </div>
 
             <div class="Mesa-img-box pa-2">
-              <img src="@/assets/img/mesas/mesaLibre.svg" alt="mesa" class="Mesa-img">
+              <img
+                src="@/assets/img/mesas/mesaLibre.svg"
+                alt="mesa"
+                class="Mesa-img"
+              >
             </div>
           </div>
         </v-card>
@@ -54,14 +64,13 @@
           @input="paginate"
           @next="paginate"
           @previous="paginate"
-        ></v-pagination>
+        />
       </div>
     </template>
 
     <loading-dialog />
 
     <alert-notifications />
-
   </v-container>
 </template>
 
@@ -71,7 +80,6 @@ import { mapState, mapMutations, mapActions } from 'vuex'
 import LoadingFish from '@/components/loading/LoadingFish'
 import AlertNotifications from '@/components/messages/AlertNotifications'
 import LoadingDialog from '@/components/loading/LoadingDialog'
-
 
 export default {
   components: {
@@ -98,15 +106,19 @@ export default {
       page: 1
     }
   },
+  computed: {
+    ...mapState(['allMesasState'])
+  },
+  created () {
+    this.getMesas()
+  },
   methods: {
     // Get mesas
     async getMesas () {
       try {
-        if (this.allMesasState.length === 0) {
-          await this.getMesasAction()
-        }
+        if (this.allMesasState.length === 0) await this.getMesasAction()
 
-        this.allMesas = [ ...this.allMesasState.libres ]
+        this.allMesas = [...this.allMesasState.libres]
         this.page = 1
         this.paginate()
       } catch (error) {
@@ -122,10 +134,10 @@ export default {
     // Refresh mesas
     async refresh () {
       try {
-        this.loadingTitleMutation('Actualizando información');
+        this.loadingTitleMutation('Actualizando información')
         this.loadingDialogMutation(true)
         await this.getMesasAction()
-        this.allMesas = [ ...this.allMesasState.libres ]
+        this.allMesas = [...this.allMesasState.libres]
         this.page = 1
         this.paginate()
       } catch (error) {
@@ -140,22 +152,16 @@ export default {
     },
     // Paginate
     paginate () {
-      if(this.allMesas.length > this.pagination){
+      if (this.allMesas.length > this.pagination) {
         this.mesas = this.allMesas.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
         this.pageTotal = Math.ceil(this.allMesas.length / this.pagination)
-      }else {
-         this.mesas = this.allMesas
-          this.pageTotal = 0
+      } else {
+        this.mesas = this.allMesas
+        this.pageTotal = 0
       }
     },
     ...mapActions(['getMesasAction']),
     ...mapMutations(['snackbarMutation', 'loadingTitleMutation', 'loadingDialogMutation'])
-  },
-  computed: {
-    ...mapState(['allMesasState'])
-  },
-  created () {
-    this.getMesas()
   }
 }
 </script>

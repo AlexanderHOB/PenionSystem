@@ -1,16 +1,35 @@
 <template>
   <LoadingFish v-if="loadingFish" />
 
-  <v-container fluid grid-list-xl v-else>
-    <v-layout row wrap class="pt-3">
-      <v-flex xs12 v-show="messagePlatillos">
-        <ErrorMessage :errorMessage="messagePlatillos" :refresh="refreshPlatillos" />
+  <v-container
+    v-else
+    grid-list-xl
+  >
+    <v-layout
+      row
+      wrap
+      class="pt-3"
+    >
+      <v-flex
+        v-show="messagePlatillos"
+        xs12
+      >
+        <ErrorMessage
+          :error-message="messagePlatillos"
+          :refresh="refreshPlatillos"
+        />
       </v-flex>
-      <v-flex xs8 v-show="!messagePlatillos">
-        <v-layout row wrap>
+      <v-flex
+        v-show="!messagePlatillos"
+        xs12
+      >
+        <v-layout
+          row
+          wrap
+        >
           <v-flex xs12>
-            <v-layout justify-space-around>
-              <v-flex xs4>
+            <v-layout>
+              <v-flex xs2>
                 <v-select
                   v-model="categoria"
                   :items="categorias"
@@ -19,9 +38,17 @@
                   label="Categorias"
                   :disabled="disabledCategories"
                   return-object
-                ></v-select>
+                />
               </v-flex>
-              <v-flex xs5>
+              <v-flex xs2 />
+              <v-flex xs2>
+                <v-select
+                  v-model="typeOfSearch"
+                  :items="typesOfSearch"
+                  label="Buscar por"
+                />
+              </v-flex>
+              <v-flex xs4>
                 <v-text-field
                   v-model="searchQuery"
                   solo
@@ -29,86 +56,688 @@
                   color="blue"
                   append-icon="search"
                   :disabled="searchDisabled"
-                ></v-text-field>
+                />
+              </v-flex>
+              <v-flex xs1 />
+              <v-flex
+                xs1
+                class="text-center"
+              >
+                <v-btn
+                  small
+                  fab
+                  dark
+                  color="blue"
+                  class="mt-2"
+                  @click="refreshPlatillos"
+                >
+                  <v-icon>refresh</v-icon>
+                </v-btn>
               </v-flex>
             </v-layout>
           </v-flex>
-          <v-flex xs12 v-show="searchMessage">
-            <p class="text-center">{{ searchMessage }}</p>
+          <v-flex
+            v-show="searchMessage"
+            xs12
+          >
+            <p class="text-center">
+              {{ searchMessage }}
+            </p>
           </v-flex>
-          <v-flex v-for="(platillo, i) of platillos" :key="platillo.id" class="platillo" xs4>
-            <mozo-platillo-box class="platillo-bg" :addPlatillo="addPlatillo" :index="i" />
-            <p class="platillo-text text-center">{{ platillo.nombre }}</p>
+          <v-flex
+            v-for="(platillo, i) of platillos"
+            :key="platillo.id"
+            class="platillo"
+            xs3
+          >
+            <mozo-platillo-box
+              class="platillo-bg"
+              :add-platillo="toggePedidoModal"
+              :index="i"
+            />
+            <p class="platillo-text text-center">
+              {{ platillo.nombre }}<br>{{ platillo.precio }}
+            </p>
             <span class="platillo-add">+</span>
           </v-flex>
         </v-layout>
       </v-flex>
-      <v-flex xs4 v-show="!messagePlatillos">
-        <v-card>
-          <v-card-title class="pb-5">
-            <v-spacer></v-spacer>
-            <h2>PEDIDO</h2>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text class="black--text">
-            <v-layout row wrap>
-              <v-flex xs4><strong>N° pedido</strong></v-flex>
-              <v-flex xs8>12345</v-flex>
-              <v-flex xs4><strong>Mozo</strong></v-flex>
-              <v-flex xs8>luisMozo</v-flex>
-              <v-flex xs4><strong>Mesa</strong></v-flex>
-              <v-flex xs8>1</v-flex>
-              <v-flex xs12>
-                <v-data-table
-                  :headers="headers"
-                  :items="ordenes"
-                  class="elevation-1"
-                >
-                  <template v-slot:item.action="{ item }">
-                    <div class="text-center px-0">
-                      <img src="@/assets/img/mozo/eliminar.svg" alt="aumentar" class="actions" @click="removePlatillo(item.id)">
-                      <img src="@/assets/img/mozo/aumentar.svg" alt="aumentar" class="actions" @click="increasePlatillo(item.id)">
-                      <img src="@/assets/img/mozo/disminuir.svg" alt="aumentar" class="actions" @click="decreasePlatillo(item.id)">
-                    </div>
-                  </template>
-                </v-data-table>
-              </v-flex>
-            </v-layout>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn class="yellow" rounded>Comanda</v-btn>
-            <v-spacer></v-spacer>
-          </v-card-actions>
-        </v-card>
-      </v-flex>
     </v-layout>
 
-    <div class="text-center" v-show="filtered">
-      <v-btn dark color="blue" @click="showAll">Mostrar Todos</v-btn>
+    <div
+      v-show="filtered"
+      class="text-center"
+    >
+      <v-btn
+        dark
+        color="blue"
+        @click="showAll"
+      >
+        Mostrar Todos
+      </v-btn>
+      <div class="Utils-height" />
     </div>
+
+    <section
+      v-if="detailShow"
+      ref="details"
+      class="Details"
+    >
+      <v-btn
+        fab
+        class="Details-arrow"
+        small
+        color="red"
+        dark
+        @click="toggleDetails"
+      >
+        <v-icon>keyboard_arrow_up</v-icon>
+      </v-btn>
+
+      <v-row class="mx-0 justify-space-between Details-wrapper">
+        <v-col
+          class="Details-card red lighten-1"
+          cols="4"
+        >
+          <v-row class="mx-0 Details-content white pa-2">
+            <div
+              v-if="loadingPedido"
+              class="Loader fill-height d-flex justify-center align-center"
+            >
+              <v-progress-circular
+                :size="50"
+                color="primary"
+                indeterminate
+              />
+            </div>
+            <template v-else>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
+                  ORDEN
+                </h3>
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                # Orden
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider"
+              >
+                {{ details.nOrden }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 my-2"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  x-small
+                  class="px-4"
+                >
+                  Mesa
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                {{ details.mesa }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                Mozo
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider text-truncate"
+              >
+                {{ details.mozo }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                PAX
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                {{ details.pax }}
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                T/C
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right Details-divider"
+              >
+                3.20
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pl-4 my-2"
+              >
+                T/C
+              </v-col>
+              <v-col
+                cols="3"
+                class="pa-0 pr-4 my-2 text-right"
+              >
+                1.00
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-2 mx-5 title mb-2 text-center">
+                  PAGOS
+                </h3>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 mb-5 pb-5 text-center"
+              >
+                Consumo
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 mb-5 pb-5 pl-4 green--text"
+              >
+                S/.
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 my-2 mb-5 pb-5 text-right pr-4"
+              >
+                {{ details.preTotal }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 Details-divider"
+              />
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                S/.
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.total }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 text-center Details-divider"
+              >
+                TOTAL A PAGAR
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                $
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.totalD }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 py-2 Details-divider"
+              />
+              <v-col
+                cols="2"
+                class="pa-0 py-2 pl-4 green--text"
+              >
+                €
+              </v-col>
+              <v-col
+                cols="4"
+                class="pa-0 py-2 pr-4 text-right"
+              >
+                {{ details.totalE }}
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  SPLITMEZA
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                  @click="pedido.send = true"
+                >
+                  ENVIAR ORDEN
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                >
+                  PRE-CUENTA
+                </v-btn>
+              </v-col>
+              <v-col
+                cols="6"
+                class="pa-0 my-2 text-center"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                  disabled
+                >
+                  NUEVA ORDEN
+                </v-btn>
+              </v-col>
+            </template>
+          </v-row>
+        </v-col>
+        <v-col
+          class="Details-card red lighten-1 pt-5 pr-5"
+          cols="7"
+        >
+          <img
+            src="@/assets/img/carta/aros.svg"
+            alt="aros"
+            class="Details-card-aros"
+          >
+          <v-row class="mx-0 Details-content white pa-2">
+            <div
+              v-if="loadingPedido"
+              class="Loader fill-height d-flex justify-center align-center"
+            >
+              <v-progress-circular
+                :size="50"
+                color="primary"
+                indeterminate
+              />
+            </div>
+            <template v-else>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
+                  PEDIDOS
+                </h3>
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 text-center"
+              >
+                Selección
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 "
+              >
+                Opciones
+              </v-col>
+              <v-col
+                cols="5"
+                class="pa-0 my-2 text-center"
+              >
+                Descripción
+              </v-col>
+              <v-col
+                cols="1"
+                class="pa-0 my-2 text-center"
+              >
+                Cantidad
+              </v-col>
+              <v-col
+                cols="2"
+                class="pa-0 my-2 text-center"
+              >
+                Precio
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.id"
+                  class="mx-0 my-3"
+                >
+                  <v-col
+                    class="pa-0 checkBox d-flex justify-center align-center"
+                    cols="1"
+                  >
+                    <v-checkbox
+                      v-model="checkboxs[i].value"
+                      dense
+                      hide-details
+                      class="mt-0 pt-0"
+                      @change="toggleSelect(i)"
+                    />
+                  </v-col>
+                  <v-col
+                    class="pa-0 pt-3 text-center"
+                    cols="3"
+                  >
+                    <img
+                      src="@/assets/img/mozo/eliminar.svg"
+                      alt="eliminiar"
+                      class="actions"
+                      @click="removePlatillo(orden.id)"
+                    >
+                    <img
+                      src="@/assets/img/mozo/aumentar.svg"
+                      alt="aumentar"
+                      class="actions"
+                      @click="increasePlatillo(orden.id)"
+                    >
+                    <img
+                      src="@/assets/img/mozo/disminuir.svg"
+                      alt="disminuir"
+                      class="actions"
+                      @click="decreasePlatillo(orden.id)"
+                    >
+                  </v-col>
+                  <v-col
+                    class="pa-0"
+                    cols="5"
+                  >
+                    <div class="subtitle-2">
+                      {{ orden.nombre_platillo }}
+                    </div>
+                    <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                  </v-col>
+                  <v-col
+                    class="pa-0 d-flex align-center justify-center"
+                    cols="1"
+                  >
+                    {{ orden.cantidad }}
+                  </v-col>
+                  <v-col
+                    class="pa-0 d-flex align-center justify-center"
+                    cols="2"
+                  >
+                    {{ orden.subtotal }}
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col
+                class="pa-0 my-2 checkBox d-flex justify-center align-center"
+                cols="1"
+              >
+                <v-checkbox
+                  v-model="checkbox"
+                  dense
+                  hide-details
+                  class="mt-0 pt-0"
+                  @change="toggleAllSelect"
+                />
+              </v-col>
+              <v-col
+                class="pa-0 my-2 text-center"
+                cols="8"
+              >
+                Seleccionar Todo
+              </v-col>
+              <v-col
+                class="pa-0 my-2 text-center"
+                cols="3"
+              >
+                <v-btn
+                  text
+                  color="blue"
+                  small
+                  @click="pedido.remove = true"
+                >
+                  Eliminar ({{ numberOfSelecteds }})
+                </v-btn>
+              </v-col>
+              <v-col class="fill-height" />
+            </template>
+          </v-row>
+        </v-col>
+      </v-row>
+    </section>
+
+    <v-dialog
+      v-model="pedido.modal"
+      max-width="660"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            {{ pedido.title }}
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col
+                cols="2"
+                class="d-flex justify-center align-center"
+              >
+                <v-btn
+                  color="green"
+                  dark
+                  fab
+                  small
+                  @click="decreaseQuantityPlatillos"
+                >
+                  -
+                </v-btn>
+              </v-col>
+              <v-col cols="2">
+                <v-text-field
+                  v-model="pedido.cantidad"
+                  v-mask="'###'"
+                  label="Cantidad"
+                  counter
+                  maxlength="3"
+                />
+              </v-col>
+              <v-col
+                cols="2"
+                class="d-flex justify-center align-center"
+              >
+                <v-btn
+                  color="red"
+                  dark
+                  fab
+                  small
+                  @click="pedido.cantidad++"
+                >
+                  +
+                </v-btn>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="pedido.comentario"
+                  label="Comentario"
+                  maxlength="25"
+                  counter
+                />
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="addPlatillo"
+          >
+            Añadir Platillo
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="pedido.modal = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.remove"
+      max-width="320"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            ¿Estás seguro?
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          Los platillos seleccionados serán eliminados.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="removePlatillos"
+          >
+            Aceptar
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="pedido.remove = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.send"
+      max-width="320"
+      :persistent="pedido.loading"
+    >
+      <v-card>
+        <v-card-title>
+          <v-spacer />
+          <h3 class="headline">
+            ¿Estás seguro?
+          </h3>
+          <v-spacer />
+        </v-card-title>
+
+        <v-card-text>
+          Enviar orden.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="sendData"
+            :loading="pedido.loading"
+          >
+            Aceptar
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            :disabled="pedido.disabled"
+            @click="pedido.send = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
     <template v-if="pageTotal">
       <div class="text-center mt-5">
         <v-pagination
           v-model="page"
           :length="pageTotal"
+          :total-visible="7"
           circle
           @input="paginate"
           @next="paginate"
           @previous="paginate"
-        ></v-pagination>
+        />
+        <div class="Utils-height" />
       </div>
     </template>
 
-    <LoadingDialog />
+    <v-overlay
+      :value="overlay"
+      z-index="99"
+    />
 
-    <AlertNotifications />
+    <v-btn
+      v-show="overlay"
+      class="Overlay-close"
+      @click="toggleDetails"
+    >
+      Close
+    </v-btn>
+
+    <loading-dialog />
+
+    <alert-notifications />
   </v-container>
 </template>
 
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
+import { mask } from 'vue-the-mask'
+
+import mozoService from '@/services/mozo'
 
 import LoadingDialog from '@/components/loading/LoadingDialog'
 import LoadingFish from '@/components/loading/LoadingFish'
@@ -124,8 +753,13 @@ export default {
     AlertNotifications,
     MozoPlatilloBox
   },
-  data(){
+  directives: {
+    mask
+  },
+  data () {
     return {
+      // General
+      overlay: false,
       // Datos para las platillos
       messagePlatillos: '',
       platillos: [],
@@ -142,6 +776,8 @@ export default {
       searchQuery: '',
       searchDisabled: true,
       searchMessage: '',
+      typeOfSearch: 'nombre',
+      typesOfSearch: ['codigo', 'nombre'],
       // Datos para las categorias
       categorias: [],
       categoria: {},
@@ -149,110 +785,163 @@ export default {
       // Filtered
       filtered: false,
       // Datos para la paginación
-      pagination: 10,
+      pagination: 12,
       pageTotal: 0,
       page: 1,
       // Datos para los pedidos
-      headers: [
-        { text: 'Actions', align: 'center', sortable: false, value: 'action' },
-        { text: 'Pedido', align: 'center', width: 120, sortable: false, value: 'platillo' },
-        { text: 'Cant', align: 'center', class: 'px-0', value: 'cantidad' },
-        { text: 'Valor', align: 'center', class: 'px-0', value: 'valor' },
-      ],
-      ordenes: []
+      ordenes: [],
+      // Details
+      details: {
+        nOrden: 0,
+        mesa: 0,
+        mozo: '',
+        pax: 0,
+        pedidos: [],
+        preTotal: 0,
+        descuento: 0,
+        total: 0,
+        totalD: 0,
+        totalE: 0
+      },
+      // Pedidos
+      checkbox: false,
+      checkboxs: [],
+      selecteds: [],
+      loadingPedido: true,
+      detailShow: false,
+      pedido: {
+        modal: false,
+        title: '',
+        disabled: false,
+        loading: false,
+        platillo: null,
+        comentario: '',
+        cantidad: 0,
+        remove: false,
+        send: false
+      }
     }
+  },
+  computed: {
+    numberOfSelecteds () {
+      return this.selecteds.length
+    },
+    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState'])
+  },
+  watch: {
+    searchQuery () {
+      if (this.searchQuery) {
+        this.disabledCategories = true
+      } else {
+        this.disabledCategories = false
+      }
+      this.searchPlatillos(this.searchQuery)
+    },
+    categoria () {
+      if (this.categoria) {
+        this.platillosFiltered(this.categoria)
+      }
+    }
+  },
+  async created () {
+    this.activeClass()
+    this.loadingFishMutation(true)
+    this.getCategorias()
+    await this.getPlatillos()
+    this.loadingFishMutation(false)
+    this.toggleDetailShow()
+  },
+  beforeMount () {
+    this.headerBreadcrumbMutation('Mozo \\ Menu')
   },
   methods: {
     // OBTENER PLATILLOS
-    async getPlatillos(){
+    async getPlatillos () {
       try {
-        if(this.backup.platillos.length != 0){
+        if (this.backup.platillos.length !== 0) {
           this.searchQuery = ''
           return
         }
         this.loadingTitleMutation('Actualizando información')
         this.loadingDialogMutation(true)
 
-        if(this.allPlatillosState.length == 0 || this.refresh){
+        if (this.allPlatillosState.length === 0 || this.refresh) {
           await this.allPlatillosAction()
           this.refresh = false
         }
-        
-        if(this.allPlatillosState.data){
-          let platillos = this.allPlatillosState.data
-          if(platillos.length > 0){
-            this.allPlatillos = platillos.filter(function(e){
-              return e.condicion
-            })
+
+        if (this.allPlatillosState.data) {
+          const platillos = this.allPlatillosState.data
+          if (platillos.length > 0) {
+            this.allPlatillos = platillos.filter(e => e.condicion)
             this.page = 1
             this.paginate()
             this.searchDisabled = false
             this.messagePlatillos = ''
-          }else {
-            this.messagePlatillos= 'No se encontraron platillos'
+          } else {
+            this.messagePlatillos = 'No se encontraron platillos'
             this.pageTotal = 0
           }
-        }else {
-          this.messagePlatillos = response.data.message
+        } else {
+          this.messagePlatillos = 'No se encontraron platillos'
           this.platillos = []
           this.pageTotal = 0
         }
-        
-      }catch (error) {
+      } catch (error) {
         this.pageTotal = 0
         this.messagePlatillos = 'Error al conctar con el servidor'
-      }finally {
+      } finally {
         this.loadingDialogMutation(false)
       }
     },
-
-    refreshPlatillos(){
-      if(this.refreshUI) {
+    refreshPlatillos () {
+      if (this.refreshUI) {
         this.refreshUIMutation(false)
       }
       this.refresh = true
       this.getPlatillos()
     },
-
     // PAGINAR PLATILLOS
-    paginate(){
-      if(this.allPlatillos.length > this.pagination){
+    paginate () {
+      if (this.allPlatillos.length > this.pagination) {
         this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
         this.pageTotal = Math.ceil(this.allPlatillos.length / this.pagination)
-      }else {
-         this.platillos = this.allPlatillos
-          this.pageTotal = 0
+      } else {
+        this.platillos = this.allPlatillos
+        this.pageTotal = 0
       }
     },
-
     // SEARCH PLATILLOS
-    searchPlatillos(query){
-      if(query != '' && query != null){
-        if(this.platillos.length != 0 && this.backup.platillosIndex){
+    searchPlatillos (query) {
+      if (query !== '' && query !== null) {
+        if (this.platillos.length !== 0 && this.backup.platillosIndex) {
           this.backup.platillos = this.platillos
-          if(this.pageTotal != 0){
+          if (this.pageTotal !== 0) {
             this.backup.pageTotal = this.pageTotal
           }
           this.backup.platillosIndex = false
         }
 
-        if(this.searchMessage.length != 0){
+        if (this.searchMessage.length !== 0) {
           this.searchMessage = ''
         }
 
-        this.platillos = this.allPlatillos.filter(function(e){
-          return  e.nombre.toLowerCase().includes(query.toLowerCase())
-        })
-        if(this.platillos.length == 0){
+        if (this.typeOfSearch === 'codigo') {
+          this.platillos = this.allPlatillos.filter(e => e.codigo.toLowerCase().includes(query.toLowerCase()))
+        } else {
+          this.platillos = this.allPlatillos.filter(e => e.nombre.toLowerCase().includes(query.toLowerCase()))
+        }
+
+        if (this.platillos.length === 0) {
           this.searchMessage = `No se encontraron platillos con el nombre "${query}"`
         }
         this.pageTotal = 0
-      }else {
-        if(this.backup.platillos.length != 0){
-          this.platillos =this.backup.platillos
+      } else {
+        if (this.backup.platillos.length !== 0) {
+          this.platillos = this.backup.platillos
           this.backup.platillos = []
           this.searchMessage = ''
-          if(this.backup.pageTotal != 0){
+          if (this.backup.pageTotal !== 0) {
             this.pageTotal = this.backup.pageTotal
             this.backup.pageTotal = 0
           }
@@ -260,126 +949,280 @@ export default {
         }
       }
     },
-
     // OBTENER CATEGORIAS
-    async getCategorias(){
+    async getCategorias () {
       try {
-        if(this.allCategoriasState.length == 0){
+        if (this.allCategoriasState.length === 0) {
           await this.allCategoriasAction()
         }
-        if(this.allCategoriasState.data){
-          let categorias = this.allCategoriasState.data
-          if(categorias.length > 0){
-              this.categorias = categorias.filter(function(e){
+        if (this.allCategoriasState.data) {
+          const categorias = this.allCategoriasState.data
+          if (categorias.length > 0) {
+            this.categorias = categorias.filter(function (e) {
               return e.condicion
             })
           }
           this.disabledCategories = false
         }
       } catch (error) {
-        this.snackbarMutation({value: true, text: 'Error al obtener las categorias', color: 'error'})
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al obtener las categorias',
+          color: 'error'
+        })
       }
     },
-
-    platillosFiltered(categoria) {
+    // Filtrar Platillos
+    platillosFiltered (categoria) {
       this.filtered = true
       this.pageTotal = 0
       const platillos = this.allPlatillos.filter(e => {
-        return categoria.id === e.categoria_id 
+        return categoria.id === e.categoria_id
       })
       this.platillos = platillos
     },
-
-    showAll() {
+    // Show All
+    showAll () {
       this.categoria = null
       this.filtered = false
       this.page = 1
       this.paginate()
     },
-
-    addPlatillo(index){
-      const platillo = this.platillos[index]
-      let pedido = null
-      if(this.ordenes.length) {
-        const pedidoIndex = this.ordenes.findIndex(e => e.id === platillo.id)
-        if(pedidoIndex !== -1) {
-          this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad + 1
-          return
+    // DETAILS
+    // Toggle Detail
+    toggleDetails () {
+      this.$refs.details.classList.toggle('Details-active')
+      document.querySelector('.Details-arrow').classList.toggle('Details-arrow-active')
+      this.overlay = !this.overlay
+    },
+    toggleDetailShow () {
+      if (this.$route.params.id) {
+        this.detailShow = true
+        const self = this
+        setTimeout(function () {
+          self.toggleDetails()
+          self.selectDetail()
+        }, 1000)
+      }
+    },
+    async selectDetail () {
+      try {
+        this.loadingPedido = true
+        const { data } = await mozoService.getPedido(this.$route.params.id)
+        console.log(data)
+        const nombre = data.mozo_nombre.split(' ')
+        const config = {
+          id: data.id,
+          nOrden: data.numero_orden,
+          mesa: data.mesa_numero,
+          mesa_id: data.mesa_id,
+          mozo: nombre[0] + data.rol,
+          pax: data.mesa_capacidad,
+          pedidos: data.detalles_pedidos
         }
+        this.ordenes = data.detalles_pedidos
+        this.assignDetaials(config)
+        this.selecteds = []
+        this.checkboxs = []
+        config.pedidos.forEach(e => {
+          this.checkboxs.push({
+            value: 0,
+            id: e.id
+          })
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al obtener el pedido',
+          color: 'error'
+        })
+      } finally {
+        this.loadingPedido = false
+      }
+    },
+    // Pedidos
+    toggleSelect (i) {
+      const obj = this.checkboxs[i]
+      if (obj.value) {
+        this.selecteds.push(obj)
+      } else {
+        this.selecteds.splice(i, 1)
+      }
+    },
+    toggleAllSelect (value) {
+      this.selecteds = []
+      if (value) {
+        this.checkboxs.forEach((e, i, arr) => {
+          this.selecteds.push(e)
+          arr[i].value = 1
+        })
+      } else {
+        this.checkboxs.forEach((e, i, arr) => {
+          arr[i].value = 0
+        })
+      }
+    },
+    // ASSIGN
+    // assign details
+    assignDetaials (config) {
+      this.details.preTotal = 0
+      let preTotal = 0
+
+      config.pedidos.forEach(e => {
+        preTotal += parseFloat(e.subtotal)
+      })
+      preTotal = preTotal.toFixed(2)
+      this.details = {
+        ...config,
+        preTotal
+      }
+      this.assignTotales(preTotal)
+    },
+    assignTotales (preTotal) {
+      const total = preTotal
+      let totalD = total / 3.2
+      totalD = totalD.toFixed(2)
+      let totalE = total / 2.1
+      totalE = totalE.toFixed(2)
+      this.details = {
+        ...this.details,
+        total,
+        totalD,
+        totalE
+      }
+    },
+    // ACTIONS
+    // Pedidio Modal
+    toggePedidoModal (index) {
+      this.pedido.platillo = this.platillos[index]
+      this.pedido.title = this.pedido.platillo.nombre
+      this.pedido.modal = true
+    },
+    // Disminuir cantidad de platillos
+    decreaseQuantityPlatillos () {
+      if (this.pedido.cantidad !== 0) this.pedido.cantidad--
+    },
+    // add Platillo
+    addPlatillo () {
+      if (!this.pedido.cantidad) return
+      if (!this.pedido.comentario) this.pedido.comentario = '-'
+      const platillo = this.pedido.platillo
+
+      const pedido = {
+        id: platillo.id,
+        nombre_platillo: platillo.nombre,
+        comentario: this.pedido.comentario,
+        cantidad: this.pedido.cantidad,
+        subtotal: platillo.precio
       }
 
-      pedido = {
-        id: platillo.id,
-        platillo: platillo.nombre,
-        msg: 'poca cantidad de sal',
-        cantidad: 1,
-        valor: platillo.precio
-      }
+      this.checkboxs.push({
+        value: 0,
+        id: pedido.id
+      })
 
       this.ordenes.push(pedido)
+      this.pedido.cantidad = 0
+      this.pedido.comentario = ''
+      this.pedido.modal = false
     },
-
-    increasePlatillo(id) {
+    // Incrementar platillo
+    increasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
       this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad + 1
     },
-
-    decreasePlatillo(id) {
+    // Decrementar Platillo
+    decreasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
-      if(this.ordenes[pedidoIndex].cantidad === 1) {
+      if (this.ordenes[pedidoIndex].cantidad === 1) {
         this.removePlatillo(id, pedidoIndex)
         return
       }
       this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad - 1
     },
-
-    removePlatillo(id, index) {
+    // Remove Platillo
+    removePlatillo (id, index) {
       let pedidoIndex = index
-      if(!pedidoIndex) {
+      if (!pedidoIndex) {
         pedidoIndex = this.getIndex(id, this.ordenes)
       }
 
       this.ordenes.splice(pedidoIndex, 1)
     },
+    // Remove Platillos
+    removePlatillos () {
+      if (this.checkbox) {
+        this.checkbox = false
+        this.selecteds = []
+        this.checkboxs = []
+        this.ordenes = []
+      } else {
+        this.selecteds.forEach((e, i) => {
+          const indexOne = this.getIndex(e.id, this.ordenes)
+          this.ordenes.splice(indexOne, 1)
+          const indexTwo = this.getIndex(e.id, this.checkboxs)
+          this.checkboxs.splice(indexTwo, 1)
+        })
+        this.toggleAllSelect()
+      }
 
-    getIndex(id, arr) {
+      this.pedido.remove = false
+    },
+    // Send data
+    async sendData () {
+      try {
+        this.pedido.loading = true
+        this.pedido.disabled = true
+        const IGV = 0
+        const detallesPedido = []
+        this.ordenes.forEach(e => {
+          const value = Math.round(parseFloat(e.subtotal), 2)
+          const pedido = {
+            mesa_id: this.details.mesa_id,
+            platillo_id: e.id,
+            cantidad: e.cantidad,
+            valor_unitario: value,
+            precio_unitario: value * (1 + IGV),
+            comentario: e.comentario,
+            subtotal: value * e.cantidad,
+            total: (value * (1 + IGV)) * e.cantidad,
+            estado: 'Produccion'
+          }
+          detallesPedido.push(pedido)
+        })
+        await mozoService.updatePedido(detallesPedido, this.details.id)
+        console.log(detallesPedido)
+        this.snackbarMutation({
+          value: true,
+          text: 'Pedido enviado.',
+          color: 'success'
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al enviarp el pedido.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.loading = false
+        this.pedido.disabled = false
+        this.pedido.send = false
+      }
+    },
+    // UTILS
+    // get Index
+    getIndex (id, arr) {
       return arr.findIndex(e => e.id === id)
     },
-
-    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'loadingTitleMutation', 'breadcrumbMutation', 'snackbarMutation', 'refreshUIMutation']),
+    // Active Class
+    activeClass () {
+      const active = document.querySelector('.Navbar-link-active')
+      if (active) {
+        active.classList.remove('Navbar-link-active')
+      }
+    },
+    ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'loadingTitleMutation', 'headerBreadcrumbMutation', 'snackbarMutation']),
     ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
-  },
-  computed: {
-    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState', 'refreshUI'])
-  },
-  watch: {
-    searchQuery(){
-      if(this.searchQuery) {
-        this.disabledCategories = true
-      }else {
-        this.disabledCategories = false
-      }
-      this.searchPlatillos(this.searchQuery)
-    },
-    categoria(){
-      if(this.categoria) {
-        this.platillosFiltered(this.categoria)
-      }
-    },
-    refreshUI() {
-      if(this.refreshUI) {
-        this.refreshPlatillos()
-      }
-    }
-  },
-  async created(){
-    this.loadingFishMutation(true)
-    this.getCategorias()
-    await this.getPlatillos()
-    this.loadingFishMutation(false)
-  },
-  beforeMount(){
-    this.breadcrumbMutation('Mozo \\ Menu')
   }
 }
 </script>
@@ -407,10 +1250,94 @@ export default {
     pointer-events: none;
   }
 }
+.Details {
+  position: fixed;
+  width: 98%;
+  height: 80%;
+  z-index: 100;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 92%);
+  transition: .45s;
+  &-arrow {
+    position: fixed;
+    top: 0;
+    left: 37.5%;
+    transform: translate(-50%, -50%);
+    transition: .45s;
+    z-index: 1;
+    &-active {
+      transform: translate(-50%, -50%) rotate(180deg);
+    }
+  }
+  &-active {
+    transform: translate(-50%, 0);
+  }
+  /* &-wrapper {
+    max-height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  } */
+  &-wrapper {
+    height: 100%;
+  }
+  &-content {
+    height: 100%;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  &-card {
+    position: relative;
+    height: 100%;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    &-aros {
+      position: absolute;
+      top: 55px;
+      left: -25px;
+      width: 70px;
+    }
+  }
+  &-title {
+    border-bottom: 1px solid #ccc;
+  }
+  &-divider {
+    border-right: 1px solid #ccc;
+  }
+  &-pedidos {
+    &-desc {
+      color: #2196f3;
+    }
+  }
+}
+.Loader {
+  width: 100%;
+}
+.Overlay-close {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  width: 100%;
+  height: 100% !important;
+  opacity: 0;
+}
+.checkBox {
+  transform: translateX(2.25em)
+}
 .actions {
   cursor: pointer;
   display: inline-block;
   width: 32px;
 }
+.Utils {
+  &-height {
+    min-height: 12vh;
+  }
+}
 </style>
-

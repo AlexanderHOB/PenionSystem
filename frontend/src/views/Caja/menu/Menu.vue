@@ -70,13 +70,10 @@ export default {
         active.classList.remove('Navbar-link-active')
       }
     },
-    ...mapMutations(['cajaBreadcrumbMutation', 'snackbarMutation', 'loadingTitleMutation', 'loadingDialogMutation'])
-  },
-  computed: {
-    // ...mapState([''])
+    ...mapMutations(['headerBreadcrumbMutation', 'snackbarMutation', 'loadingTitleMutation', 'loadingDialogMutation'])
   },
   created () {
-    this.cajaBreadcrumbMutation('Menú')
+    this.headerBreadcrumbMutation('Menú')
     this.getAllPlatillos()
   },
   mounted () {

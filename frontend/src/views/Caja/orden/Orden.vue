@@ -16,13 +16,10 @@ export default {
       const link = document.querySelector('.Navbar-link-orden')
       link.classList.add('Navbar-link-active')
     },
-    ...mapMutations(['cajaBreadcrumbMutation'])
-  },
-  computed: {
-    ...mapState(['cajaBreadcrumb'])
+    ...mapMutations(['headerBreadcrumbMutation'])
   },
   created () {
-    this.cajaBreadcrumbMutation('Ordenes')
+    this.headerBreadcrumbMutation('Ordenes')
   },
   mounted () {
     this.activeClass()

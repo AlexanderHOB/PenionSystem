@@ -149,6 +149,12 @@ img {
   }
 }
 
+.Navbar {
+  &-link-active {
+    color: #FFEB3B !important;
+  }
+}
+
 // MOZO
 .mesas-link.router-link-exact-active.router-link-active {
 	color: #fff;

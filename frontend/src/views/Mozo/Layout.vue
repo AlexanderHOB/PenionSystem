@@ -1,57 +1,40 @@
 <template>
   <div>
-    <header class="mozo-header-bg white--text">
-      <v-container class="mozo-header pb-2">
-        <v-layout row wrap class="mozo-header-layout">
-          <v-flex xs4></v-flex>
-          <v-flex xs4 class="pt-3">
-            <div class="mozo-header-breadcrumbBox d-flex align-center fill-height">
-              <p class="mozo-header-breadcrumb mb-0"><span class="yellow--text">El Peñon \</span> {{ breadcrumb }}</p>
-          </div>
-          </v-flex>
-          <v-flex xs12 sm3 class="mozo-header-user pt-3">
-            <div class="ml-5">
-              <v-btn class="blue ml-5" dark fab small @click="refreshUIMutation(true)"><v-icon>replay</v-icon></v-btn>
-            </div>
-            <div class="mozo-header-userBox fill-height">
-              <p class="mb-0 mozo-header-userText pl-3 pr-5">LuisMozo</p>
-              <v-img
-                :src="require('@/assets/iconos/administrador.svg')"
-                alt="user"
-                class="mozo-header-userImg"
-                contain
-                height="40"
-                width="40"
-              ></v-img>
-            </div>
-          </v-flex>
-          <v-flex xs4 class="pt-5">
-            <router-link class="mozo-buttonBox" :to="{name: 'mozo-mesas'}">
-              <img src="@/assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText"><img src="@/assets/img/mozo/mesas.svg" alt="mesas" class="mozo-buttonIcon"><span>Mesas</span></p>
-            </router-link>
-          </v-flex>
-          <v-flex xs4 class="pt-5">
-            <router-link class="mozo-buttonBox" :to="{name: 'mozo-menu'}">
-              <img src="@/assets/img/mozo/etiqueta.svg" alt="mozo button" class="mozo-buttonImg">
-              <p class="pb-0 mozo-buttonText"><img src="@/assets/img/mozo/menu.svg" alt="mesas" class="mozo-buttonIcon"><span>Menú</span></p>
-            </router-link>
-          </v-flex>
-          <v-flex class="pt-5 mt-5">
-            <v-btn dark color="red" rounded @click="logoutUI">Logout</v-btn>
-          </v-flex>
-        </v-layout>
-      </v-container>
-      <div class="mozo-header-waves">
-        <v-img
-          :src="require('@/assets/img/header/wave.png')"
-          contain
-          height="80"
-          class="mozo-header-waves-img"
-          position="center bottom"
-        ></v-img>
-      </div>
-    </header>
+    <header-layout />
+
+    <navbar-layout>
+      <v-spacer />
+      <v-menu offset-y>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            text
+            class="Navbar-link-mozo-mesas"
+            v-on="on"
+          >
+            Mesas
+          </v-btn>
+        </template>
+        <v-list nav>
+          <v-list-item :to="{name: 'mozo-mesas-libres'}">
+            <v-list-item-title>Mesas Libres</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="{name: 'mozo-mesas-ocupadas'}">
+            <v-list-item-title>Mesas Ocupadas</v-list-item-title>
+          </v-list-item>
+          <v-list-item :to="{name: 'mozo-mis-mesas'}">
+            <v-list-item-title>Mis mesas</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-btn
+        text
+        :to="{name: 'mozo-menu'}"
+        active-class="yellow--text"
+        class="ml-5"
+      >
+        Menú
+      </v-btn>
+    </navbar-layout>
 
     <v-content>
       <router-view />
@@ -60,92 +43,13 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapActions } from 'vuex'
+import HeaderLayout from '@/components/Layout/Header'
+import NavbarLayout from '@/components/Layout/Navbar'
 
 export default {
-  methods: {
-    search () {},
-    async logoutUI () {
-      this.logout()
-      this.$router.push({name: 'login'})
-    },
-    ...mapActions(['logout']),
-    ...mapMutations(['breadcrumbMutation', 'tokenMutation', 'authMutation', 'refreshUIMutation'])
-  },
-  computed: {
-    ...mapState(['breadcrumb'])
-  },
-  mounted(){
-    this.breadcrumbMutation('Mozo')
+  components: {
+    HeaderLayout,
+    NavbarLayout
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.mozo {
-  &-header {
-    &-bg {
-      position: relative;
-      @extend %bg-primary;
-    }
-    &-layout {
-      position: relative;
-      z-index: 2;
-    }
-    &-breadcrumbBox {
-      padding-left: 16px;
-      padding-right: 16px;
-      @extend %header-bg-items;
-    }
-    &-breadcrumb {
-      font-size: 20px;
-    }
-    &-userBox {
-      @extend %header-bg-items;
-      overflow: hidden;
-      width: 180px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    &-user {
-      display: flex;
-      justify-content: space-between;
-    }
-    &-userImg {
-      height: 100%;
-      background-color: rgba(255, 255, 255, .3);
-    }
-      &-waves {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      z-index: 1;
-      height: 80px;
-      width: 100%;
-      opacity: .5;
-    }
-  }
-  &-buttonBox {
-    position: relative;
-    width: 70%;
-    display: block;
-  }
-  &-buttonText {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #000;
-    font-size: 20px;
-  }
-  &-buttonIcon {
-    width: 40px;
-    margin-right: 16px;
-    transform: translateY(-5px)
-  }
-}
-</style>

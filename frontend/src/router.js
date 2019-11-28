@@ -7,9 +7,7 @@ Vue.use(Router)
 
 function requireAuth () {
   const verify = checkLocal()
-  if (!verify) {
-    return false
-  }
+  if (!verify) return false
   return true
 }
 
@@ -21,9 +19,7 @@ function requireAdminRol (to, from, next) {
     return
   }
 
-  if (store.getters.getRol !== 'Administrador') {
-    redirect(next)
-  }
+  if (store.getters.getRol !== 'Administrador') redirect(next)
 
   next()
 }
@@ -58,7 +54,6 @@ function requireCajeroRol (to, from, next) {
 }
 
 function Auth (to, from, next) {
-
   const verify = checkLocal()
   if (verify) {
     redirect(next)
@@ -71,8 +66,8 @@ function checkLocal () {
     return true
   }
 
-  if (localStorage.getItem('auth')) {
-    const user = JSON.parse(localStorage.getItem('auth'))
+  if (window.localStorage.getItem('auth')) {
+    const user = JSON.parse(window.localStorage.getItem('auth'))
     store.commit('authMutation', user)
     return true
   }
@@ -80,19 +75,17 @@ function checkLocal () {
 }
 
 function redirect (next) {
-  
-    if (store.getters.getRol === 'Administrador') {
-      next({ name: 'admin' })
-    }
-  
-    if (store.getters.getRol === 'Mozo') {
-      next({ name: 'mozo' })
-    }
+  if (store.getters.getRol === 'Administrador') {
+    next({ name: 'admin' })
+  }
 
-    if (store.getters.getRol === 'Cajero') {
-      next({ name: 'caja' })
-    }
+  if (store.getters.getRol === 'Mozo') {
+    next({ name: 'mozo' })
+  }
 
+  if (store.getters.getRol === 'Cajero') {
+    next({ name: 'caja' })
+  }
 }
 
 export default new Router({
@@ -103,7 +96,7 @@ export default new Router({
       path: '/',
       name: 'login',
       beforeEnter: Auth,
-      component: () => import( './views/Login.vue')
+      component: () => import('./views/Login.vue')
     },
     {
       path: '/admin',
@@ -120,7 +113,7 @@ export default new Router({
         {
           path: 'mesas',
           name: 'mesas',
-          component: () => import( './views/Admin/Mesas.vue')
+          component: () => import('./views/Admin/Mesas.vue')
         },
         {
           path: 'categorias',
@@ -190,7 +183,7 @@ export default new Router({
           ]
         },
         {
-          path: 'menu',
+          path: 'menu/:id?',
           name: 'mozo-menu',
           component: () => import('./views/Mozo/Menu.vue')
         }
@@ -218,7 +211,7 @@ export default new Router({
               path: 'mesas-ocupadas',
               name: 'cajeroMesasOcupadas',
               component: () => import('./views/Caja/cajero/MesasOcupadas.vue')
-            },
+            }
           ]
         },
         {
@@ -236,7 +229,7 @@ export default new Router({
               path: 'evento',
               name: 'evento',
               component: () => import('./views/Caja/eventos/CrearEvento.vue')
-            },
+            }
           ]
         },
         {
@@ -254,7 +247,7 @@ export default new Router({
               path: 'reservacion',
               name: 'reservacion',
               component: () => import('./views/Caja/reservaciones/CrearReservacion.vue')
-            },
+            }
           ]
         },
         {
@@ -272,7 +265,7 @@ export default new Router({
               path: 'nueva-orden',
               name: 'nuevaOrden',
               component: () => import('./views/Caja/orden/NuevaOrden.vue')
-            },
+            }
           ]
         },
         {
