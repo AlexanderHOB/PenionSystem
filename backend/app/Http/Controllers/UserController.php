@@ -113,4 +113,18 @@ class UserController extends Controller
 
         return $personas;
     }
+
+    public function getMozos(){
+        $mozos = User::where('rol_id','=',4)->where('condicion','=',1)->get();
+        $mozosSimplificado=[];
+        foreach ($mozos as $m){
+            $response=[
+                'mozo_id'=>$m->empleado->id,
+                'nombre' =>$m->empleado->persona->apellidos . ' ' . $m->empleado->persona->nombres,
+                'color'  =>$m->color,
+            ];
+            array_push($mozosSimplificado,$response);
+        }
+        return $mozosSimplificado;
+    }
 }
