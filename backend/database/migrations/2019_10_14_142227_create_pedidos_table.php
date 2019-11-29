@@ -20,9 +20,11 @@ class CreatePedidosTable extends Migration
             $table->date('fecha_registro');
             $table->decimal('total',10,2);
             $table->string('tipo_descuento',30)->default('porcentaje');
-            $table->decimal('descuento',10,2)->default(0,00);
+            $table->decimal('descuento',10,2)->nullable()->default(0,00);
             $table->boolean('especial')->default(0); //no comprobante
             $table->string('estado',50)->default('Iniciado');
+            $table->smallInteger('pax')->nullable()->default('1');
+
             $table->integer('mozo_id')->unsigned();
             $table->foreign('mozo_id')->references('id')->on('users');
             $table->integer('mesa_id')->unsigned();

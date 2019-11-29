@@ -53,6 +53,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/user/updatePass/{id}', 'UserController@updatePass');  // aomine
     Route::put('/user/desactivar/{id}', 'UserController@desactivar');
     Route::put('/user/activar/{id}', 'UserController@activar');
+    Route::get('/user/mozos','UserController@getMozos');
      //Empleados
     Route::get('/empleado','EmpleadoController@index');
     Route::get('/empleados','EmpleadoController@getAllEmpleados');
@@ -75,6 +76,8 @@ Route::group(['middleware' => 'cors'], function(){
     Route::put('/pedido/anular/{id}','PedidoController@anular');// anular un pedido
     Route::put('/pedido/actualizar','PedidoController@update'); // actualizar algun pedido en caja
     Route::patch('/pedido/especial/{id}','PedidoController@especial'); //definir un pedido como especial
+    Route::patch('/pedido/pax/{id}','PedidoController@changePax');//Cambiar el pax del pedido
+    Route::patch('/pedido/precuenta/{id}','PedidoController@precuenta'); //Cambiar los estados
     //splits
     Route::put('/pedido/split','PedidoController@Split');
     //Comensales

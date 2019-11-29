@@ -13,6 +13,7 @@ class Pedido extends Model
         'fecha_registro',
         'total',
         'descuento',
+        'pax',
         'especial',
         'mozo_id'
         ];

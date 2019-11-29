@@ -64,16 +64,13 @@ class PedidoController extends Controller
     
     }
     public function split(Request $request){
-        $detalle_pedido_id = $request->detalle_pedido_id;
-        $pedido = $request->pedido_id;
-        $mesa   = $request->mesa_id;
-
-        $detalle_pedido = DetallePedido::findOrFail($detalle_pedido_id);
-        $detalle_pedido->pedido_id  = $pedido;
-        $detalle_pedido->mesa_id    = $mesa;
-        $detalle_pedido->save();
-
-        return['Exito'];
+        $detalles = $request->detalle_pedidos;
+        foreach($detalles as $d){
+            $detalle_pedido = DetallePedido::findOrFail($d->id);
+            $detalle_pedido->pedido_id = $d->pedido_id;
+            $detalle_pedido->mesa_ida  = $d->mesa_id;
+            $detalle_pedido->save();
+        }   
     }
     public function store(Request $request){
         //if (!$request->ajax()) return redirect('/');
@@ -84,12 +81,13 @@ class PedidoController extends Controller
             $pedido->tipo_pedido    =$request->tipo_pedido;
             $pedido->numero_orden   ='1';
             $pedido->fecha_registro =Carbon::now('America/Lima');
-            $pedido->mozo_id        =$request->user_id;
+            $pedido->mozo_id        =$request->mozo_id;
             $pedido->total          =$request->total;
             $pedido->descuento      =$request->descuento;
             $pedido->especial       =$request->especial;
             $pedido->mesa_id        =$request->mesa_id;
-            $pedido->estado         ='Produccion';
+            $pedido->pax            =$request->pax; 
+            $pedido->estado         ='Nuevo';
             $pedido->save();
             $pedido->numero_orden   =$pedido->id;
             $pedido->save();
@@ -98,27 +96,6 @@ class PedidoController extends Controller
             $mesa->estado='Ocupado';
             $mesa->save();
 
-            $detalles =$request->detalles_pedido;
-                //Array de detalles
-            //Recorro todos los elementos
-
-            foreach($detalles as $ep=>$det)
-            {
-                $detalle = new DetallePedido();
-                $detalle->pedido_id         = $pedido->id;
-                $detalle->mesa_id           = $det['mesa_id'];
-                $detalle->platillo_id       = $det['platillo_id'];
-                $detalle->cantidad          = $det['cantidad'];
-                $detalle->valor_unitario    = $det['valor_unitario'];
-                $detalle->precio_unitario   = $det['precio_unitario'];
-                $detalle->comentario        = $det['comentario'];
-                $detalle->estado            = $det['estado'];
-                $detalle->tipo_de_igv       = '8';
-                $detalle->igv               = 0;
-                $detalle->subtotal          = $det['subtotal'];
-                $detalle->total             = $det['total'];      
-                $detalle->save();
-            }       
             DB::commit();
             return[
                 'pedido_id'=>$pedido->id
@@ -130,9 +107,10 @@ class PedidoController extends Controller
     }
     public function aumentarPedido(Request $request,$id){
         $pedido=Pedido::findOrFail($id);
+        $pedido->estado='Produccion';
         try{
             DB::beginTransaction();
-
+            $detalle_pedidos=[];
             $detalles =$request->detalle_pedidos;
             foreach($detalles as $ep=>$det)
                 {
@@ -144,14 +122,16 @@ class PedidoController extends Controller
                     $detalle->valor_unitario    = $det['valor_unitario'];
                     $detalle->precio_unitario   = $det['precio_unitario'];
                     $detalle->comentario        = $det['comentario'];
-                    $detalle->estado            = $det['estado'];
+                    $detalle->estado            = 'Preparado';
                     $detalle->tipo_de_igv       = '8';
                     $detalle->igv               = 0;
                     $detalle->subtotal          = $det['subtotal'];
                     $detalle->total             = $det['total'];      
                     $detalle->save();
+                    array_push($detalle_pedidos,$detalle);
                 }  
             DB::commit();    
+            return $detalle_pedidos;
         } catch (Exception $e){
             DB::rollBack();
         }
@@ -222,5 +202,24 @@ class PedidoController extends Controller
         $pedido = Pedido::findOrFail($id);
         $pedido->especial = 1;
         $pedido->save();
+    }
+    public function changePax(Request $request,$id){
+        $pedido = Pedido::findOrFail($id);
+        $pedido->pax        = $request->pax;
+        $pedido->mozo_id    =$request->mozo_id;
+        $pedido->save();
+    }
+    public function precuenta($id){
+
+        $pedido = Pedido::findOrFail($id);
+        $pedido->estado='Pendiente';
+        
+        $detallePedidos = DetallePedido::where('pedido_id','=',$id)->get();
+        foreach ($detallePedidos as $dp){
+            $detallePedido  = DetallePedido::findOrFail($dp->id);
+            $detallePedido->estado = 'Finalizado';
+            $detallePedido->save();
+        }
+
     }
 } 
