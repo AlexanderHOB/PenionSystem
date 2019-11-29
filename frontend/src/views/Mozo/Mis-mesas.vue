@@ -286,7 +286,7 @@
                   text
                   color="blue"
                   small
-                disabled
+                  disabled
                 >
                   ENVIAR ORDEN
                 </v-btn>

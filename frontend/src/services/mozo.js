@@ -11,7 +11,7 @@ const mozoService = {
     return service.post('/pedido/registrar', data)
   },
   updatePedido: (detallesPedido, id) => {
-    return service.put(`/pedido/aumentar/${id}`, { detalles_pedido: detallesPedido })
+    return service.put(`/pedido/aumentar/${id}`, { detalle_pedidos: detallesPedido })
   }
 }
 
