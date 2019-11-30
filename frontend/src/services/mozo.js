@@ -12,6 +12,9 @@ const mozoService = {
   },
   updatePedido: (detallesPedido, id) => {
     return service.put(`/pedido/aumentar/${id}`, { detalle_pedidos: detallesPedido })
+  },
+  split: data => {
+    return service.put('/pedido/split', data)
   }
 }
 

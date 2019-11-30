@@ -737,7 +737,7 @@
           <v-card-text>
             <v-container>
               <v-row
-                v-for="(orden, i) in ordenes"
+                v-for="(orden, i) in pedido.pedidoFiltered"
                 :key="orden.key"
               >
                 <v-col cols="8">
@@ -750,8 +750,8 @@
                 </v-col>
                 <v-col cols="4">
                   <v-select
-                    class="pt-0"
                     v-model="pedido.mesasModel[i].value"
+                    class="pt-0"
                     :items="pedido.mesas"
                     :disabled="pedido.splitDisabled"
                     label="Mesas"
@@ -759,6 +759,7 @@
                     item-text="mesa_numero"
                     dense
                     single-line
+                    clearable
                   />
                 </v-col>
               </v-row>
@@ -916,6 +917,7 @@ export default {
         splitDisabled: false,
         splitDisabledBtn: true,
         mesasLoading: true,
+        pedidoFiltered: [],
         mesas: [],
         mesasModel: [],
         preCuentaDisabledBtn: true
@@ -1126,7 +1128,6 @@ export default {
         }
 
         this.ordenes = data.detalles_pedidos
-        console.log(this.ordenes)
         this.assignDetaials(config)
         this.selecteds = []
         this.checkboxs = []
@@ -1429,8 +1430,9 @@ export default {
         this.pedido.split = true
         await this.getPedidosAction()
         this.pedido.mesas = this.allPedidosState
+        this.pedido.pedidoFiltered = this.ordenes.filter(e => e.estado === 'Preparado')
         this.pedido.mesasModel = []
-        this.pedido.mesas.forEach(e => {
+        this.pedido.pedidoFiltered.forEach(e => {
           const obj = {
             value: ''
           }
@@ -1451,6 +1453,21 @@ export default {
         this.pedido.splitLoading = true
         this.pedido.splitDisabled = true
         console.log(this.pedido.mesasModel)
+        const request = {
+          detalle_pedidos: []
+        }
+        this.pedido.pedidoFiltered.forEach((e, i) => {
+          if (!this.pedido.mesasModel[i].value) return
+          console.log(e)
+          const obj = {
+            id: e.detalle_pedido_id,
+            pedido_id: this.details.id,
+            mesa_id: this.pedido.mesasModel[i].value
+          }
+          request.detalle_pedidos.push(obj)
+        })
+        console.log(request)
+        // const { data } = await mozoService.split(request)
         this.snackbarMutation({
           value: true,
           text: 'Split realizado satisfactoriamente.',
@@ -1498,18 +1515,15 @@ export default {
     },
     // Handle Remove Pedido
     handleRemovePedido() {
-      console.log('entrando en el manejador')
       let index = 0
       this.ordenes.forEach(e => {
-        console.log(e)
         if (index === 1) return
-        if (e.estado !== 'Nuevo' && e.estado === 'Prepardo') {
-          console.log('esta en produción')
+        if (e.estado !== 'Nuevo' && e.estado === 'Preparado') {
           this.details.estado = 'Produccion'
-          handlePledidoState()
+          this.handlePledidoState()
         } else if (e.estado !== 'Nuevo' && e.estado === 'Finalizado') {
           this.details.estado = 'Pendiente'
-          handlePledidoState()
+          this.handlePledidoState()
           index = 1
         }
       })
