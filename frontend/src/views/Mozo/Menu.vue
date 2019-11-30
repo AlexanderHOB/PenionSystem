@@ -1111,7 +1111,6 @@ export default {
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
-          key: Date.now(),
           nOrden: data.numero_orden,
           mesa: data.mesa_numero,
           mesa_id: data.mesa_id,
@@ -1156,6 +1155,7 @@ export default {
         })
       }
     },
+    // Toggle All Selecy
     toggleAllSelect (value) {
       this.selecteds = []
       if (value) {
@@ -1237,6 +1237,7 @@ export default {
       const precio = Math.round(parseFloat(platillo.precio), 2)
       const pedido = {
         id: platillo.id,
+        detalle_pedido_id: 0,
         key: Date.now(),
         nombre_platillo: platillo.nombre,
         comentario: this.pedido.comentario,
@@ -1339,9 +1340,8 @@ export default {
         this.pedido.disabled = true
         const IGV = 0
         const detallesPedido = []
-        this.ordenes.forEach((e, i, arr) => {
+        this.ordenes.forEach(e => {
           if (e.estado === 'Nuevo') {
-            arr[i].estado = 'Preparado'
             const value = Math.round(parseFloat(e.subtotal), 2)
             const pedido = {
               mesa_id: this.details.mesa_id,
@@ -1364,8 +1364,18 @@ export default {
         })
         this.pedido.disabledSend = true
 
-        await mozoService.updatePedido(detallesPedido, this.details.id)
-
+        const { data } = await mozoService.updatePedido(detallesPedido, this.details.id)
+        console.log(data)
+        // inyectar id
+        let index = 0
+        this.ordenes.forEach((e, i, arr) => {
+          if (e.estado === 'Nuevo') {
+            arr[i].detalle_pedido_id = data[index].id
+            arr[i].estado = 'Preparado'
+            index++
+          }
+        })
+        console.log(this.ordenes)
         this.details.estado = 'Produccion'
         this.handlePledidoState()
 

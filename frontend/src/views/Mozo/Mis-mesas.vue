@@ -273,7 +273,7 @@
                   text
                   color="blue"
                   small
-                  disabled
+                  :disabled="details.splitDisabledBtn"
                 >
                   SPLITMEZA
                 </v-btn>
@@ -299,7 +299,7 @@
                   text
                   color="blue"
                   small
-                  disabled
+                  :disabled="details.preCuentaDisabledBtn"
                 >
                   PRE-CUENTA
                 </v-btn>
@@ -499,7 +499,9 @@ export default {
       descuento: 0,
       total: 0,
       totalD: 0,
-      totalE: 0
+      totalE: 0,
+      splitDisabledBtn: true,
+      preCuentaDisabledBtn: true
     },
     // Pedidos
     loadingPedido: true
@@ -529,14 +531,8 @@ export default {
 
         if (this.allPedidosState) {
           const mesas = this.allPedidosState
-          console.log(mesas, this.auth.user.id)
           if (mesas.length > 0) {
-            // this.allMesas = mesas.filter(e => e.mozo_id === this.auth.user.id)
-            this.allMesas = mesas.filter(e => {
-              console.log(e.mozo_id)
-              return e.mozo_id === this.auth.user.id
-            })
-            console.log(this.allMesas)
+            this.allMesas = mesas.filter(e => e.mozo_id === this.auth.user.id)
             if (!this.allPedidosState.length) {
               this.messageMesas = 'No se encontraron mesas ocupadas'
               return
@@ -596,13 +592,31 @@ export default {
           mesa: pedido.mesa_numero,
           mozo: nombre[0] + data.rol,
           pax: pedido.mesa_capacidad,
-          pedidos: data.detalles_pedidos
+          pedidos: data.detalles_pedidos,
+          estado: data.estado
         }
-        this.assignDetaials(config)
 
+        this.assignDetaials(config)
+        if (config.estado === 'Nuevo') {
+          this.details.splitDisabledBtn = true
+          this.details.preCuentaDisabledBtn = true
+        } else if (config.estado === 'Produccion') {
+          this.details.splitDisabledBtn = false
+          this.details.preCuentaDisabledBtn = false
+        } else if (config.estado === 'Pendiente') {
+          this.details.splitDisabledBtn = true
+          this.details.preCuentaDisabledBtn = true
+        } else if (config.estado === 'Finalizado') {
+          this.details.splitDisabledBtn = true
+          this.details.preCuentaDisabledBtn = true
+        }
         this.loadingPedido = false
       } catch (error) {
-        console.log(error)
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al traer los detalles del pedido.',
+          color: 'error'
+        })
       }
     },
     // ASSIGN
