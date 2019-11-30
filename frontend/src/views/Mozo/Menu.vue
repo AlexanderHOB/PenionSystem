@@ -322,6 +322,7 @@
                   text
                   color="blue"
                   small
+                  :disabled="pedido.splitDisabledBtn"
                   @click="openSplitModal"
                 >
                   SPLITMEZA
@@ -349,6 +350,7 @@
                   text
                   color="blue"
                   small
+                  :disabled="pedido.preCuentaDisabledBtn"
                 >
                   PRE-CUENTA
                 </v-btn>
@@ -574,6 +576,7 @@
                   label="Cantidad"
                   counter
                   maxlength="3"
+                  @keyup.enter="addPlatillo"
                 />
               </v-col>
               <v-col
@@ -596,6 +599,7 @@
                   label="Comentario"
                   maxlength="25"
                   counter
+                  @keyup.enter="addPlatillo"
                 />
               </v-col>
             </v-row>
@@ -906,9 +910,11 @@ export default {
         split: false,
         splitLoading: false,
         splitDisabled: false,
+        splitDisabledBtn: true,
         mesasLoading: true,
         mesas: [],
-        mesasModel: []
+        mesasModel: [],
+        preCuentaDisabledBtn: true
       }
     }
   },
@@ -1085,21 +1091,23 @@ export default {
       document.querySelector('.Details-arrow').classList.toggle('Details-arrow-active')
       this.overlay = !this.overlay
     },
+    // toggle detail modaal
     toggleDetailShow () {
       if (this.$route.params.id) {
         this.detailShow = true
         const self = this
         setTimeout(function () {
           self.toggleDetails()
-          self.selectDetail()
+          self.getDetail()
         }, 1000)
       }
     },
-    async selectDetail () {
+    // getDetail
+    async getDetail () {
       try {
         this.loadingPedido = true
         const { data } = await mozoService.getPedido(this.$route.params.id)
-        console.log(data)
+
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
@@ -1109,7 +1117,8 @@ export default {
           mesa_id: data.mesa_id,
           mozo: nombre[0] + data.rol,
           pax: data.mesa_capacidad,
-          pedidos: data.detalles_pedidos
+          pedidos: data.detalles_pedidos,
+          estado: data.estado
         }
 
         this.ordenes = data.detalles_pedidos
@@ -1123,6 +1132,7 @@ export default {
             state: 1
           })
         })
+        this.handlePledidoState()
       } catch (error) {
         this.snackbarMutation({
           value: true,
@@ -1248,6 +1258,8 @@ export default {
       this.pedido.comentario = ''
       this.pedido.modal = false
       this.pedido.disabledSend = false
+      this.details.estado = 'Nuevo'
+      this.handlePledidoState()
     },
     // Incrementar platillo
     increasePlatillo (id) {
@@ -1354,6 +1366,9 @@ export default {
 
         await mozoService.updatePedido(detallesPedido, this.details.id)
 
+        this.details.estado = 'Produccion'
+        this.handlePledidoState()
+
         this.snackbarMutation({
           value: true,
           text: 'Pedido enviado.',
@@ -1413,9 +1428,9 @@ export default {
           color: 'error'
         })
       } finally {
-        this.pedido.split = false
-        this.pedido.splitLoading = false
-        this.pedido.splitDisabled = false
+        // this.pedido.split = false
+        // this.pedido.splitLoading = false
+        // this.pedido.splitDisabled = false
       }
     },
     // UTILS
@@ -1431,6 +1446,26 @@ export default {
           this.pedido.disabledSend = false
         }
       })
+    },
+    // Handle Pedido State
+    handlePledidoState () {
+      if (this.details.estado) {
+        if (this.details.estado === 'Nuevo') {
+          this.handleButtonsDisableds(true, true)
+        } else if (this.details.estado === 'Produccion') {
+          this.handleButtonsDisableds(false, false)
+        } else if (this.details.estado === 'Pendiente') {
+          this.handleButtonsDisableds(true, true)
+        } else if (this.details.estado === 'Finalizado') {
+          this.handleButtonsDisableds(true, true)
+          // disabled add platillos
+        }
+      }
+    },
+    // Handle Buttons Disableds
+    handleButtonsDisableds (split, preCuenta) {
+      this.pedido.splitDisabledBtn = split
+      this.pedido.preCuentaDisabledBtn = preCuenta
     },
     // Active Class
     activeClass () {

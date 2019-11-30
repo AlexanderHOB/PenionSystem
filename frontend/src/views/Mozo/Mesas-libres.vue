@@ -253,12 +253,11 @@ export default {
         this.loadingBtn = true
         const pedido = {
           tipo_pedido: 'Normal',
-          user_id: this.auth.user.id,
+          mozo_id: this.auth.user.id,
           total: 0,
           descuento: 0,
           especial: 0,
-          mesa_id: this.mesaSelect.id,
-          detalles_pedido: []
+          mesa_id: this.mesaSelect.id
         }
 
         const { data } = await mozoService.createPedido(pedido)

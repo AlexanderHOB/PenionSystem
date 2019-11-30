@@ -529,8 +529,14 @@ export default {
 
         if (this.allPedidosState) {
           const mesas = this.allPedidosState
+          console.log(mesas, this.auth.user.id)
           if (mesas.length > 0) {
-            this.allMesas = mesas.filter(e => e.mozo_id === this.auth.user.id)
+            // this.allMesas = mesas.filter(e => e.mozo_id === this.auth.user.id)
+            this.allMesas = mesas.filter(e => {
+              console.log(e.mozo_id)
+              return e.mozo_id === this.auth.user.id
+            })
+            console.log(this.allMesas)
             if (!this.allPedidosState.length) {
               this.messageMesas = 'No se encontraron mesas ocupadas'
               return
