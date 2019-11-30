@@ -1465,9 +1465,9 @@ export default {
           }
           request.detalle_pedidos.push(obj)
         })
-        console.log(request)
-        const { data } = await mozoService.split(request)
-        console.log(data)
+        
+        await mozoService.split(request)
+        
         request.detalle_pedidos.forEach(e => {
           const index = this.ordenes.findIndex(item => item.detalle_pedido_id === e.id)
           this.ordenes.splice(index, 1)

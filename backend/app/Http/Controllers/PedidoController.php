@@ -153,7 +153,6 @@ class PedidoController extends Controller
 
     }
     public function split(Request $request){
-        return $request->detalle_pedidos[0]['id'];
         $detalles = $request->detalle_pedidos;
         foreach($detalles as $d){
             $detalle_pedido = DetallePedido::findOrFail($d['id']);
