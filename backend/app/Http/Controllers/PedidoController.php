@@ -155,9 +155,9 @@ class PedidoController extends Controller
     public function split(Request $request){
         $detalles = $request->detalle_pedidos;
         foreach($detalles as $d){
-            $detalle_pedido = DetallePedido::findOrFail($d->id);
-            $detalle_pedido->pedido_id = $d->pedido_id;
-            $detalle_pedido->mesa_id  = $d->mesa_id;
+            $detalle_pedido = DetallePedido::findOrFail($d['id']);
+            $detalle_pedido->pedido_id = $d['pedido_id'];
+            $detalle_pedido->mesa_id  = $d['mesa_id'];
             $detalle_pedido->save();
         }   
     }
@@ -228,6 +228,7 @@ class PedidoController extends Controller
     }
     public function modificacionDetalles(Request $request){
         $detalle_pedidos = $request->detalle_pedidos;
+        $pedido = Pedido::findOrFail($request->pedido_id);
         foreach($detalle_pedidos as $detalle => $dp){
             $modificacion = new Modificacion();
             $modificacion->modificaciones       = $dp['modificaciones']; //Reducir - Eliminar
@@ -238,12 +239,16 @@ class PedidoController extends Controller
             $modificacion->detalle_pedido_id    = $dp['detalle_pedido_id'];
             $modificacion->save();
             $detalle_pedido = DetallePedido::findOrFail($dp['detalle_pedido_id']);
+
+            $pedido->total -=$detalle_pedido->total; //Restamos el total
+            $detalle_pedido->total =0.00;
             if($dp['modificaciones'] == "Reducir"){
-                $detalle_pedido->total =0.00;
+                $detalle_pedido->estado="Reducido";
             }else{
                 $detalle_pedido->estado = "Eliminado";
             }
             $detalle_pedido->save();
+            $pedido->save();
         }
         $detalles_pedidos = DetallePedido::where('pedido_id','=',$request->pedido_id)->where('estado','<>','Eliminado')->get();
         return $detalles_pedidos;
