@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class PedidoController extends Controller
 {
     public function index(Request $request){
-        $pedidos = Pedido::orderBy('fecha_registro','desc')->where('estado','=','Produccion')->paginate(40);
+        $pedidos = Pedido::orderBy('fecha_registro','desc')->get();
         $pedidoSimplificado=[];
         foreach ($pedidos as $pedido){
             $response=[
