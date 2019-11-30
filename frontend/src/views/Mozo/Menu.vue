@@ -760,6 +760,7 @@
                     dense
                     single-line
                     clearable
+                    return-object
                   />
                 </v-col>
               </v-row>
@@ -1452,22 +1453,28 @@ export default {
       try {
         this.pedido.splitLoading = true
         this.pedido.splitDisabled = true
-        console.log(this.pedido.mesasModel)
         const request = {
           detalle_pedidos: []
         }
         this.pedido.pedidoFiltered.forEach((e, i) => {
           if (!this.pedido.mesasModel[i].value) return
-          console.log(e)
           const obj = {
             id: e.detalle_pedido_id,
-            pedido_id: this.details.id,
-            mesa_id: this.pedido.mesasModel[i].value
+            pedido_id: this.pedido.mesasModel[i].value.id,
+            mesa_id: this.pedido.mesasModel[i].value.mesa_id
           }
           request.detalle_pedidos.push(obj)
         })
         console.log(request)
-        // const { data } = await mozoService.split(request)
+        const { data } = await mozoService.split(request)
+        console.log(data)
+        request.detalle_pedidos.forEach(e => {
+          const index = this.ordenes.findIndex(item => item.detalle_pedido_id === e.id)
+          this.ordenes.splice(index, 1)
+        })
+        this.handleRemovePedido()
+        this.handleTotal()
+        this.handlePledidoState()
         this.snackbarMutation({
           value: true,
           text: 'Split realizado satisfactoriamente.',
@@ -1480,9 +1487,9 @@ export default {
           color: 'error'
         })
       } finally {
-        // this.pedido.split = false
-        // this.pedido.splitLoading = false
-        // this.pedido.splitDisabled = false
+        this.pedido.split = false
+        this.pedido.splitLoading = false
+        this.pedido.splitDisabled = false
       }
     },
     // UTILS
@@ -1514,7 +1521,8 @@ export default {
       }
     },
     // Handle Remove Pedido
-    handleRemovePedido() {
+    handleRemovePedido () {
+      this.details.estado = 'Nuevo'
       let index = 0
       this.ordenes.forEach(e => {
         if (index === 1) return

@@ -40,7 +40,7 @@ class PedidoController extends Controller
             $pedido->descuento      =$request->descuento;
             $pedido->especial       =$request->especial;
             $pedido->mesa_id        =$request->mesa_id;
-            $pedido->pax            =$request->pax; 
+            $pedido->pax            =$request->pax;
             $pedido->estado         ='Nuevo';
             $pedido->save();
             $pedido->numero_orden   =$pedido->id;
@@ -53,11 +53,11 @@ class PedidoController extends Controller
             DB::commit();
             return[
                 'pedido_id'=>$pedido->id
-            ]; 
+            ];
         } catch (Exception $e){
             DB::rollBack();
         }
-        
+
     }
     public function update(Request $request){
         //if (!$request->ajax()) return redirect('/');
@@ -92,7 +92,7 @@ class PedidoController extends Controller
         //         $detalle->tipo_de_igv       = '8';
         //         $detalle->igv               = 0;
         //         $detalle->subtotal          = $det['subtotal'];
-        //         $detalle->total             = $det['total'];      
+        //         $detalle->total             = $det['total'];
         //         $detalle->save();
         //         $modificaciones=$det['modificaciones'];
         //         foreach($modificaciones as $md=>$mod){
@@ -105,7 +105,7 @@ class PedidoController extends Controller
         //             $modificacion->detalle_pedido_id    = $det['id'];
         //             $modificacion->save();
         //         }
-        //     }       
+        //     }
         //     DB::commit();
         //     return [
         //         'id' => $pedido->id
@@ -113,7 +113,7 @@ class PedidoController extends Controller
         // } catch (Exception $e){
         //     DB::rollBack();
         // }
-        
+
     }
     public function detallePedido($id){
         $pedido = Pedido::findOrFail($id);
@@ -133,7 +133,7 @@ class PedidoController extends Controller
             'mesa_capacidad'=>$pedido->mesa->capacidad,
             'mesa_numero'   =>$pedido->mesa->numero,
         ];
-    
+
         foreach($detalles as $d){
             $response=[
                 'detalle_pedido_id' =>$d->id,
@@ -150,16 +150,17 @@ class PedidoController extends Controller
         }
         $pedidoSimplificado['detalles_pedidos']=$detallesPedidos;
         return $pedidoSimplificado;
-    
+
     }
     public function split(Request $request){
+        return $request->detalle_pedidos[0]['id'];
         $detalles = $request->detalle_pedidos;
         foreach($detalles as $d){
             $detalle_pedido = DetallePedido::findOrFail($d->id);
             $detalle_pedido->pedido_id = $d->pedido_id;
             $detalle_pedido->mesa_id  = $d->mesa_id;
             $detalle_pedido->save();
-        }   
+        }
     }
     public function aumentarPedido(Request $request,$id){
         try{
@@ -184,13 +185,13 @@ class PedidoController extends Controller
                     $detalle->igv               = 0;
                     $detalle->subtotal          = $det['subtotal'];
                     $detalle->total             = $det['total'];
-                    $total                      += $detalle->total;      
+                    $total                      += $detalle->total;
                     $detalle->save();
                     array_push($detalle_pedidos,$detalle);
                 }
             $pedido->total+=$total;
-            $pedido->save();  
-            DB::commit();    
+            $pedido->save();
+            DB::commit();
             return $detalle_pedidos;
         } catch (Exception $e){
             DB::rollBack();
@@ -217,7 +218,7 @@ class PedidoController extends Controller
 
         $pedido = Pedido::findOrFail($id);
         $pedido->estado='Pendiente';
-        
+
         $detallePedidos = DetallePedido::where('pedido_id','=',$id)->get();
         foreach ($detallePedidos as $dp){
             $detallePedido  = DetallePedido::findOrFail($dp->id);
@@ -248,6 +249,6 @@ class PedidoController extends Controller
         $detalles_pedidos = DetallePedido::where('pedido_id','=',$request->pedido_id)->where('estado','<>','Eliminado')->get();
         return $detalles_pedidos;
 
-      
+
     }
-} 
+}
