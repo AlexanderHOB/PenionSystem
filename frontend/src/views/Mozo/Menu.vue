@@ -336,7 +336,7 @@
                   text
                   color="blue"
                   small
-                  :disabled="pedido.disabledSend"
+                  :disabled="pedido.disabledSendBtn"
                   @click="pedido.send = true"
                 >
                   ENVIAR ORDEN
@@ -741,12 +741,16 @@
                 :key="orden.key"
               >
                 <v-col cols="8">
-                  <h4 class="subtitle-2">
+                  <h4 class="subtitle-2 pb-3">
                     {{ orden.nombre_platillo }}
                   </h4>
+                  <p class="mb-0">
+                    {{ orden.comentario }} | cantidad: {{ orden.cantidad }}
+                  </p>
                 </v-col>
                 <v-col cols="4">
                   <v-select
+                    class="pt-0"
                     v-model="pedido.mesasModel[i].value"
                     :items="pedido.mesas"
                     :disabled="pedido.splitDisabled"
@@ -899,7 +903,7 @@ export default {
       pedido: {
         modal: false,
         title: '',
-        disabledSend: true,
+        disabledSendBtn: true,
         disabled: false,
         loading: false,
         platillo: null,
@@ -991,11 +995,10 @@ export default {
       }
     },
     refreshPlatillos () {
-      if (this.refreshUI) {
-        this.refreshUIMutation(false)
-      }
       this.refresh = true
       this.getPlatillos()
+      this.getCategorias()
+      this.getDetail()
     },
     // PAGINAR PLATILLOS
     paginate () {
@@ -1048,8 +1051,9 @@ export default {
     // OBTENER CATEGORIAS
     async getCategorias () {
       try {
-        if (this.allCategoriasState.length === 0) {
+        if (this.allCategoriasState.length === 0 || this.refresh) {
           await this.allCategoriasAction()
+          this.refresh = false
         }
         if (this.allCategoriasState.data) {
           const categorias = this.allCategoriasState.data
@@ -1107,7 +1111,7 @@ export default {
       try {
         this.loadingPedido = true
         const { data } = await mozoService.getPedido(this.$route.params.id)
-
+        
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
@@ -1117,21 +1121,32 @@ export default {
           mozo: nombre[0] + data.rol,
           pax: data.mesa_capacidad,
           pedidos: data.detalles_pedidos,
-          estado: data.estado
+          estado: data.estado,
+          total: data.total
         }
 
         this.ordenes = data.detalles_pedidos
+        console.log(this.ordenes)
         this.assignDetaials(config)
         this.selecteds = []
         this.checkboxs = []
-        config.pedidos.forEach(e => {
-          this.checkboxs.push({
-            value: 0,
-            id: e.key,
-            state: 1
-          })
+        this.ordenes.forEach(e => {
+          if (e.estado === 'Nuevo') {
+            this.checkboxs.push({
+              value: 0,
+              id: e.key,
+              state: 1
+            })
+          } else {
+            this.checkboxs.push({
+              value: 0,
+              id: e.key,
+              state: 0
+            })
+          }
         })
         this.handlePledidoState()
+        this.toggleDisabledSend()
       } catch (error) {
         this.snackbarMutation({
           value: true,
@@ -1177,31 +1192,19 @@ export default {
     // assign details
     assignDetaials (config) {
       this.details.preTotal = 0
-      let preTotal = 0
-
-      config.pedidos.forEach(e => {
-        preTotal += parseFloat(e.subtotal)
-      })
-      preTotal = preTotal.toFixed(2)
-      this.details = {
-        ...config,
-        preTotal
+        let preTotal = 0
+      if (!config.total) {
+        config.pedidos.forEach(e => {
+          preTotal += parseFloat(e.subtotal)
+        })
+        preTotal = preTotal.toFixed(2)
+      } else {
+        preTotal = (parseFloat(config.total)).toFixed(2)
       }
-      this.assignTotales(preTotal)
-    },
-    // handle total
-    handleTotal () {
-      this.details.preTotal = 0
-      let preTotal = 0
-
-      this.ordenes.forEach(e => {
-        preTotal += parseFloat(e.subtotal)
-      })
-      preTotal = preTotal.toFixed(2)
       this.details = {
-        ...this.details,
-        preTotal
-      }
+          ...config,
+          preTotal
+        }
       this.assignTotales(preTotal)
     },
     // assign Totales
@@ -1217,6 +1220,21 @@ export default {
         totalD,
         totalE
       }
+    },
+    // handle total
+    handleTotal () {
+      this.details.preTotal = 0
+      let preTotal = 0
+
+      this.ordenes.forEach(e => {
+        preTotal += parseFloat(e.subtotal)
+      })
+      preTotal = preTotal.toFixed(2)
+      this.details = {
+        ...this.details,
+        preTotal
+      }
+      this.assignTotales(preTotal)
     },
     // ACTIONS
     // Pedidio Modal
@@ -1257,10 +1275,11 @@ export default {
 
       this.pedido.cantidad = 1
       this.pedido.comentario = ''
-      this.pedido.modal = false
-      this.pedido.disabledSend = false
+      this.pedido.disabledSendBtn = false
       this.details.estado = 'Nuevo'
+      this.handleTotal()
       this.handlePledidoState()
+      this.pedido.modal = false
     },
     // Incrementar platillo
     increasePlatillo (id) {
@@ -1275,6 +1294,8 @@ export default {
       if (this.ordenes[pedidoIndex].cantidad === 1) {
         this.removePlatillo(id, pedidoIndex)
         this.toggleDisabledSend()
+        this.handleTotal()
+        this.handleRemovePedido()
         return
       }
       this.ordenes[pedidoIndex].cantidad--
@@ -1292,8 +1313,9 @@ export default {
 
       const indexTwo = this.getIndex(id, this.checkboxs)
       this.checkboxs.splice(indexTwo, 1)
-
+      this.handleTotal()
       this.toggleDisabledSend()
+      this.handleRemovePedido()
     },
     // Remove Platillos
     removePlatillos () {
@@ -1319,7 +1341,7 @@ export default {
           this.ordenes.splice(index, 1)
         })
 
-        this.pedido.disabledSend = true
+        this.pedido.disabledSendBtn = true
       } else {
         this.selecteds.forEach((e, i) => {
           const indexOne = this.getIndex(e.id, this.ordenes)
@@ -1327,10 +1349,12 @@ export default {
           const indexTwo = this.getIndex(e.id, this.checkboxs)
           this.checkboxs.splice(indexTwo, 1)
         })
-        this.toggleAllSelect()
         this.toggleDisabledSend()
+        this.toggleAllSelect()
       }
 
+      this.handleRemovePedido()
+      this.handleTotal()
       this.pedido.remove = false
     },
     // Send data
@@ -1342,16 +1366,17 @@ export default {
         const detallesPedido = []
         this.ordenes.forEach(e => {
           if (e.estado === 'Nuevo') {
+            const precio = Math.round(parseFloat(e.precio), 2)
             const value = Math.round(parseFloat(e.subtotal), 2)
             const pedido = {
               mesa_id: this.details.mesa_id,
               platillo_id: e.id,
               cantidad: e.cantidad,
-              valor_unitario: value,
-              precio_unitario: value * (1 + IGV),
+              valor_unitario: precio,
+              precio_unitario: precio * (1 + IGV),
               comentario: e.comentario,
-              subtotal: value * e.cantidad,
-              total: (value * (1 + IGV)) * e.cantidad,
+              subtotal: value,
+              total: value * (1 + IGV),
               estado: 'Preparado'
             }
             detallesPedido.push(pedido)
@@ -1362,10 +1387,10 @@ export default {
         this.checkboxs.forEach((e, i, arr) => {
           arr[i].state = 0
         })
-        this.pedido.disabledSend = true
+        this.pedido.disabledSendBtn = true
 
         const { data } = await mozoService.updatePedido(detallesPedido, this.details.id)
-        console.log(data)
+        
         // inyectar id
         let index = 0
         this.ordenes.forEach((e, i, arr) => {
@@ -1375,7 +1400,7 @@ export default {
             index++
           }
         })
-        console.log(this.ordenes)
+        
         this.details.estado = 'Produccion'
         this.handlePledidoState()
 
@@ -1450,12 +1475,11 @@ export default {
     },
     // Toogle Disabled Send Button
     toggleDisabledSend () {
-      this.pedido.disabledSend = true
+      this.pedido.disabledSendBtn = true
       this.ordenes.forEach(e => {
-        if (e.estado === 'Nuevo') {
-          this.pedido.disabledSend = false
-        }
+        if (e.estado === 'Nuevo') this.pedido.disabledSendBtn = false
       })
+      if (this.details.estado !== 'Nuevo') this.pedido.disabledSendBtn = true
     },
     // Handle Pedido State
     handlePledidoState () {
@@ -1471,6 +1495,24 @@ export default {
           // disabled add platillos
         }
       }
+    },
+    // Handle Remove Pedido
+    handleRemovePedido() {
+      console.log('entrando en el manejador')
+      let index = 0
+      this.ordenes.forEach(e => {
+        console.log(e)
+        if (index === 1) return
+        if (e.estado !== 'Nuevo' && e.estado === 'Prepardo') {
+          console.log('esta en produción')
+          this.details.estado = 'Produccion'
+          handlePledidoState()
+        } else if (e.estado !== 'Nuevo' && e.estado === 'Finalizado') {
+          this.details.estado = 'Pendiente'
+          handlePledidoState()
+          index = 1
+        }
+      })
     },
     // Handle Buttons Disableds
     handleButtonsDisableds (split, preCuenta) {
