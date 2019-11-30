@@ -157,7 +157,7 @@ class PedidoController extends Controller
         foreach($detalles as $d){
             $detalle_pedido = DetallePedido::findOrFail($d->id);
             $detalle_pedido->pedido_id = $d->pedido_id;
-            $detalle_pedido->mesa_ida  = $d->mesa_id;
+            $detalle_pedido->mesa_id  = $d->mesa_id;
             $detalle_pedido->save();
         }   
     }
