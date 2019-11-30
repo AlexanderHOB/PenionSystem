@@ -78,6 +78,7 @@ Route::group(['middleware' => 'cors'], function(){
     Route::patch('/pedido/especial/{id}','PedidoController@especial'); //definir un pedido como especial
     Route::patch('/pedido/pax/{id}','PedidoController@changePax');//Cambiar el pax del pedido
     Route::patch('/pedido/precuenta/{id}','PedidoController@precuenta'); //Cambiar los estados
+    Route::put('/pedido/modificar','PedidoController@modificacionDetalles');// Eliminar - Reducir detalles de pedido
     //splits
     Route::put('/pedido/split','PedidoController@Split');
     //Comensales

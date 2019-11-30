@@ -144,7 +144,7 @@ class PedidoController extends Controller
                 'valor_unitario'    =>$d->platillo->precio,
                 'subtotal'          =>($d->platillo->precio * $d->cantidad),
                 'platillo_id'       =>$d->platillo->id,
-                
+                'estado'            =>$d->estado,
             ];
             array_push($detallesPedidos,$response);
         }
@@ -226,16 +226,28 @@ class PedidoController extends Controller
         }
 
     }
-    public function modificacionDetalles(Request $request,$id){
-        $detalle_pedido = DetallePedido::findOrFail($id);
-        $detalle_pedido->cantidad;
-        $modificacion = new Modificacion();
-        $modificacion->modificaciones       = $request->item;
-        $modificacion->usuario_id           = $request->user_id;
-        $modificacion->fecha                = Carbon::now('America/Lima');
-        $modificacion->sustento             = $request->sustento;
-        $modificacion->cantidad_antigua     = $request->cantidad_antigua;
-        $modificacion->detalle_pedido_id    = $id;
-        $modificacion->save();
+    public function modificacionDetalles(Request $request){
+        $detalle_pedidos = $request->detalle_pedidos;
+        foreach($detalle_pedidos as $detalle => $dp){
+            $modificacion = new Modificacion();
+            $modificacion->modificaciones       = $dp['modificaciones']; //Reducir - Eliminar
+            $modificacion->usuario_id           = $dp['user_id'];
+            $modificacion->fecha                = Carbon::now('America/Lima');
+            $modificacion->sustento             = $dp['sustento'];
+            $modificacion->cantidad_antigua     = $dp['cantidad_antigua'];
+            $modificacion->detalle_pedido_id    = $dp['detalle_pedido_id'];
+            $modificacion->save();
+            $detalle_pedido = DetallePedido::findOrFail($dp['detalle_pedido_id']);
+            if($dp['modificaciones'] == "Reducir"){
+                $detalle_pedido->total =0.00;
+            }else{
+                $detalle_pedido->estado = "Eliminado";
+            }
+            $detalle_pedido->save();
+        }
+        $detalles_pedidos = DetallePedido::where('pedido_id','=',$request->pedido_id)->where('estado','<>','Eliminado')->get();
+        return $detalles_pedidos;
+
+      
     }
 } 
