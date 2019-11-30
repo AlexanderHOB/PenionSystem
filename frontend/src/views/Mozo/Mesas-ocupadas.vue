@@ -134,7 +134,7 @@ export default {
     page: 1
   }),
   computed: {
-    ...mapState(['url', 'config', 'loadingFish', 'allPedidosState'])
+    ...mapState(['loadingFish', 'allPedidosState'])
   },
   async created () {
     this.loadingFishMutation(true)

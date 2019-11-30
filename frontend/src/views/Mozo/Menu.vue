@@ -322,6 +322,7 @@
                   text
                   color="blue"
                   small
+                  @click="openSplitModal"
                 >
                   SPLITMEZA
                 </v-btn>
@@ -334,6 +335,7 @@
                   text
                   color="blue"
                   small
+                  :disabled="pedido.disabledSend"
                   @click="pedido.send = true"
                 >
                   ENVIAR ORDEN
@@ -432,43 +434,47 @@
               >
                 <v-row
                   v-for="(orden, i) in ordenes"
-                  :key="orden.id"
+                  :key="orden.key"
                   class="mx-0 my-3"
                 >
                   <v-col
                     class="pa-0 checkBox d-flex justify-center align-center"
                     cols="1"
                   >
-                    <v-checkbox
-                      v-model="checkboxs[i].value"
-                      dense
-                      hide-details
-                      class="mt-0 pt-0"
-                      @change="toggleSelect(i)"
-                    />
+                    <template v-if="orden.estado === 'Nuevo'">
+                      <v-checkbox
+                        v-model="checkboxs[i].value"
+                        dense
+                        hide-details
+                        class="mt-0 pt-0"
+                        @change="toggleSelect(i)"
+                      />
+                    </template>
                   </v-col>
                   <v-col
                     class="pa-0 pt-3 text-center"
                     cols="3"
                   >
-                    <img
-                      src="@/assets/img/mozo/eliminar.svg"
-                      alt="eliminiar"
-                      class="actions"
-                      @click="removePlatillo(orden.id)"
-                    >
-                    <img
-                      src="@/assets/img/mozo/aumentar.svg"
-                      alt="aumentar"
-                      class="actions"
-                      @click="increasePlatillo(orden.id)"
-                    >
-                    <img
-                      src="@/assets/img/mozo/disminuir.svg"
-                      alt="disminuir"
-                      class="actions"
-                      @click="decreasePlatillo(orden.id)"
-                    >
+                    <template v-if="orden.estado === 'Nuevo'">
+                      <img
+                        src="@/assets/img/mozo/eliminar.svg"
+                        alt="eliminiar"
+                        class="actions"
+                        @click="removePlatillo(orden.key)"
+                      >
+                      <img
+                        src="@/assets/img/mozo/aumentar.svg"
+                        alt="aumentar"
+                        class="actions"
+                        @click="increasePlatillo(orden.key)"
+                      >
+                      <img
+                        src="@/assets/img/mozo/disminuir.svg"
+                        alt="disminuir"
+                        class="actions"
+                        @click="decreasePlatillo(orden.key)"
+                      >
+                    </template>
                   </v-col>
                   <v-col
                     class="pa-0"
@@ -680,8 +686,8 @@
           <v-btn
             color="green darken-1"
             text
-            @click="sendData"
             :loading="pedido.loading"
+            @click="sendData"
           >
             Aceptar
           </v-btn>
@@ -696,6 +702,83 @@
           </v-btn>
           <v-spacer />
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.split"
+      :persistent="pedido.splitLoading"
+      max-width="480"
+    >
+      <v-card>
+        <div
+          v-if="pedido.mesasLoading"
+          class="Loader Loader-single fill-height d-flex justify-center align-center"
+        >
+          <v-progress-circular
+            :size="50"
+            color="primary"
+            indeterminate
+          />
+        </div>
+        <template v-else>
+          <v-card-title>
+            <v-spacer />
+            <h3 class="headline">
+              Split
+            </h3>
+            <v-spacer />
+          </v-card-title>
+
+          <v-card-text>
+            <v-container>
+              <v-row
+                v-for="(orden, i) in ordenes"
+                :key="orden.key"
+              >
+                <v-col cols="8">
+                  <h4 class="subtitle-2">
+                    {{ orden.nombre_platillo }}
+                  </h4>
+                </v-col>
+                <v-col cols="4">
+                  <v-select
+                    v-model="pedido.mesasModel[i].value"
+                    :items="pedido.mesas"
+                    :disabled="pedido.splitDisabled"
+                    label="Mesas"
+                    item-value="mesa_id"
+                    item-text="mesa_numero"
+                    dense
+                    single-line
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              color="green darken-1"
+              text
+              :loading="pedido.splitLoading"
+              @click="splitMesa"
+            >
+              Aceptar
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              color="red darken-1"
+              text
+              :disabled="pedido.splitDisabled"
+              @click="pedido.split = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-spacer />
+          </v-card-actions>
+        </template>
       </v-card>
     </v-dialog>
 
@@ -812,13 +895,20 @@ export default {
       pedido: {
         modal: false,
         title: '',
+        disabledSend: true,
         disabled: false,
         loading: false,
         platillo: null,
         comentario: '',
-        cantidad: 0,
+        cantidad: 1,
         remove: false,
-        send: false
+        send: false,
+        split: false,
+        splitLoading: false,
+        splitDisabled: false,
+        mesasLoading: true,
+        mesas: [],
+        mesasModel: []
       }
     }
   },
@@ -826,7 +916,7 @@ export default {
     numberOfSelecteds () {
       return this.selecteds.length
     },
-    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState'])
+    ...mapState(['loadingFish', 'allPlatillosState', 'allCategoriasState', 'allPedidosState'])
   },
   watch: {
     searchQuery () {
@@ -1013,6 +1103,7 @@ export default {
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
+          key: Date.now(),
           nOrden: data.numero_orden,
           mesa: data.mesa_numero,
           mesa_id: data.mesa_id,
@@ -1020,6 +1111,7 @@ export default {
           pax: data.mesa_capacidad,
           pedidos: data.detalles_pedidos
         }
+
         this.ordenes = data.detalles_pedidos
         this.assignDetaials(config)
         this.selecteds = []
@@ -1027,7 +1119,8 @@ export default {
         config.pedidos.forEach(e => {
           this.checkboxs.push({
             value: 0,
-            id: e.id
+            id: e.key,
+            state: 1
           })
         })
       } catch (error) {
@@ -1046,19 +1139,27 @@ export default {
       if (obj.value) {
         this.selecteds.push(obj)
       } else {
-        this.selecteds.splice(i, 1)
+        this.selecteds.forEach((e, index, arr) => {
+          if (obj.id === e.id) {
+            arr.splice(index, 1)
+          }
+        })
       }
     },
     toggleAllSelect (value) {
       this.selecteds = []
       if (value) {
         this.checkboxs.forEach((e, i, arr) => {
-          this.selecteds.push(e)
-          arr[i].value = 1
+          if (e.state) {
+            this.selecteds.push(e)
+            arr[i].value = 1
+          }
         })
       } else {
         this.checkboxs.forEach((e, i, arr) => {
-          arr[i].value = 0
+          if (e.state) {
+            arr[i].value = 0
+          }
         })
       }
     },
@@ -1078,6 +1179,22 @@ export default {
       }
       this.assignTotales(preTotal)
     },
+    // handle total
+    handleTotal () {
+      this.details.preTotal = 0
+      let preTotal = 0
+
+      this.ordenes.forEach(e => {
+        preTotal += parseFloat(e.subtotal)
+      })
+      preTotal = preTotal.toFixed(2)
+      this.details = {
+        ...this.details,
+        preTotal
+      }
+      this.assignTotales(preTotal)
+    },
+    // assign Totales
     assignTotales (preTotal) {
       const total = preTotal
       let totalD = total / 3.2
@@ -1099,7 +1216,7 @@ export default {
       this.pedido.modal = true
     },
     // Disminuir cantidad de platillos
-    decreaseQuantityPlatillos () {
+    decreaseQuantityPlatillos (i) {
       if (this.pedido.cantidad !== 0) this.pedido.cantidad--
     },
     // add Platillo
@@ -1107,55 +1224,89 @@ export default {
       if (!this.pedido.cantidad) return
       if (!this.pedido.comentario) this.pedido.comentario = '-'
       const platillo = this.pedido.platillo
-
+      const precio = Math.round(parseFloat(platillo.precio), 2)
       const pedido = {
         id: platillo.id,
+        key: Date.now(),
         nombre_platillo: platillo.nombre,
         comentario: this.pedido.comentario,
         cantidad: this.pedido.cantidad,
-        subtotal: platillo.precio
+        precio: precio,
+        subtotal: precio * this.pedido.cantidad,
+        estado: 'Nuevo'
       }
 
       this.checkboxs.push({
         value: 0,
-        id: pedido.id
+        id: pedido.key,
+        state: 1
       })
 
       this.ordenes.push(pedido)
-      this.pedido.cantidad = 0
+
+      this.pedido.cantidad = 1
       this.pedido.comentario = ''
       this.pedido.modal = false
+      this.pedido.disabledSend = false
     },
     // Incrementar platillo
     increasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
-      this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad + 1
+      this.ordenes[pedidoIndex].cantidad++
+      this.ordenes[pedidoIndex].subtotal += this.ordenes[pedidoIndex].precio
+      this.handleTotal()
     },
     // Decrementar Platillo
     decreasePlatillo (id) {
       const pedidoIndex = this.getIndex(id, this.ordenes)
       if (this.ordenes[pedidoIndex].cantidad === 1) {
         this.removePlatillo(id, pedidoIndex)
+        this.toggleDisabledSend()
         return
       }
-      this.ordenes[pedidoIndex].cantidad = this.ordenes[pedidoIndex].cantidad - 1
+      this.ordenes[pedidoIndex].cantidad--
+      this.ordenes[pedidoIndex].subtotal -= this.ordenes[pedidoIndex].precio
+      this.handleTotal()
     },
     // Remove Platillo
     removePlatillo (id, index) {
       let pedidoIndex = index
+
       if (!pedidoIndex) {
         pedidoIndex = this.getIndex(id, this.ordenes)
       }
-
       this.ordenes.splice(pedidoIndex, 1)
+
+      const indexTwo = this.getIndex(id, this.checkboxs)
+      this.checkboxs.splice(indexTwo, 1)
+
+      this.toggleDisabledSend()
     },
     // Remove Platillos
     removePlatillos () {
       if (this.checkbox) {
         this.checkbox = false
         this.selecteds = []
-        this.checkboxs = []
-        this.ordenes = []
+
+        const checboxArr = []
+        this.checkboxs.forEach(e => {
+          if (e.state) checboxArr.push(e.id)
+        })
+        checboxArr.forEach(e => {
+          const index = this.getIndex(e, this.ordenes)
+          this.checkboxs.splice(index, 1)
+        })
+
+        const ordenesArr = []
+        this.ordenes.forEach(e => {
+          if (e.estado === 'Nuevo') ordenesArr.push(e.key)
+        })
+        ordenesArr.forEach(e => {
+          const index = this.getIndex(e, this.ordenes)
+          this.ordenes.splice(index, 1)
+        })
+
+        this.pedido.disabledSend = true
       } else {
         this.selecteds.forEach((e, i) => {
           const indexOne = this.getIndex(e.id, this.ordenes)
@@ -1164,6 +1315,7 @@ export default {
           this.checkboxs.splice(indexTwo, 1)
         })
         this.toggleAllSelect()
+        this.toggleDisabledSend()
       }
 
       this.pedido.remove = false
@@ -1175,23 +1327,33 @@ export default {
         this.pedido.disabled = true
         const IGV = 0
         const detallesPedido = []
-        this.ordenes.forEach(e => {
-          const value = Math.round(parseFloat(e.subtotal), 2)
-          const pedido = {
-            mesa_id: this.details.mesa_id,
-            platillo_id: e.id,
-            cantidad: e.cantidad,
-            valor_unitario: value,
-            precio_unitario: value * (1 + IGV),
-            comentario: e.comentario,
-            subtotal: value * e.cantidad,
-            total: (value * (1 + IGV)) * e.cantidad,
-            estado: 'Produccion'
+        this.ordenes.forEach((e, i, arr) => {
+          if (e.estado === 'Nuevo') {
+            arr[i].estado = 'Preparado'
+            const value = Math.round(parseFloat(e.subtotal), 2)
+            const pedido = {
+              mesa_id: this.details.mesa_id,
+              platillo_id: e.id,
+              cantidad: e.cantidad,
+              valor_unitario: value,
+              precio_unitario: value * (1 + IGV),
+              comentario: e.comentario,
+              subtotal: value * e.cantidad,
+              total: (value * (1 + IGV)) * e.cantidad,
+              estado: 'Preparado'
+            }
+            detallesPedido.push(pedido)
           }
-          detallesPedido.push(pedido)
         })
+
+        this.selecteds = []
+        this.checkboxs.forEach((e, i, arr) => {
+          arr[i].state = 0
+        })
+        this.pedido.disabledSend = true
+
         await mozoService.updatePedido(detallesPedido, this.details.id)
-        console.log(detallesPedido)
+
         this.snackbarMutation({
           value: true,
           text: 'Pedido enviado.',
@@ -1200,7 +1362,7 @@ export default {
       } catch (error) {
         this.snackbarMutation({
           value: true,
-          text: 'Error al enviarp el pedido.',
+          text: 'Error al enviar el pedido.',
           color: 'error'
         })
       } finally {
@@ -1209,10 +1371,66 @@ export default {
         this.pedido.send = false
       }
     },
+    // Split
+    // Open Split Modal
+    async openSplitModal () {
+      try {
+        this.pedido.mesasLoading = true
+        this.pedido.split = true
+        await this.getPedidosAction()
+        this.pedido.mesas = this.allPedidosState
+        this.pedido.mesasModel = []
+        this.pedido.mesas.forEach(e => {
+          const obj = {
+            value: ''
+          }
+          this.pedido.mesasModel.push(obj)
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al enviar el pedido.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.mesasLoading = false
+      }
+    },
+    async splitMesa () {
+      try {
+        this.pedido.splitLoading = true
+        this.pedido.splitDisabled = true
+        console.log(this.pedido.mesasModel)
+        this.snackbarMutation({
+          value: true,
+          text: 'Split realizado satisfactoriamente.',
+          color: 'success'
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al hacer split.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.split = false
+        this.pedido.splitLoading = false
+        this.pedido.splitDisabled = false
+      }
+    },
     // UTILS
     // get Index
     getIndex (id, arr) {
-      return arr.findIndex(e => e.id === id)
+      return arr.findIndex(e => e.key === id)
+    },
+    // Toogle Disabled Send Button
+    toggleDisabledSend () {
+      this.pedido.disabledSend = true
+      this.ordenes.forEach(e => {
+        if (e.estado === 'Nuevo') {
+          this.pedido.disabledSend = false
+        }
+      })
     },
     // Active Class
     activeClass () {
@@ -1222,7 +1440,7 @@ export default {
       }
     },
     ...mapMutations(['loadingDialogMutation', 'loadingFishMutation', 'loadingTitleMutation', 'headerBreadcrumbMutation', 'snackbarMutation']),
-    ...mapActions(['allPlatillosAction', 'allCategoriasAction'])
+    ...mapActions(['allPlatillosAction', 'allCategoriasAction', 'getPedidosAction'])
   }
 }
 </script>
@@ -1317,6 +1535,9 @@ export default {
 }
 .Loader {
   width: 100%;
+  &-single {
+    height: 300px;
+  }
 }
 .Overlay-close {
   position: fixed;

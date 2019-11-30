@@ -273,6 +273,7 @@
                   text
                   color="blue"
                   small
+                  disabled
                 >
                   SPLITMEZA
                 </v-btn>
@@ -285,6 +286,7 @@
                   text
                   color="blue"
                   small
+                  disabled
                 >
                   ENVIAR ORDEN
                 </v-btn>
@@ -297,6 +299,7 @@
                   text
                   color="blue"
                   small
+                  disabled
                 >
                   PRE-CUENTA
                 </v-btn>
