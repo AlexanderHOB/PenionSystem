@@ -431,78 +431,292 @@
                 Precio
               </v-col>
               <v-col
+                v-if="areaMixta"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Mixta</h3>
+              </v-col>
+              <v-col
                 cols="12"
                 class="pa-0"
               >
                 <v-row
                   v-for="(orden, i) in ordenes"
                   :key="orden.key"
-                  class="mx-0 my-3"
+                  class="mx-0"
                 >
-                  <v-col
-                    class="pa-0 checkBox d-flex justify-center align-center"
-                    cols="1"
-                  >
-                    <template v-if="orden.estado === 'Nuevo'">
-                      <v-checkbox
-                        v-model="checkboxs[i].value"
-                        dense
-                        hide-details
-                        class="mt-0 pt-0"
-                        @change="toggleSelect(i)"
-                      />
-                    </template>
-                  </v-col>
-                  <v-col
-                    class="pa-0 pt-3 text-center"
-                    cols="3"
-                  >
-                    <template v-if="orden.estado === 'Nuevo'">
-                      <img
-                        src="@/assets/img/mozo/eliminar.svg"
-                        alt="eliminiar"
-                        class="actions"
-                        @click="removePlatillo(orden.key)"
+                  <template v-if="orden.area === 'Área Mixta'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
                       >
-                      <img
-                        src="@/assets/img/mozo/aumentar.svg"
-                        alt="aumentar"
-                        class="actions"
-                        @click="increasePlatillo(orden.key)"
-                      >
-                      <img
-                        src="@/assets/img/mozo/disminuir.svg"
-                        alt="disminuir"
-                        class="actions"
-                        @click="decreasePlatillo(orden.key)"
-                      >
-                    </template>
-                  </v-col>
-                  <v-col
-                    class="pa-0"
-                    cols="5"
-                  >
-                    <div class="subtitle-2">
-                      {{ orden.nombre_platillo }}
-                    </div>
-                    <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
-                  </v-col>
-                  <v-col
-                    class="pa-0 d-flex align-center justify-center"
-                    cols="1"
-                  >
-                    {{ orden.cantidad }}
-                  </v-col>
-                  <v-col
-                    class="pa-0 d-flex align-center justify-center"
-                    cols="2"
-                  >
-                    {{ orden.subtotal }}
-                  </v-col>
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
                 </v-row>
               </v-col>
               <v-col
-                class="pa-0 my-2 checkBox d-flex justify-center align-center"
+                v-if="areaCaliente"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Caliente</h3>
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.key"
+                  class="mx-0"
+                >
+                  <template v-if="orden.area === 'Área Caliente'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
+                      >
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
+                </v-row>
+              </v-col>
+              <v-col
+                v-if="areaFria"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Fría</h3>
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.key"
+                  class="mx-0"
+                >
+                  <template v-if="orden.area === 'Área Fría'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
+                      >
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
+                </v-row>
+              </v-col>
+              <v-col
+                class="pa-0 mb-2 mt-5 checkBox d-flex justify-center align-center"
                 cols="1"
               >
                 <v-checkbox
@@ -514,13 +728,13 @@
                 />
               </v-col>
               <v-col
-                class="pa-0 my-2 text-center"
+                class="pa-0 mb-2 mt-5 text-center"
                 cols="8"
               >
                 Seleccionar Todo
               </v-col>
               <v-col
-                class="pa-0 my-2 text-center"
+                class="pa-0 mb-2 mt-5 text-center"
                 cols="3"
               >
                 <v-btn
@@ -659,6 +873,47 @@
             color="red darken-1"
             text
             @click="pedido.remove = false"
+          >
+            Cancelar
+          </v-btn>
+          <v-spacer />
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog
+      v-model="pedido.edit"
+      max-width="480"
+    >
+      <v-card>
+        <v-card-title>
+          <h4 class="title">
+            {{ pedido.editTitle }}
+          </h4>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="pedido.editComment"
+            label="Comentario"
+            counter
+            maxlength="25"
+            @keydown.enter="editComment"
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="editComment"
+          >
+            Aceptar
+          </v-btn>
+          <v-spacer />
+          <v-btn
+            color="red darken-1"
+            text
+            @click="pedido.edit = false"
           >
             Cancelar
           </v-btn>
@@ -897,6 +1152,9 @@ export default {
         totalE: 0
       },
       // Pedidos
+      areaMixta: false,
+      areaFria: false,
+      areaCaliente: false,
       checkbox: false,
       checkboxs: [],
       selecteds: [],
@@ -912,6 +1170,10 @@ export default {
         comentario: '',
         cantidad: 1,
         remove: false,
+        edit: '',
+        editIndex: 0,
+        editTitle: '',
+        editComment: '',
         send: false,
         split: false,
         splitLoading: false,
@@ -944,6 +1206,16 @@ export default {
       if (this.categoria) {
         this.platillosFiltered(this.categoria)
       }
+    },
+    ordenes () {
+      this.areaMixta = false
+      this.areaCaliente = false
+      this.areaFria = false
+      this.ordenes.forEach(e => {
+        if (e.area === 'Área Mixta') this.areaMixta = true
+        if (e.area === 'Área Caliente') this.areaCaliente = true
+        if (e.area === 'Área Fría') this.areaFria = true
+      })
     }
   },
   async created () {
@@ -958,7 +1230,8 @@ export default {
     this.headerBreadcrumbMutation('Mozo \\ Menu')
   },
   methods: {
-    // OBTENER PLATILLOS
+    // GENERAL
+    // Obtener platillos
     async getPlatillos () {
       try {
         if (this.backup.platillos.length !== 0) {
@@ -997,13 +1270,14 @@ export default {
         this.loadingDialogMutation(false)
       }
     },
+    // Actualizar platillos
     refreshPlatillos () {
       this.refresh = true
       this.getPlatillos()
       this.getCategorias()
       this.getDetail()
     },
-    // PAGINAR PLATILLOS
+    // paginar platillos
     paginate () {
       if (this.allPlatillos.length > this.pagination) {
         this.platillos = this.allPlatillos.slice(((this.pagination * this.page) - this.pagination), (this.pagination * this.page))
@@ -1013,7 +1287,7 @@ export default {
         this.pageTotal = 0
       }
     },
-    // SEARCH PLATILLOS
+    // search platillos
     searchPlatillos (query) {
       if (query !== '' && query !== null) {
         if (this.platillos.length !== 0 && this.backup.platillosIndex) {
@@ -1051,7 +1325,17 @@ export default {
         }
       }
     },
-    // OBTENER CATEGORIAS
+    // Filtrar Platillos
+    platillosFiltered (categoria) {
+      this.filtered = true
+      this.pageTotal = 0
+      const platillos = this.allPlatillos.filter(e => {
+        return categoria.id === e.categoria_id
+      })
+      this.platillos = platillos
+    },
+    // CATEGORIAS
+    // Obtener categorias
     async getCategorias () {
       try {
         if (this.allCategoriasState.length === 0 || this.refresh) {
@@ -1075,16 +1359,7 @@ export default {
         })
       }
     },
-    // Filtrar Platillos
-    platillosFiltered (categoria) {
-      this.filtered = true
-      this.pageTotal = 0
-      const platillos = this.allPlatillos.filter(e => {
-        return categoria.id === e.categoria_id
-      })
-      this.platillos = platillos
-    },
-    // Show All
+    // Show All platillos
     showAll () {
       this.categoria = null
       this.filtered = false
@@ -1114,7 +1389,7 @@ export default {
       try {
         this.loadingPedido = true
         const { data } = await mozoService.getPedido(this.$route.params.id)
-        
+
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
@@ -1194,7 +1469,7 @@ export default {
     // assign details
     assignDetaials (config) {
       this.details.preTotal = 0
-        let preTotal = 0
+      let preTotal = 0
       if (!config.total) {
         config.pedidos.forEach(e => {
           preTotal += parseFloat(e.subtotal)
@@ -1204,9 +1479,9 @@ export default {
         preTotal = (parseFloat(config.total)).toFixed(2)
       }
       this.details = {
-          ...config,
-          preTotal
-        }
+        ...config,
+        preTotal
+      }
       this.assignTotales(preTotal)
     },
     // assign Totales
@@ -1257,8 +1532,9 @@ export default {
       const precio = Math.round(parseFloat(platillo.precio), 2)
       const pedido = {
         id: platillo.id,
-        detalle_pedido_id: 0,
         key: Date.now(),
+        detalle_pedido_id: 0,
+        area: platillo.area,
         nombre_platillo: platillo.nombre,
         comentario: this.pedido.comentario,
         cantidad: this.pedido.cantidad,
@@ -1359,6 +1635,20 @@ export default {
       this.handleTotal()
       this.pedido.remove = false
     },
+    // handleEditComment
+    handleEditComment (key) {
+      const pedidoIndex = this.getIndex(key, this.ordenes)
+      const pedido = this.ordenes[pedidoIndex]
+      this.pedido.editIndex = pedidoIndex
+      this.pedido.editTitle = pedido.nombre_platillo
+      this.pedido.editComment = pedido.comentario
+      this.pedido.edit = true
+    },
+    // edit Comment
+    editComment () {
+      this.ordenes[this.pedido.editIndex].comentario = this.pedido.editComment
+      this.pedido.edit = false
+    },
     // Send data
     async sendData () {
       try {
@@ -1392,7 +1682,7 @@ export default {
         this.pedido.disabledSendBtn = true
 
         const { data } = await mozoService.updatePedido(detallesPedido, this.details.id)
-        
+
         // inyectar id
         let index = 0
         this.ordenes.forEach((e, i, arr) => {
@@ -1402,7 +1692,7 @@ export default {
             index++
           }
         })
-        
+
         this.details.estado = 'Produccion'
         this.handlePledidoState()
 
@@ -1430,7 +1720,7 @@ export default {
         this.pedido.mesasLoading = true
         this.pedido.split = true
         await this.getPedidosAction()
-        this.pedido.mesas = this.allPedidosState
+        this.pedido.mesas = this.allPedidosState.filter(e => e.mesa_id !== this.details.mesa_id)
         this.pedido.pedidoFiltered = this.ordenes.filter(e => e.estado === 'Preparado')
         this.pedido.mesasModel = []
         this.pedido.pedidoFiltered.forEach(e => {
@@ -1465,9 +1755,9 @@ export default {
           }
           request.detalle_pedidos.push(obj)
         })
-        
+
         await mozoService.split(request)
-        
+
         request.detalle_pedidos.forEach(e => {
           const index = this.ordenes.findIndex(item => item.detalle_pedido_id === e.id)
           this.ordenes.splice(index, 1)

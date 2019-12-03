@@ -96,6 +96,10 @@ export default new Vuex.Store({
     allMesasMutation (state, object) {
       state.allMesasState = object
     },
+    allMesasSplice (state, id) {
+      const index = state.allMesasState.data.findIndex(e => e.id === id)
+      state.allMesasState.data[index].estado = 'Ocupado'
+    },
     allCategoriasMutation (state, action) {
       state.allCategoriasState = action
     },

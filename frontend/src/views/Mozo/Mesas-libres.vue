@@ -261,22 +261,20 @@ export default {
         }
 
         const { data } = await mozoService.createPedido(pedido)
-
-        this.mesas.splice(this.index, 1)
+        this.allMesasSplice(this.mesaSelect.id)
+        this.detail = false
         this.$router.push({ name: 'mozo-menu', params: { id: data.pedido_id } })
       } catch (error) {
-        console.log(error)
         this.snackbarMutation({
           value: true,
           text: 'Ocurrio un error en el servidor.',
           color: 'error'
         })
       } finally {
-        this.detail = false
         this.loadingBtn = false
       }
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation', 'allMesasSplice']),
     ...mapActions(['allMesasAction'])
   }
 }
