@@ -29,6 +29,6 @@ class CategoriaStoreRequest extends FormRequest
         ];
     }
     protected function failedValidation(Validator $validator) {
-        throw new HttpResponseException(response()->json(['message'=>'Errores de validación de datos en el servidor'], 422));
+        throw new   (response()->json(['message'=>'Errores de validación de datos en el servidor'], 422));
     }
 }
