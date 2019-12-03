@@ -499,7 +499,6 @@
                         >
                           <div class="subtitle-2">
                             {{ orden.nombre_platillo }}
-                            {{ orden.area }}
                           </div>
                           <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
                         </v-col>
@@ -596,7 +595,6 @@
                         >
                           <div class="subtitle-2">
                             {{ orden.nombre_platillo }}
-                            {{ orden.area }}
                           </div>
                           <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
                         </v-col>
@@ -693,7 +691,6 @@
                         >
                           <div class="subtitle-2">
                             {{ orden.nombre_platillo }}
-                            {{ orden.area }}
                           </div>
                           <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
                         </v-col>
@@ -1402,7 +1399,6 @@ export default {
       try {
         this.loadingPedido = true
         const { data } = await mozoService.getPedido(this.$route.params.id)
-        console.log(data)
         const nombre = data.mozo_nombre.split(' ')
         const config = {
           id: data.id,
@@ -1435,7 +1431,7 @@ export default {
             })
           }
         })
-        this.handlePledidoState()
+        this.handlePedidoState()
         this.toggleDisabledSend()
       } catch (error) {
         this.snackbarMutation({
@@ -1529,6 +1525,7 @@ export default {
     // ACTIONS
     // Pedidio Modal
     toggePedidoModal (index) {
+      if (!this.detailShow) return
       this.pedido.platillo = this.platillos[index]
       this.pedido.title = this.pedido.platillo.nombre
       this.pedido.modal = true
@@ -1569,7 +1566,7 @@ export default {
       this.pedido.disabledSendBtn = false
       this.details.estado = 'Nuevo'
       this.handleTotal()
-      this.handlePledidoState()
+      this.handlePedidoState()
       this.pedido.modal = false
     },
     // Incrementar platillo
@@ -1707,7 +1704,7 @@ export default {
         })
 
         this.details.estado = 'Produccion'
-        this.handlePledidoState()
+        this.handlePedidoState()
 
         this.snackbarMutation({
           value: true,
@@ -1777,7 +1774,7 @@ export default {
         })
         this.handleRemovePedido()
         this.handleTotal()
-        this.handlePledidoState()
+        this.handlePedidoState()
         this.snackbarMutation({
           value: true,
           text: 'Split realizado satisfactoriamente.',
@@ -1809,7 +1806,7 @@ export default {
       if (this.details.estado !== 'Nuevo') this.pedido.disabledSendBtn = true
     },
     // Handle Pedido State
-    handlePledidoState () {
+    handlePedidoState () {
       if (this.details.estado) {
         if (this.details.estado === 'Nuevo') {
           this.handleButtonsDisableds(true, true)
@@ -1831,10 +1828,10 @@ export default {
         if (index === 1) return
         if (e.estado !== 'Nuevo' && e.estado === 'Preparado') {
           this.details.estado = 'Produccion'
-          this.handlePledidoState()
+          this.handlePedidoState()
         } else if (e.estado !== 'Nuevo' && e.estado === 'Finalizado') {
           this.details.estado = 'Pendiente'
-          this.handlePledidoState()
+          this.handlePedidoState()
           index = 1
         }
       })

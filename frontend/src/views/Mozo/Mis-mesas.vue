@@ -273,7 +273,8 @@
                   text
                   color="blue"
                   small
-                  :disabled="details.splitDisabledBtn"
+                  :disabled="pedido.splitDisabledBtn"
+                  @click="openSplitModal"
                 >
                   SPLITMEZA
                 </v-btn>
@@ -299,7 +300,7 @@
                   text
                   color="blue"
                   small
-                  :disabled="details.preCuentaDisabledBtn"
+                  :disabled="pedido.preCuentaDisabledBtn"
                 >
                   PRE-CUENTA
                 </v-btn>
@@ -343,70 +344,303 @@
             <template v-else>
               <v-col
                 cols="12"
-                class="pa-0"
+                class="pa-0 pt-2 Details-content-pedidos"
               >
-                <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
-                  PEDIDOS
-                </h3>
-              </v-col>
-              <v-col cols="2" />
-              <v-col
-                cols="6"
-                class="pa-0 my-2 text-center"
-              >
-                Descripción
-              </v-col>
-              <v-col
-                cols="2"
-                class="pa-0 my-2 text-center"
-              >
-                Cantidad
-              </v-col>
-              <v-col
-                cols="2"
-                class="pa-0 my-2 text-center"
-              >
-                Precio
-              </v-col>
-              <v-col
-                cols="12"
-                class="pa-0"
-              >
-                <v-row
-                  v-for="pedido in details.pedidos"
-                  :key="pedido.id"
-                  class="mx-0 my-3"
-                >
-                  <v-col cols="2" />
+                <v-row class="mx-0">
                   <v-col
+                    cols="12"
                     class="pa-0"
-                    cols="6"
                   >
-                    <div class="subtitle-2">
-                      {{ pedido.nombre_platillo }}
-                    </div>
-                    <small class="Details-pedidos-desc caption">{{ pedido.comentario }}</small>
+                    <h3 class="Details-title pt-1 mx-5 title mb-2 text-center">
+                      PEDIDOS
+                    </h3>
                   </v-col>
                   <v-col
-                    class="pa-0 d-flex align-center justify-center"
                     cols="2"
+                    class="pa-0 my-2 text-center"
                   >
-                    {{ pedido.cantidad }}
+                    Selección
                   </v-col>
                   <v-col
-                    class="pa-0 d-flex align-center justify-center"
                     cols="2"
+                    class="pa-0 my-2 "
                   >
-                    {{ pedido.subtotal }}
+                    Opciones
+                  </v-col>
+                  <v-col
+                    cols="5"
+                    class="pa-0 my-2 text-center"
+                  >
+                    Descripción
+                  </v-col>
+                  <v-col
+                    cols="1"
+                    class="pa-0 my-2 text-center"
+                  >
+                    Cantidad
+                  </v-col>
+                  <v-col
+                    cols="2"
+                    class="pa-0 my-2 text-center"
+                  >
+                    Precio
+                  </v-col>
+                  <v-col
+                    v-if="areaMixta"
+                    cols="12"
+                    class="pa-0 mx-5 px-5"
+                  >
+                    <h3 class="subtitle-1 font-weight-bold mt-3">
+                      Área Mixta
+                    </h3>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    class="pa-0"
+                  >
+                    <v-row
+                      v-for="orden in ordenes"
+                      :key="orden.key"
+                      class="mx-0"
+                    >
+                      <template v-if="orden.area === 'Área Mixta'">
+                        <v-col
+                          class="pa-0 checkBox d-flex justify-center align-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 pt-3 text-center"
+                          cols="3"
+                        />
+                        <v-col
+                          class="pa-0"
+                          cols="4"
+                        >
+                          <div class="subtitle-2">
+                            {{ orden.nombre_platillo }}
+                          </div>
+                          <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        >
+                          {{ orden.cantidad }}
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="2"
+                        >
+                          {{ orden.subtotal }}
+                        </v-col>
+                      </template>
+                    </v-row>
+                  </v-col>
+                  <v-col
+                    v-if="areaCaliente"
+                    cols="12"
+                    class="pa-0 mx-5 px-5"
+                  >
+                    <h3 class="subtitle-1 font-weight-bold mt-3">
+                      Área Caliente
+                    </h3>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    class="pa-0"
+                  >
+                    <v-row
+                      v-for="orden in ordenes"
+                      :key="orden.key"
+                      class="mx-0"
+                    >
+                      <template v-if="orden.area === 'Área Caliente'">
+                        <v-col
+                          class="pa-0 checkBox d-flex justify-center align-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 pt-3 text-center"
+                          cols="3"
+                        />
+                        <v-col
+                          class="pa-0"
+                          cols="4"
+                        >
+                          <div class="subtitle-2">
+                            {{ orden.nombre_platillo }}
+                          </div>
+                          <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        >
+                          {{ orden.cantidad }}
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="2"
+                        >
+                          {{ orden.subtotal }}
+                        </v-col>
+                      </template>
+                    </v-row>
+                  </v-col>
+                  <v-col
+                    v-if="areaFria"
+                    cols="12"
+                    class="pa-0 mx-5 px-5"
+                  >
+                    <h3 class="subtitle-1 font-weight-bold mt-3">
+                      Área Fría
+                    </h3>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    class="pa-0"
+                  >
+                    <v-row
+                      v-for="orden in ordenes"
+                      :key="orden.key"
+                      class="mx-0"
+                    >
+                      <template v-if="orden.area === 'Área Fría'">
+                        <v-col
+                          class="pa-0 checkBox d-flex justify-center align-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 pt-3 text-center"
+                          cols="3"
+                        />
+                        <v-col
+                          class="pa-0"
+                          cols="4"
+                        >
+                          <div class="subtitle-2">
+                            {{ orden.nombre_platillo }}
+                          </div>
+                          <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        />
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="1"
+                        >
+                          {{ orden.cantidad }}
+                        </v-col>
+                        <v-col
+                          class="pa-0 d-flex align-center justify-center"
+                          cols="2"
+                        >
+                          {{ orden.subtotal }}
+                        </v-col>
+                      </template>
+                    </v-row>
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col class="fill-height" />
+              <v-col class="fill-height pa-0" />
             </template>
           </v-row>
         </v-col>
       </v-row>
     </section>
+
+    <v-dialog
+      v-model="pedido.split"
+      :persistent="pedido.splitLoading"
+      max-width="480"
+    >
+      <v-card>
+        <div
+          v-if="pedido.mesasLoading"
+          class="Loader Loader-single fill-height d-flex justify-center align-center"
+        >
+          <v-progress-circular
+            :size="50"
+            color="primary"
+            indeterminate
+          />
+        </div>
+        <template v-else>
+          <v-card-title>
+            <v-spacer />
+            <h3 class="headline">
+              Split
+            </h3>
+            <v-spacer />
+          </v-card-title>
+
+          <v-card-text>
+            <v-container>
+              <v-row
+                v-for="(orden, i) in pedido.pedidoFiltered"
+                :key="orden.key"
+              >
+                <v-col cols="8">
+                  <h4 class="subtitle-2 pb-3">
+                    {{ orden.nombre_platillo }}
+                  </h4>
+                  <p class="mb-0">
+                    {{ orden.comentario }} | cantidad: {{ orden.cantidad }}
+                  </p>
+                </v-col>
+                <v-col cols="4">
+                  <v-select
+                    v-model="pedido.mesasModel[i].value"
+                    class="pt-0"
+                    :items="pedido.mesas"
+                    :disabled="pedido.splitDisabled"
+                    label="Mesas"
+                    item-value="mesa_id"
+                    item-text="mesa_numero"
+                    dense
+                    single-line
+                    clearable
+                    return-object
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer />
+            <v-btn
+              color="green darken-1"
+              text
+              :loading="pedido.splitLoading"
+              @click="splitMesa"
+            >
+              Aceptar
+            </v-btn>
+            <v-spacer />
+            <v-btn
+              color="red darken-1"
+              text
+              :disabled="pedido.splitDisabled"
+              @click="pedido.split = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-spacer />
+          </v-card-actions>
+        </template>
+      </v-card>
+    </v-dialog>
 
     <template v-if="pageTotal">
       <div class="text-center mt-5">
@@ -499,18 +733,44 @@ export default {
       descuento: 0,
       total: 0,
       totalD: 0,
-      totalE: 0,
-      splitDisabledBtn: true,
-      preCuentaDisabledBtn: true
+      totalE: 0
     },
     // Pedidos
-    loadingPedido: true
+    ordenes: [],
+    areaMixta: false,
+    areaFria: false,
+    areaCaliente: false,
+    loadingPedido: true,
+    pedido: {
+      split: false,
+      splitLoading: false,
+      splitDisabled: false,
+      splitDisabledBtn: true,
+      mesasLoading: true,
+      pedidoFiltered: [],
+      mesas: [],
+      mesasModel: [],
+      preCuentaDisabledBtn: true
+    }
   }),
   computed: {
     numberOfSelecteds () {
       return this.selected.length
     },
     ...mapState(['loadingFish', 'allPedidosState', 'auth'])
+  },
+  watch: {
+    ordenes () {
+      console.log('watch ordenes')
+      this.areaMixta = false
+      this.areaCaliente = false
+      this.areaFria = false
+      this.ordenes.forEach(e => {
+        if (e.area === 'Área Mixta') this.areaMixta = true
+        if (e.area === 'Área Caliente') this.areaCaliente = true
+        if (e.area === 'Área Fría') this.areaFria = true
+      })
+    }
   },
   async created () {
     this.loadingFishMutation(true)
@@ -556,7 +816,7 @@ export default {
         this.loadingDialogMutation(false)
       }
     },
-
+    // Actualizar mesas
     refreshMesas () {
       this.refresh = true
       this.getMesas()
@@ -590,33 +850,25 @@ export default {
           id: data.id,
           nOrden: data.numero_orden,
           mesa: pedido.mesa_numero,
+          mesa_id: data.mesa_id,
           mozo: nombre[0] + data.rol,
           pax: pedido.mesa_capacidad,
           pedidos: data.detalles_pedidos,
-          estado: data.estado
+          estado: data.estado,
+          total: data.total
         }
 
+        this.ordenes = data.detalles_pedidos
         this.assignDetaials(config)
-        if (config.estado === 'Nuevo') {
-          this.details.splitDisabledBtn = true
-          this.details.preCuentaDisabledBtn = true
-        } else if (config.estado === 'Produccion') {
-          this.details.splitDisabledBtn = false
-          this.details.preCuentaDisabledBtn = false
-        } else if (config.estado === 'Pendiente') {
-          this.details.splitDisabledBtn = true
-          this.details.preCuentaDisabledBtn = true
-        } else if (config.estado === 'Finalizado') {
-          this.details.splitDisabledBtn = true
-          this.details.preCuentaDisabledBtn = true
-        }
-        this.loadingPedido = false
+        this.handlePedidoState()
       } catch (error) {
         this.snackbarMutation({
           value: true,
           text: 'Error al traer los detalles del pedido.',
           color: 'error'
         })
+      } finally {
+        this.loadingPedido = false
       }
     },
     // ASSIGN
@@ -624,11 +876,14 @@ export default {
     assignDetaials (config) {
       this.details.preTotal = 0
       let preTotal = 0
-
-      config.pedidos.forEach(e => {
-        preTotal += parseFloat(e.subtotal)
-      })
-      preTotal = preTotal.toFixed(2)
+      if (!config.total) {
+        config.pedidos.forEach(e => {
+          preTotal += parseFloat(e.subtotal)
+        })
+        preTotal = preTotal.toFixed(2)
+      } else {
+        preTotal = (parseFloat(config.total)).toFixed(2)
+      }
       this.details = {
         ...config,
         preTotal
@@ -647,6 +902,126 @@ export default {
         totalD,
         totalE
       }
+    },
+    // handle total
+    handleTotal () {
+      this.details.preTotal = 0
+      let preTotal = 0
+
+      this.ordenes.forEach(e => {
+        preTotal += parseFloat(e.subtotal)
+      })
+      preTotal = preTotal.toFixed(2)
+      this.details = {
+        ...this.details,
+        preTotal
+      }
+      this.assignTotales(preTotal)
+    },
+    // Split
+    // Open Split Modal
+    async openSplitModal () {
+      try {
+        this.pedido.mesasLoading = true
+        this.pedido.split = true
+        await this.getPedidosAction()
+        this.pedido.mesas = this.allPedidosState.filter(e => e.mesa_id !== this.details.mesa_id)
+        this.pedido.pedidoFiltered = this.ordenes.filter(e => e.estado === 'Preparado')
+        this.pedido.mesasModel = []
+        this.pedido.pedidoFiltered.forEach(e => {
+          const obj = {
+            value: ''
+          }
+          this.pedido.mesasModel.push(obj)
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al enviar el pedido.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.mesasLoading = false
+      }
+    },
+    async splitMesa () {
+      try {
+        this.pedido.splitLoading = true
+        this.pedido.splitDisabled = true
+        const request = {
+          detalle_pedidos: []
+        }
+        this.pedido.pedidoFiltered.forEach((e, i) => {
+          if (!this.pedido.mesasModel[i].value) return
+          const obj = {
+            id: e.detalle_pedido_id,
+            pedido_id: this.pedido.mesasModel[i].value.id,
+            mesa_id: this.pedido.mesasModel[i].value.mesa_id
+          }
+          request.detalle_pedidos.push(obj)
+        })
+
+        await mozoService.split(request)
+
+        request.detalle_pedidos.forEach(e => {
+          const index = this.ordenes.findIndex(item => item.detalle_pedido_id === e.id)
+          this.ordenes.splice(index, 1)
+        })
+        this.handleRemovePedido()
+        this.handleTotal()
+        this.handlePedidoState()
+        this.snackbarMutation({
+          value: true,
+          text: 'Split realizado satisfactoriamente.',
+          color: 'success'
+        })
+      } catch (error) {
+        this.snackbarMutation({
+          value: true,
+          text: 'Error al hacer split.',
+          color: 'error'
+        })
+      } finally {
+        this.pedido.split = false
+        this.pedido.splitLoading = false
+        this.pedido.splitDisabled = false
+      }
+    },
+    // UTILS
+    // Handle Pedido State
+    handlePedidoState () {
+      if (this.details.estado) {
+        if (this.details.estado === 'Nuevo') {
+          this.handleButtonsDisableds(true, true)
+        } else if (this.details.estado === 'Produccion') {
+          this.handleButtonsDisableds(false, false)
+        } else if (this.details.estado === 'Pendiente') {
+          this.handleButtonsDisableds(true, true)
+        } else if (this.details.estado === 'Finalizado') {
+          this.handleButtonsDisableds(true, true)
+        }
+      }
+    },
+    // Handle Remove Pedido
+    handleRemovePedido () {
+      this.details.estado = 'Nuevo'
+      let index = 0
+      this.ordenes.forEach(e => {
+        if (index === 1) return
+        if (e.estado !== 'Nuevo' && e.estado === 'Preparado') {
+          this.details.estado = 'Produccion'
+          this.handlePedidoState()
+        } else if (e.estado !== 'Nuevo' && e.estado === 'Finalizado') {
+          this.details.estado = 'Pendiente'
+          this.handlePedidoState()
+          index = 1
+        }
+      })
+    },
+    // Handle Buttons Disableds
+    handleButtonsDisableds (split, preCuenta) {
+      this.pedido.splitDisabledBtn = split
+      this.pedido.preCuentaDisabledBtn = preCuenta
     },
     ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
     ...mapActions(['getPedidosAction'])
@@ -705,6 +1080,16 @@ export default {
     &::-webkit-scrollbar {
       display: none;
     }
+    &-right {
+      overflow: hidden;
+    }
+    &-pedidos {
+      max-height: 100%;
+      overflow-y: auto;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
   }
   &-card {
     position: relative;
@@ -732,6 +1117,9 @@ export default {
 }
 .Loader {
   width: 100%;
+  &-single {
+    height: 300px;
+  }
 }
 .Overlay-close {
   position: fixed;
