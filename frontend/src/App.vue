@@ -5,11 +5,12 @@
 </template>
 
 <script>
-  import { service } from '@/services/service'
+// eslint-disable-next-line no-unused-vars
+import { service } from '@/services/service'
 
-  export default {
-    name: 'App'
-  }
+export default {
+  name: 'App'
+}
 </script>
 
 <style lang="scss">
@@ -24,7 +25,7 @@
   // background-color: transparent;
   // text-shadow: 0 0 2px #068FD2;
 // }
-body {	
+body {
   // Scroll
   &::-webkit-scrollbar {
     width: 12px;
@@ -104,7 +105,7 @@ img {
   color: rgba(0, 0, 0, .87) !important;
 }
 
-// Group Arrow 
+// Group Arrow
 .sidenav-group .v-icon.material-icons {
     margin-top: 4px;
 }
@@ -154,12 +155,4 @@ img {
     color: #FFEB3B !important;
   }
 }
-
-// MOZO
-.mesas-link.router-link-exact-active.router-link-active {
-	color: #fff;
-  @extend %bg-primary;
-  box-shadow: $primary-shadow;
-}
 </style>
-
