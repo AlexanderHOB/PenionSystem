@@ -156,12 +156,18 @@ class PedidoController extends Controller
         $detalles = $request->detalle_pedidos;
         foreach($detalles as $d){
             $detalle_pedido = DetallePedido::findOrFail($d['id']);
+            //Restamos el total del precio del pedido
             $pedido = Pedido::findOrFail($detalle_pedido->pedido_id);
             $pedido->total -= $detalle_pedido->total;
             $pedido->save();
-            $oldPedido_id=$detalle_pedido->pedido_id;
+            //Actualizamos con el nuevo id el detalle de pedido
             $detalle_pedido->pedido_id = $d['pedido_id'];
             $detalle_pedido->mesa_id  = $d['mesa_id'];
+            //Aumentamos el total del precio del detalle al pedido
+            $new_pedido = Pedido::findOrFail($d['pedido_id']);
+            $new_pedido->total += $detalle_pedido->total;
+            $new_pedido->save();
+
             $detalle_pedido->save();
         }
     }
