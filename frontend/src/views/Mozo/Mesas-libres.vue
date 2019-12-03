@@ -261,8 +261,9 @@ export default {
         }
 
         const { data } = await mozoService.createPedido(pedido)
-        this.mesas.splice(this.index, 1)
+        this.allMesasSplice(this.mesaSelect.id)
         this.detail = false
+        this.$router.push({ name: 'mozo-menu', params: { id: data.pedido_id } })
       } catch (error) {
         this.snackbarMutation({
           value: true,
@@ -273,7 +274,7 @@ export default {
         this.loadingBtn = false
       }
     },
-    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation']),
+    ...mapMutations(['loadingDialogMutation', 'loadingTitleMutation', 'loadingFishMutation', 'snackbarMutation', 'allMesasSplice']),
     ...mapActions(['allMesasAction'])
   }
 }

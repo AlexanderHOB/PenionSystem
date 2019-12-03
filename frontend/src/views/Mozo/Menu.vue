@@ -431,92 +431,292 @@
                 Precio
               </v-col>
               <v-col
+                v-if="areaMixta"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Mixta</h3>
+              </v-col>
+              <v-col
                 cols="12"
                 class="pa-0"
               >
                 <v-row
                   v-for="(orden, i) in ordenes"
                   :key="orden.key"
-                  class="mx-0 my-3"
+                  class="mx-0"
                 >
-                  <v-col
-                    class="pa-0 checkBox d-flex justify-center align-center"
-                    cols="1"
-                  >
-                    <template v-if="orden.estado === 'Nuevo'">
-                      <v-checkbox
-                        v-model="checkboxs[i].value"
-                        dense
-                        hide-details
-                        class="mt-0 pt-0"
-                        @change="toggleSelect(i)"
-                      />
-                    </template>
-                  </v-col>
-                  <v-col
-                    class="pa-0 pt-3 text-center"
-                    cols="3"
-                  >
-                    <template v-if="orden.estado === 'Nuevo'">
-                      <img
-                        src="@/assets/img/mozo/eliminar.svg"
-                        alt="eliminiar"
-                        class="actions"
-                        @click="removePlatillo(orden.key)"
+                  <template v-if="orden.area === 'Área Mixta'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
                       >
-                      <img
-                        src="@/assets/img/mozo/aumentar.svg"
-                        alt="aumentar"
-                        class="actions"
-                        @click="increasePlatillo(orden.key)"
-                      >
-                      <img
-                        src="@/assets/img/mozo/disminuir.svg"
-                        alt="disminuir"
-                        class="actions"
-                        @click="decreasePlatillo(orden.key)"
-                      >
-                    </template>
-                  </v-col>
-                  <v-col
-                    class="pa-0"
-                    cols="4"
-                  >
-                    <div class="subtitle-2">
-                      {{ orden.nombre_platillo }}
-                    </div>
-                    <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
-                  </v-col>
-                  <v-col
-                    class="pa-0 d-flex align-center justify-center"
-                    cols="1"
-                  >
-                  <v-btn
-                    small
-                    icon
-                    color="blue"
-                    v-if="orden.estado === 'Nuevo'"
-                    @click="handleEditComment(orden.key)"
-                  >
-                    <v-icon>edit</v-icon>
-                  </v-btn>
-                  </v-col>
-                  <v-col
-                    class="pa-0 d-flex align-center justify-center"
-                    cols="1"
-                  >
-                    {{ orden.cantidad }}
-                  </v-col>
-                  <v-col
-                    class="pa-0 d-flex align-center justify-center"
-                    cols="2"
-                  >
-                    {{ orden.subtotal }}
-                  </v-col>
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
                 </v-row>
               </v-col>
               <v-col
-                class="pa-0 my-2 checkBox d-flex justify-center align-center"
+                v-if="areaCaliente"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Caliente</h3>
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.key"
+                  class="mx-0"
+                >
+                  <template v-if="orden.area === 'Área Caliente'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
+                      >
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
+                </v-row>
+              </v-col>
+              <v-col
+                v-if="areaFria"
+                cols="12"
+                class="pa-0 mx-5 px-5"
+              >
+                <h3 class="subtitle-1 font-weight-bold mt-3">Área Fría</h3>
+              </v-col>
+              <v-col
+                cols="12"
+                class="pa-0"
+              >
+                <v-row
+                  v-for="(orden, i) in ordenes"
+                  :key="orden.key"
+                  class="mx-0"
+                >
+                  <template v-if="orden.area === 'Área Fría'">
+                    <v-col
+                      class="pa-0 checkBox d-flex justify-center align-center"
+                      cols="1"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <v-checkbox
+                          v-model="checkboxs[i].value"
+                          dense
+                          hide-details
+                          class="mt-0 pt-0"
+                          @change="toggleSelect(i)"
+                        />
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0 pt-3 text-center"
+                      cols="3"
+                    >
+                      <template v-if="orden.estado === 'Nuevo'">
+                        <img
+                          src="@/assets/img/mozo/eliminar.svg"
+                          alt="eliminiar"
+                          class="actions"
+                          @click="removePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/aumentar.svg"
+                          alt="aumentar"
+                          class="actions"
+                          @click="increasePlatillo(orden.key)"
+                        >
+                        <img
+                          src="@/assets/img/mozo/disminuir.svg"
+                          alt="disminuir"
+                          class="actions"
+                          @click="decreasePlatillo(orden.key)"
+                        >
+                      </template>
+                    </v-col>
+                    <v-col
+                      class="pa-0"
+                      cols="4"
+                    >
+                      <div class="subtitle-2">
+                        {{ orden.nombre_platillo }}
+                        {{ orden.area }}
+                      </div>
+                      <small class="Details-pedidos-desc caption">{{ orden.comentario }}</small>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      <v-btn
+                        v-if="orden.estado === 'Nuevo'"
+                        small
+                        icon
+                        color="blue"
+                        @click="handleEditComment(orden.key)"
+                      >
+                        <v-icon>edit</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="1"
+                    >
+                      {{ orden.cantidad }}
+                    </v-col>
+                    <v-col
+                      class="pa-0 d-flex align-center justify-center"
+                      cols="2"
+                    >
+                      {{ orden.subtotal }}
+                    </v-col>
+                  </template>
+                </v-row>
+              </v-col>
+              <v-col
+                class="pa-0 mb-2 mt-5 checkBox d-flex justify-center align-center"
                 cols="1"
               >
                 <v-checkbox
@@ -528,13 +728,13 @@
                 />
               </v-col>
               <v-col
-                class="pa-0 my-2 text-center"
+                class="pa-0 mb-2 mt-5 text-center"
                 cols="8"
               >
                 Seleccionar Todo
               </v-col>
               <v-col
-                class="pa-0 my-2 text-center"
+                class="pa-0 mb-2 mt-5 text-center"
                 cols="3"
               >
                 <v-btn
@@ -687,12 +887,14 @@
     >
       <v-card>
         <v-card-title>
-          <h4 class="title">{{ pedido.editTitle }}</h4>
+          <h4 class="title">
+            {{ pedido.editTitle }}
+          </h4>
         </v-card-title>
         <v-card-text>
           <v-text-field
-            label="Comentario"
             v-model="pedido.editComment"
+            label="Comentario"
             counter
             maxlength="25"
             @keydown.enter="editComment"
@@ -950,6 +1152,9 @@ export default {
         totalE: 0
       },
       // Pedidos
+      areaMixta: false,
+      areaFria: false,
+      areaCaliente: false,
       checkbox: false,
       checkboxs: [],
       selecteds: [],
@@ -1001,6 +1206,16 @@ export default {
       if (this.categoria) {
         this.platillosFiltered(this.categoria)
       }
+    },
+    ordenes () {
+      this.areaMixta = false
+      this.areaCaliente = false
+      this.areaFria = false
+      this.ordenes.forEach(e => {
+        if (e.area === 'Área Mixta') this.areaMixta = true
+        if (e.area === 'Área Caliente') this.areaCaliente = true
+        if (e.area === 'Área Fría') this.areaFria = true
+      })
     }
   },
   async created () {
@@ -1314,7 +1529,6 @@ export default {
       if (!this.pedido.cantidad) return
       if (!this.pedido.comentario) this.pedido.comentario = '-'
       const platillo = this.pedido.platillo
-      console.log(platillo)
       const precio = Math.round(parseFloat(platillo.precio), 2)
       const pedido = {
         id: platillo.id,
