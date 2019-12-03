@@ -141,6 +141,7 @@ class PedidoController extends Controller
                 'comentario'        =>$d->comentario,
                 'cantidad'          =>$d->cantidad,
                 'unidad_medida'     =>$d->platillo->unidad_de_medida,
+                'area'              =>$d->platillo->area,
                 'valor_unitario'    =>$d->platillo->precio,
                 'subtotal'          =>($d->platillo->precio * $d->cantidad),
                 'platillo_id'       =>$d->platillo->id,
